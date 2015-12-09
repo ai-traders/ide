@@ -30,3 +30,8 @@ if [ ! -f "$DIRECTORY/.ssh/id_rsa" ]; then
   exit 1;
 fi
 cp $DIRECTORY/.ssh/id_rsa /home/ide/.ssh/
+
+# 3rd file we need; in order to ensure that after bash login, the ide user
+# is in /ide/work. Not obligatory but shortens end user's commands.
+touch /home/ide/.profile
+echo "cd /ide/work" > /home/ide/.profile

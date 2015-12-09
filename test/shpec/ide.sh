@@ -16,6 +16,15 @@ describe "commandline options"
     end
   end
   describe "--idefile"
+    it "exits 0, if --idefile not set and exists in curent directory"
+      message="$(cd examples/gitide && ${IDE_PATH} --dryrun some_command)"
+      assert equal "$?" "0"
+    end
+    it "exits 1, if --idefile not set and does not exist in curent directory"
+      message="$(${IDE_PATH} --dryrun some_command)"
+      assert equal "$?" "1"
+      assert equal "$message" "idefile: ${PWD}/Idefile does not exist"
+    end
     it "exits 1, if zero-length string set"
       # do not use \"\" it will not be counted as empty string
       message="$(${IDE_PATH} --idefile '' --dryrun some_command)"
@@ -28,7 +37,7 @@ describe "commandline options"
       assert equal "$message" "idefile: aa does not exist"
     end
     it "exits 0, if not zero-length string set and the file exists"
-      message="$(${IDE_PATH} --idefile examples/gitide/Idefile --dryrun some_command)"
+      message="$(${IDE_PATH} --idefile test/complexide-usage/Idefile --dryrun some_command)"
       assert equal "$?" "0"
     end
   end
@@ -40,14 +49,14 @@ describe "commandline options"
       assert equal "$message" "command not specified"
     end
     it "exits 0, if not zero-length command set"
-      message="$(${IDE_PATH} --idefile examples/gitide/Idefile --dryrun some_command)"
+      message="$(cd examples/gitide  && ${IDE_PATH} --dryrun some_command)"
       assert equal "$?" "0"
     end
   end
   describe "docker run command, using gitide"
     it "exits 0, constructs correct command"
       # do not use \"\" it will not be counted as empty string
-      message="$(IDE_LOG=debug ${IDE_PATH} --idefile examples/gitide/Idefile --dryrun some_command)"
+      message="$(cd examples/gitide && IDE_LOG=debug ${IDE_PATH} --dryrun some_command)"
       assert equal "$?" "0"
       assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/examples/gitide/work:/ide/work\ -v\ ${HOME}:/ide/identity:ro\ gitide:0.1.0\ \\\"some_command\\\""
     end

@@ -30,15 +30,18 @@ namespace 'itest' do
     end
   end
   task :test_gitide_dryrun do
-    Rake.sh('IDE_LOG=debug ./ide --idefile ./examples/gitide/Idefile --dryrun '\
-      '"echo sth"')
+    Dir.chdir('./examples/gitide') do
+      # changing current directory, because IDE_WORK in Idefile is set relative
+      # to './examples/gitide'
+      Rake.sh('IDE_LOG=debug ../../ide --dryrun "echo sth"')
+    end
   end
   task :test_gitide do
     Dir.chdir('./examples/gitide') do
       # changing current directory, because IDE_WORK in Idefile is set relative
       # to './examples/gitide'
       Rake.sh('IDE_LOG=debug ../../ide '\
-        '"git clone git@git.ai-traders.com:edu/bash.git && ls -la bash"')
+        '"git clone git@git.ai-traders.com:edu/bash.git && ls -la bash && pwd"')
     end
   end
 end

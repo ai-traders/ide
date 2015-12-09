@@ -196,4 +196,3 @@ Style guides:
 ### TODO
 1. Support groups
 1. Apply https://github.com/progrium/bashstyle style guide
-1. Entrypoint in `gitide` docker image should cd into `ide/work`
