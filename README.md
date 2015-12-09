@@ -4,6 +4,8 @@ Build/test/release your software in an isolated environment. Currently only dock
  images are supported to provide such an environment.
 
 ## Features (specification)
+1. End user can run `ide <command>` and this will run a docker container and
+ invoke a `command` inside.
 1. End user can use different docker images for different tasks.
 
 ## Why
@@ -13,6 +15,8 @@ Build/test/release your software in an isolated environment. Currently only dock
  to execute those commands locally, instead it would always spin-up docker container
  or vm and run commands there. This means:
  * no need to update CI agent deployment whenever your project environment changes
+ * CI agent needs only docker daemon and client, ide installed and secrets
+  provisioned 
 2. The docker image used as your project isolated environment can be reused across
  CI agents and workstations.
 
@@ -78,6 +82,12 @@ Setting the variables without `groups` can be treated as a fallback - configurat
  for a default `group`.
 
 ## Docker image specification
+### Name
+A convention for all ide docker images names is to end them with `ide`, e.g.:
+ * rubyide
+ * chefide
+ * gitide
+
 ### Linux user
 Docker image must have an `ide` user (actually any not-root user is fine, use
  `ide` user for convention only).
@@ -92,12 +102,13 @@ So if your docker image already has `/ide/work` or `/ide/identity`, they will
  Entrypoint should fail if `IDE_WORK`or `IDE_HOME` directories do not exist.
 
 ### CMD and ENTRYPOINT
-The entrypoint must take care of mapping needed settings and secrets from
- `/ide/identity` into `/home/ide/xx`. Also map any files from `ide/identity/.bashrc.d`
- into `/etc/profile.d`, because in docker we will run not-interactively, but as
+#### Configuration and secrets
+The entrypoint must take care of mapping any settings and secrets files from
+ `/ide/identity/` into `/home/ide/`. Also map any files from `ide/identity/.bashrc.d/`
+ into `/etc/profile.d/`, because in docker we will run not-interactively, but as
  a logged linux user.
 
-Thanks to that we close all configuration problems of a particular project type
+Thanks to that, we close all configuration problems of a particular project type
  in a single IDE image. You should know what your IDE image is capable of, what
  secrets it needs. Forgetting identity or config files is one of the most frequent
  causes of failed CI jobs. Here we move this problem to the earlier CI stages.
@@ -111,4 +122,27 @@ The IDE image readme should note:
 Frequently evolving IDE images are very ok. You should not just start using new
  tools without building and testing new dev image first.
 
-TODO write about uid gid
+Do it in `set-configs-secrets.sh` script.
+#### UID GID problem
+The destined uid and gid are the same as the uid and gid of `/ide/work` directory.
+ Thanks to [Tom's docker-uid-gid-fix](https://github.com/tomzo/docker-uid-gid-fix)
+ project, we are armed with PoC how to achieve this. We change the uid and gid of
+ `ide` user with the destined uid and gid. You should avoid mounting anything into
+ `/ide/work` as root. When docker image already contains files owned by `ide` user,
+ (e.g. `/ide/home`), then after changing uid and gid we have to search for all
+ those files and update their ownership.
+
+Do it in `fix-uid-gid.sh` script.
+
+#### ENTRYPOINT
+The entrypoint should invoke `set-configs-secrets.sh` and `fix-uid-gid.sh` scripts.
+ It should enable end user to run the docker image interactively or not. It should
+ also change the current directory into `/ide/work`.
+
+#### CMD
+Thanks to ENTRYPOINT taking care of all configuration, secrets, ownership, current
+ directory, the CMD can be as simple as possbile, as if you ran it on fully
+ provisioned instance. Example: `rake style:rubocop` or some mono command.
+
+
+See the [examples](./examples) directory.
