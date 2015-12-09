@@ -1,0 +1,70 @@
+#!/bin/bash
+
+
+helpfunc() {
+    echo "Usage: $0 [--group GROUP] [--idefile IDEFILE] COMMAND"
+    echo "  --help     Help. Display this message and quit."
+    echo "  --version  Version. Print version number and quit."
+    echo "  --group    Specify GROUP from Idefile"
+    echo "  --idefile  Specify IDEFILE, default is: ./Idefile"
+    exit
+}
+
+# parse_idefile() {
+#
+# }
+
+groupname="default"
+idefile="${PWD}/Idefile"
+version="0.0.1"
+while (( $# > 0 ))
+do
+    opt="$1"
+    shift
+
+    case $opt in
+    --help)
+        helpfunc
+        exit 0
+        ;;
+    --version)
+        echo "$0 version $version"
+        exit 0
+        ;;
+    --group)  # Example with an operand
+        echo "groupnames other than default are not supported"
+        exit 1;
+        # TODO: support groups
+        # groupname="$1"
+        # shift
+        ;;
+    --idefile)  # Example with an operand
+        idefile="$1"
+        shift
+        ;;
+    --*)
+        echo "Invalid option: '$opt'" >&2
+        exit 1
+        ;;
+    -*)
+        echo "Invalid option: '$opt'" >&2
+        exit 1
+        ;;
+    *)
+        # end of long options
+        break;
+        ;;
+   esac
+
+done
+
+if [ -z "$groupname" ]; then
+  echo "groupname not specified"
+  exit 1;
+fi
+if [ -z "$idefile" ]; then
+  echo "idefile not specified"
+  exit 1;
+fi
+echo "groupname: $groupname"
+echo "idefile: $idefile"

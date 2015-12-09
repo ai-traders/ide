@@ -62,6 +62,9 @@ docker run --rm -v ${IDE_WORK}:/ide/work -v ${IDE_HOME}:/ide/identity \
 ```
 4. IDE runs rake style:rubocop in the container in the /ide/work directory.
 
+## Installation
+TODO!
+
 ## Configuration
 The whole configuration is put in `Idefile`. It is an environment variable style
  file (e.g `IDE_DRIVER=docker`). It should be put in a root directory of your
