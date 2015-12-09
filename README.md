@@ -6,7 +6,7 @@ Build/test/release your software in an isolated environment. Currently only dock
 ## Features (specification)
 1. End user can run `ide <command>` and this will run a docker container and
  invoke a `command` inside.
-1. End user can use different docker images for different tasks.
+1. End user can use different docker images for different tasks. - not supported right now
 
 ## Why
 1. For Continuous Integration: this moves out your project requirements from CI
@@ -23,18 +23,19 @@ Build/test/release your software in an isolated environment. Currently only dock
 ## Usage
 Run it from bash terminal:
 ```bash
-ide [GROUP] COMMAND
+ide [--group] COMMAND  
 ```
 Example command:
 ```bash
-ide ruby rake style:rubocop
+ide --group=ruby rake style:rubocop
 ```
 Example configuration:
 ```
 IDE_RUBY_DOCKER_IMAGE="rubydev:0.1.0"
 IDE_RUBY_ENV_ABC=1
 ```
-The `group` is not required, and: **`group`s are not supported right now**. Use default group by invoking:
+The `group` is not required, and: **`group`s are not supported right now**.
+ Use the default group by invoking:
 ```bash
 ide COMMAND
 ```
