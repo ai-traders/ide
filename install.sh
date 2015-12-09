@@ -5,5 +5,5 @@
 
 TMPDIR=${TMPDIR:-/tmp}
 cd $TMPDIR
-sudo wget --quiet http://gitlab.ai-traders.com/lab/ide/raw/master/ide -O /usr/bin/ide
+wget --quiet http://gitlab.ai-traders.com/lab/ide/raw/master/ide -O /usr/bin/ide
 chmod 755 /usr/bin/ide

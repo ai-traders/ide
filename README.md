@@ -23,7 +23,7 @@ Build/test/release your software in an isolated environment. Currently only dock
 ## Usage
 Run it from bash terminal:
 ```bash
-ide [--group] COMMAND  
+ide [--group GROUP] [--idefile IDEFILE] COMMAND  
 ```
 Example command:
 ```bash
@@ -73,8 +73,6 @@ $ cd examples/gitide
 $ ../../ide "git clone git@git.ai-traders.com:edu/bash.git && ls -la bash"
 ```
 
-The `ide`
-
 ### General
 For debug output set `IDE_LOG=debug`.
 
@@ -82,6 +80,8 @@ For debug output set `IDE_LOG=debug`.
 ```bash
 sudo bash -c "`curl -L http://gitlab.ai-traders.com/lab/ide/blob/master/install.sh`"
 ```
+
+Or just do what [install.sh](./install.sh) says.
 
 ## Configuration
 The whole configuration is put in `Idefile`. It is an environment variable style
@@ -172,14 +172,20 @@ Thanks to ENTRYPOINT taking care of all configuration, secrets, ownership, curre
  directory, the CMD can be as simple as possible, as if you ran it on fully
  provisioned instance. Example: `rake style:rubocop` or some mono command.
 
+Such a docker image can be ran:
+ * **not-interactively**: `docker run --rm -v ${PWD}/examples/gitide/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0 "git clone git@git.ai-traders.com:edu/bash.git && ls -la bash"`
+ * **interactively**: `docker run -ti --rm -v ${PWD}/examples/gitide/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0`
 
 See the [examples](./examples) directory.
 
 ## Development
 There is a `Rakefile.rb` and rake tasks to be used:
 ```
-rake style
-rake unit
+$ rake style
+$ rake unit
+$ rake itest:build_gitide
+$ rake itest:test_gitide_dryrun
+$ rake itest:test_gitide
 ```
 The `Rakefile.rb` contains guidelines how to install testing software. If you wish,
  you can invoke them without rake.
@@ -190,3 +196,4 @@ Style guides:
 ### TODO
 1. Support groups
 1. Apply https://github.com/progrium/bashstyle style guide
+1. Entrypoint in `gitide` docker image should cd into `ide/work`
