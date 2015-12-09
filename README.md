@@ -16,7 +16,7 @@ Build/test/release your software in an isolated environment. Currently only dock
  or vm and run commands there. This means:
  * no need to update CI agent deployment whenever your project environment changes
  * CI agent needs only docker daemon and client, ide installed and secrets
-  provisioned 
+  provisioned
 2. The docker image used as your project isolated environment can be reused across
  CI agents and workstations.
 
@@ -34,7 +34,11 @@ Example configuration:
 IDE_RUBY_DOCKER_IMAGE="rubydev:0.1.0"
 IDE_RUBY_ENV_ABC=1
 ```
-The `group` is not required, you can use default group by invoking:
+The `group` is not required, and: **`group`s are not supported right now**. Use default group by invoking:
+```bash
+ide COMMAND
+```
+e.g.:
 ```bash
 ide rake style:rubocop
 ```
@@ -90,7 +94,8 @@ A convention for all ide docker images names is to end them with `ide`, e.g.:
 
 ### Linux user
 Docker image must have an `ide` user (actually any not-root user is fine, use
- `ide` user for convention only).
+ `ide` user for convention only). It's recommended to use uid and gid 1000. There
+ is a convention that main (human) linux user has uid and gid 1000.
 
 ### Directories
 `IDE_WORK` directory will be mounted as `/ide/work`.
@@ -106,7 +111,8 @@ So if your docker image already has `/ide/work` or `/ide/identity`, they will
 The entrypoint must take care of mapping any settings and secrets files from
  `/ide/identity/` into `/home/ide/`. Also map any files from `ide/identity/.bashrc.d/`
  into `/etc/profile.d/`, because in docker we will run not-interactively, but as
- a logged linux user.
+ a logged linux user. All these mappings should be done by **copying** and changing
+ ownership and setting permissions to `ide` user.
 
 Thanks to that, we close all configuration problems of a particular project type
  in a single IDE image. You should know what your IDE image is capable of, what
@@ -122,7 +128,7 @@ The IDE image readme should note:
 Frequently evolving IDE images are very ok. You should not just start using new
  tools without building and testing new dev image first.
 
-Do it in `set-configs-secrets.sh` script.
+Do it in `ide-setup-identity.sh` script.
 #### UID GID problem
 The destined uid and gid are the same as the uid and gid of `/ide/work` directory.
  Thanks to [Tom's docker-uid-gid-fix](https://github.com/tomzo/docker-uid-gid-fix)
@@ -132,10 +138,10 @@ The destined uid and gid are the same as the uid and gid of `/ide/work` director
  (e.g. `/ide/home`), then after changing uid and gid we have to search for all
  those files and update their ownership.
 
-Do it in `fix-uid-gid.sh` script.
+Do it in `ide-fix-uid-gid.sh` script.
 
 #### ENTRYPOINT
-The entrypoint should invoke `set-configs-secrets.sh` and `fix-uid-gid.sh` scripts.
+The entrypoint should invoke `ide-setup-identity.sh` and `ide-fix-uid-gid.sh` scripts.
  It should enable end user to run the docker image interactively or not. It should
  also change the current directory into `/ide/work`.
 
