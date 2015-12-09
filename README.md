@@ -72,12 +72,12 @@ The whole configuration is put in `Idefile`. It is an environment variable style
 
 Supported variables:
 * `IDE_DRIVER`, supported values: docker, docker-compose (won’t be implemented now), vagrant (won’t be implemented now), defaults to docker – will run docker run command
+* `IDE_DOCKER_IMAGE`, the only required setting, docker image (or in the future maybe openstack image) to use
+* `IDE_DOCKER_OPTIONS="--privileged"` will append the string into docker run command. This is a fallback, because I can’t predict all the ide usage but I think such a fallback will be needed.
 * `IDE_HOME`, what on localhost should be mounted into container as /ide/identity, defaults to `HOME`
 * `IDE_WORK`, what on localhost should be mounted into container as /ide/work,
  this is your working copy, your project repository; defaults to current directory
 * `IDE_ENV_ABC=1`, will result in setting `ABC=1` inside the container
-* `IDE_DOCKER_IMAGE`, the only required setting, docker image (or in the future maybe openstack image) to use
-* `IDE_DOCKER_OPTIONS="--privileged"` will append the string into docker run command. This is a fallback, because I can’t predict all the ide usage but I think such a fallback will be needed.
 
 In order to allow end user to use different docker images for different tasks,
  groups are introduced. Example for `BUILD` group:
@@ -151,8 +151,24 @@ The entrypoint should invoke `ide-setup-identity.sh` and `ide-fix-uid-gid.sh` sc
 
 #### CMD
 Thanks to ENTRYPOINT taking care of all configuration, secrets, ownership, current
- directory, the CMD can be as simple as possbile, as if you ran it on fully
+ directory, the CMD can be as simple as possible, as if you ran it on fully
  provisioned instance. Example: `rake style:rubocop` or some mono command.
 
 
 See the [examples](./examples) directory.
+
+## Development
+There is a `Rakefile.rb` and rake tasks to be used:
+```
+rake style
+rake unit
+```
+The `Rakefile.rb` contains guidelines how to install testing software. If you wish,
+ you can invoke them without rake.
+
+Style guides:
+ * https://github.com/progrium/bashstyle
+
+### TODO
+1. Support groups
+1. Apply https://github.com/progrium/bashstyle style guide

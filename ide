@@ -10,13 +10,16 @@ helpfunc() {
     exit
 }
 
-# parse_idefile() {
-#
-# }
+log_debug() {
+    if [ "$IDE_LOG" == "debug" ]; then
+      echo "$1"
+    fi
+}
 
 groupname="default"
 idefile="${PWD}/Idefile"
 version="0.0.1"
+dryrun="false"
 while (( $# > 0 ))
 do
     opt="$1"
@@ -42,6 +45,9 @@ do
         idefile="$1"
         shift
         ;;
+    --dryrun)
+        dryrun="true"
+        ;;
     --*)
         echo "Invalid option: '$opt'" >&2
         exit 1
@@ -58,6 +64,7 @@ do
 
 done
 
+# verify options
 if [ -z "$groupname" ]; then
   echo "groupname not specified"
   exit 1;
@@ -66,5 +73,56 @@ if [ -z "$idefile" ]; then
   echo "idefile not specified"
   exit 1;
 fi
-echo "groupname: $groupname"
-echo "idefile: $idefile"
+if [ ! -f "$idefile" ]; then
+  echo "idefile: $idefile does not exist"
+  exit 1;
+fi
+log_debug "Starting ide, version: $version"
+log_debug "groupname: $groupname"
+log_debug "idefile: $idefile"
+
+if [[ "$dryrun" == "true" ]]; then
+  exit 0
+fi
+
+# verify Idefile
+source $idefile
+if [ -z "$IDE_DOCKER_IMAGE" ]; then
+  echo "IDE_DOCKER_IMAGE not set"
+  exit 1;
+fi
+if [ -z "$IDE_DOCKER_DRIVER" ]; then
+  IDE_DOCKER_DRIVER="docker"
+  log_debug "IDE_DOCKER_DRIVER not set, setting to: $IDE_DOCKER_DRIVER"
+fi
+if [ "$IDE_DOCKER_DRIVER" != "docker" ]; then
+  echo "IDE_DOCKER_DRIVER set to $IDE_DOCKER_DRIVER, supported is only: docker"
+  exit 1
+fi
+if [ -z "$IDE_WORK" ]; then
+  IDE_WORK=$PWD
+  log_debug "IDE_WORK not set, setting to: $IDE_WORK"
+fi
+if [ ! -d "$IDE_WORK" ]; then
+  echo "IDE_WORK set to $IDE_WORK which does not exist"
+  exit 1
+fi
+if [ -z "$IDE_HOME" ]; then
+  IDE_HOME=$HOME
+  log_debug "IDE_HOME not set, setting to: $IDE_HOME"
+fi
+if [ ! -d "$IDE_HOME" ]; then
+  echo "IDE_HOME set to $IDE_HOME which does not exist"
+  exit 1
+fi
+
+# pull docker image, exit on error
+docker pull $IDE_DOCKER_IMAGE
+exit_status="$?"
+if [[ "$exit_status" != "0" ]]; then
+  exit $exit_status
+fi
+
+# construct docker command
+echo $IDE_DOCKER_IMAGE
+echo $IDE_DOCKER_DRIVER
