@@ -9,5 +9,11 @@ RUN useradd -d /home/ide -p pass -s /bin/bash -u 1000 -m ide &&\
     chmod 755 /usr/bin/entrypoint.sh &&\
     chown ide:ide -R /home/ide
 
+RUN apt-get update && apt-get install -y git && apt-get -y autoremove && \
+   apt-get -y autoclean && \
+   apt-get -y clean && \
+   rm -rf /tmp/* /var/tmp/* && \
+   rm -rf /var/lib/apt/lists/*
+
 ENTRYPOINT ["/usr/bin/entrypoint.sh"]
 CMD ["/bin/bash"]

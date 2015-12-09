@@ -22,3 +22,16 @@ namespace 'unit' do
     Rake.sh('shpec test/shpec/ide.sh')
   end
 end
+
+namespace 'itest' do
+  task :build_gitide do
+    Dir.chdir('./examples/gitide/docker') do
+      Rake.sh('docker build -t gitide:0.1.0 .')
+    end
+  end
+  task :test_gitide do
+    Dir.chdir('./examples/gitide/docker') do
+      Rake.sh('docker build -t gitide:0.1.0 .')
+    end
+  end
+end

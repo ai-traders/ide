@@ -28,28 +28,28 @@ describe "commandline options"
       assert equal "$message" "idefile: aa does not exist"
     end
     it "exits 0, if not zero-length string set and the file exists"
-      message="$(${IDE_PATH} --idefile examples/gitide-usage/Idefile --dryrun some_command)"
+      message="$(${IDE_PATH} --idefile examples/gitide/Idefile --dryrun some_command)"
       assert equal "$?" "0"
     end
   end
   describe "command"
     it "exits 1, if zero-length command set"
       # do not use \"\" it will not be counted as empty string
-      message="$(${IDE_PATH} --idefile examples/gitide-usage/Idefile --dryrun)"
+      message="$(${IDE_PATH} --idefile examples/gitide/Idefile --dryrun)"
       assert equal "$?" "1"
       assert equal "$message" "command not specified"
     end
     it "exits 0, if not zero-length command set"
-      message="$(${IDE_PATH} --idefile examples/gitide-usage/Idefile --dryrun some_command)"
+      message="$(${IDE_PATH} --idefile examples/gitide/Idefile --dryrun some_command)"
       assert equal "$?" "0"
     end
   end
   describe "docker run command, using gitide"
     it "exits 0, constructs correct command"
       # do not use \"\" it will not be counted as empty string
-      message="$(IDE_LOG=debug ${IDE_PATH} --idefile examples/gitide-usage/Idefile --dryrun some_command)"
+      message="$(IDE_LOG=debug ${IDE_PATH} --idefile examples/gitide/Idefile --dryrun some_command)"
       assert equal "$?" "0"
-      assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/examples/gitide/work:/work\ -v\ ${HOME}:/ide/identity\ gitide:0.1.0\ \\\"some_command\\\""
+      assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/examples/gitide/work:/work\ -v\ ${HOME}:/ide/identity:ro\ gitide:0.1.0\ \\\"some_command\\\""
     end
   end
   describe "docker run command, using complexide"
@@ -57,7 +57,7 @@ describe "commandline options"
       # do not use \"\" it will not be counted as empty string
       message="$(IDE_LOG=debug ${IDE_PATH} --idefile test/complexide-usage/Idefile --dryrun some_command)"
       assert equal "$?" "0"
-      assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/test/empty_work_dir:/work\ -v\ ${PWD}/test/empty_home_dir:/ide/identity\ -e\ ABC=1\ -e\ DEF=2\ -e\ GHI=3\ --privileged\ complexide:0.1.0\ \\\"some_command\\\""
+      assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/test/empty_work_dir:/work\ -v\ ${PWD}/test/empty_home_dir:/ide/identity:ro\ -e\ ABC=1\ -e\ DEF=2\ -e\ GHI=3\ --privileged\ complexide:0.1.0\ \\\"some_command\\\""
     end
   end
   describe "docker run command, using invalid-driver-ide"
