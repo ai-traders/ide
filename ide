@@ -12,8 +12,34 @@ helpfunc() {
 
 log_debug() {
     if [ "$IDE_LOG" == "debug" ]; then
-      echo "$1"
+      echo -e "$(date "+%d-%m-%Y %T") $1"
     fi
+}
+
+# Echoes the docker run command, all the arguments are verified already.
+construct_docker_command() {
+  # initial part of the docker command
+  docker_cmd="docker run --rm -v $IDE_WORK:/work -v $IDE_HOME:/ide/identity"
+
+  # get all the bash variables set and grep for only the ones starting with
+  # IDE_ENV
+  env_in_docker=$( ( set -o posix ; set ) | grep IDE_ENV)
+  ARRAY=()
+  # replace "IDE_ENV_" with nothing
+  for line in $env_in_docker ; do
+      one_env_var=$(echo "$line" | sed 's/IDE_ENV_//g')
+      ARRAY+=($one_env_var)
+  done
+  for env_var in "${ARRAY[@]}" ; do
+      docker_cmd+=" -e $env_var"
+  done
+
+  if [ -n "$IDE_DOCKER_OPTIONS" ]; then
+    docker_cmd+=" $IDE_DOCKER_OPTIONS"
+  fi
+
+  docker_cmd+=" $IDE_DOCKER_IMAGE \"$1\""
+  echo $docker_cmd
 }
 
 groupname="default"
@@ -57,6 +83,7 @@ do
         exit 1
         ;;
     *)
+        command="$opt"
         # end of long options
         break;
         ;;
@@ -67,6 +94,10 @@ done
 # verify options
 if [ -z "$groupname" ]; then
   echo "groupname not specified"
+  exit 1;
+fi
+if [ -z "$command" ]; then
+  echo "command not specified"
   exit 1;
 fi
 if [ -z "$idefile" ]; then
@@ -80,10 +111,6 @@ fi
 log_debug "Starting ide, version: $version"
 log_debug "groupname: $groupname"
 log_debug "idefile: $idefile"
-
-if [[ "$dryrun" == "true" ]]; then
-  exit 0
-fi
 
 # verify Idefile
 source $idefile
@@ -117,12 +144,15 @@ if [ ! -d "$IDE_HOME" ]; then
 fi
 
 # pull docker image, exit on error
-docker pull $IDE_DOCKER_IMAGE
-exit_status="$?"
-if [[ "$exit_status" != "0" ]]; then
-  exit $exit_status
+if [[ "$dryrun" != "true" ]]; then
+  log_debug "pulling image $IDE_DOCKER_IMAGE"
+  docker pull $IDE_DOCKER_IMAGE
+  exit_status="$?"
+  if [[ "$exit_status" != "0" ]]; then
+    exit $exit_status
+  fi
 fi
 
 # construct docker command
-echo $IDE_DOCKER_IMAGE
-echo $IDE_DOCKER_DRIVER
+docker_command=$(construct_docker_command "$command")
+log_debug "docker command would be:\n$docker_command"
