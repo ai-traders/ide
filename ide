@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 helpfunc() {
     echo "Usage: $0 [--group GROUP] [--idefile IDEFILE] COMMAND"
     echo "  --help     Help. Display this message and quit."
@@ -27,7 +26,7 @@ construct_docker_command() {
   ARRAY=()
   # replace "IDE_ENV_" with nothing
   for line in $env_in_docker ; do
-      one_env_var=$(echo "$line" | sed 's/IDE_ENV_//g')
+      one_env_var="${line//IDE_ENV_/}"
       ARRAY+=($one_env_var)
   done
   for env_var in "${ARRAY[@]}" ; do
@@ -39,7 +38,7 @@ construct_docker_command() {
   fi
 
   docker_cmd+=" $IDE_DOCKER_IMAGE \"$1\""
-  echo $docker_cmd
+  echo "$docker_cmd"
 }
 
 groupname="default"
@@ -113,17 +112,17 @@ log_debug "groupname: $groupname"
 log_debug "idefile: $idefile"
 
 # verify Idefile
-source $idefile
+source "$idefile"
 if [ -z "$IDE_DOCKER_IMAGE" ]; then
   echo "IDE_DOCKER_IMAGE not set"
   exit 1;
 fi
-if [ -z "$IDE_DOCKER_DRIVER" ]; then
-  IDE_DOCKER_DRIVER="docker"
-  log_debug "IDE_DOCKER_DRIVER not set, setting to: $IDE_DOCKER_DRIVER"
+if [ -z "$IDE_DRIVER" ]; then
+  IDE_DRIVER="docker"
+  log_debug "IDE_DRIVER not set, setting to: $IDE_DRIVER"
 fi
-if [ "$IDE_DOCKER_DRIVER" != "docker" ]; then
-  echo "IDE_DOCKER_DRIVER set to $IDE_DOCKER_DRIVER, supported is only: docker"
+if [ "$IDE_DRIVER" != "docker" ]; then
+  echo "IDE_DRIVER set to $IDE_DRIVER, supported is only: docker"
   exit 1
 fi
 if [ -z "$IDE_WORK" ]; then
@@ -146,7 +145,7 @@ fi
 # pull docker image, exit on error
 if [[ "$dryrun" != "true" ]]; then
   log_debug "pulling image $IDE_DOCKER_IMAGE"
-  docker pull $IDE_DOCKER_IMAGE
+  docker pull "$IDE_DOCKER_IMAGE"
   exit_status="$?"
   if [[ "$exit_status" != "0" ]]; then
     exit $exit_status
@@ -156,3 +155,12 @@ fi
 # construct docker command
 docker_command=$(construct_docker_command "$command")
 log_debug "docker command would be:\n$docker_command"
+
+# run docker run
+if [[ "$dryrun" != "true" ]]; then
+  "$docker_command"
+  exit_status="$?"
+  if [[ "$exit_status" != "0" ]]; then
+    exit $exit_status
+  fi
+fi

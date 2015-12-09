@@ -62,6 +62,9 @@ docker run --rm -v ${IDE_WORK}:/ide/work -v ${IDE_HOME}:/ide/identity \
 ```
 4. IDE runs rake style:rubocop in the container in the /ide/work directory.
 
+### General
+For debug output set `IDE_LOG=debug`.
+
 ## Installation
 TODO!
 
