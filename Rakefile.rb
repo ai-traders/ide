@@ -34,7 +34,11 @@ namespace 'itest' do
       '"echo sth"')
   end
   task :test_gitide do
-    Rake.sh('IDE_LOG=debug ./ide --idefile ./examples/gitide/Idefile '\
-      '"git clone git@git.ai-traders.com:edu/bash.git && ls -la bash"')
+    Dir.chdir('./examples/gitide') do
+      # changing current directory, because IDE_WORK in Idefile is set relative
+      # to './examples/gitide'
+      Rake.sh('IDE_LOG=debug ../../ide '\
+        '"git clone git@git.ai-traders.com:edu/bash.git && ls -la bash"')
+    end
   end
 end

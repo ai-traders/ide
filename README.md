@@ -48,8 +48,8 @@ with configuration
 IDE_DOCKER_IMAGE="rubydev:0.1.0"
 IDE_ENV_ABC=1
 ```
-
 About groups, see the description in Configuration section.
+
 
 ### What happens
 1. IDE determines that "ruby" `group` is needed and therefore docker image rubydev:0.1.0
@@ -62,11 +62,26 @@ docker run --rm -v ${IDE_WORK}:/ide/work -v ${IDE_HOME}:/ide/identity \
 ```
 4. IDE runs rake style:rubocop in the container in the /ide/work directory.
 
+### Quick start
+See the [Rakefile.rb](./Rakefile.rb). The example there serves also as integration
+ test and concerns `gitide` docker image. Run:
+```
+# build docker image
+$ rake itest:build_gitide
+$ cd examples/gitide
+# run the actual ide command
+$ ../../ide "git clone git@git.ai-traders.com:edu/bash.git && ls -la bash"
+```
+
+The `ide`
+
 ### General
 For debug output set `IDE_LOG=debug`.
 
 ## Installation
-TODO!
+```bash
+sudo bash -c "`curl -L http://gitlab.ai-traders.com/lab/ide/blob/master/install.sh`"
+```
 
 ## Configuration
 The whole configuration is put in `Idefile`. It is an environment variable style

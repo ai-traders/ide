@@ -1,2 +1,2 @@
 IDE_DOCKER_IMAGE="gitide:0.1.0"
-IDE_WORK="${PWD}/examples/gitide/work"
+IDE_WORK="${PWD}/work"

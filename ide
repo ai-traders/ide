@@ -53,7 +53,7 @@ get_image_name() {
       image_name=$(local IFS=":"; shift; echo "${image_name_arr[@]}";)
     done <<< "$IDE_DOCKER_IMAGE"
 
-    echo $image_name
+    echo "$image_name"
 }
 get_image_tag() {
     # there can be two ':' in docker image name, e.g.:
@@ -65,15 +65,15 @@ get_image_tag() {
       done
     done <<< "$IDE_DOCKER_IMAGE"
 
-    echo $tag
+    echo "$tag"
 }
 # $1 is docker image name
 # $2 is docker image tag
 docker_image_exists?() {
   # multiline string with docker images tags
-  tags=$(docker images $1 | awk '{print $2}')
+  tags=$(docker images "$1" | awk '{print $2}')
   for line in $tags ; do
-      if [[ "$line" == $2 ]]; then
+      if [[ "$line" == "$2" ]]; then
         echo "true"
         return;
       fi
