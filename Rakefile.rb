@@ -29,9 +29,12 @@ namespace 'itest' do
       Rake.sh('docker build -t gitide:0.1.0 .')
     end
   end
+  task :test_gitide_dryrun do
+    Rake.sh('IDE_LOG=debug ./ide --idefile ./examples/gitide/Idefile --dryrun '\
+      '"echo sth"')
+  end
   task :test_gitide do
-    Dir.chdir('./examples/gitide/docker') do
-      Rake.sh('docker build -t gitide:0.1.0 .')
-    end
+    Rake.sh('IDE_LOG=debug ./ide --idefile ./examples/gitide/Idefile '\
+      '"git clone git@git.ai-traders.com:edu/bash.git && ls -la bash"')
   end
 end
