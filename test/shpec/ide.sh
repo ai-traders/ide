@@ -49,7 +49,7 @@ describe "commandline options"
       # do not use \"\" it will not be counted as empty string
       message="$(IDE_LOG=debug ${IDE_PATH} --idefile examples/gitide/Idefile --dryrun some_command)"
       assert equal "$?" "0"
-      assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/examples/gitide/work:/work\ -v\ ${HOME}:/ide/identity:ro\ gitide:0.1.0\ \\\"some_command\\\""
+      assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/examples/gitide/work:/ide/work\ -v\ ${HOME}:/ide/identity:ro\ gitide:0.1.0\ \\\"some_command\\\""
     end
   end
   describe "docker run command, using complexide"
@@ -57,7 +57,7 @@ describe "commandline options"
       # do not use \"\" it will not be counted as empty string
       message="$(IDE_LOG=debug ${IDE_PATH} --idefile test/complexide-usage/Idefile --dryrun some_command)"
       assert equal "$?" "0"
-      assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/test/empty_work_dir:/work\ -v\ ${PWD}/test/empty_home_dir:/ide/identity:ro\ -e\ ABC=1\ -e\ DEF=2\ -e\ GHI=3\ --privileged\ complexide:0.1.0\ \\\"some_command\\\""
+      assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/test/empty_work_dir:/ide/work\ -v\ ${PWD}/test/empty_home_dir:/ide/identity:ro\ -e\ ABC=1\ -e\ DEF=2\ -e\ GHI=3\ --privileged\ complexide:0.1.0\ \\\"some_command\\\""
     end
   end
   describe "docker run command, using invalid-driver-ide"

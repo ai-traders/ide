@@ -20,7 +20,7 @@ log_debug() {
 # $1 is command to be run in docker container
 construct_docker_command() {
   # initial part of the docker command
-  docker_cmd="docker run --rm -v $IDE_WORK:/work -v $IDE_HOME:/ide/identity:ro"
+  docker_cmd="docker run --rm -v $IDE_WORK:/ide/work -v $IDE_HOME:/ide/identity:ro"
 
   # get all the bash variables set and grep for only the ones starting with
   # IDE_ENV
@@ -209,7 +209,7 @@ log_debug "docker command would be:\n$docker_command"
 
 # run docker run
 if [[ "$dryrun" != "true" ]]; then
-  "$docker_command"
+  eval "$docker_command"
   exit_status="$?"
   if [[ "$exit_status" != "0" ]]; then
     exit $exit_status
