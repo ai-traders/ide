@@ -1,0 +1,2 @@
+IDE_WORK="${PWD}/test/empty_work_dir"
+IDE_HOME="${PWD}/test/empty_home_dir"

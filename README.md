@@ -23,7 +23,7 @@ Build/test/release your software in an isolated environment. Currently only dock
 ## Usage
 Run it from bash terminal:
 ```bash
-ide [--group] COMMAND  
+ide [--group GROUP] [--idefile IDEFILE] COMMAND  
 ```
 Example command:
 ```bash
@@ -31,7 +31,7 @@ ide --group=ruby rake style:rubocop
 ```
 Example configuration:
 ```
-IDE_RUBY_DOCKER_IMAGE="rubydev:0.1.0"
+IDE_RUBY_DOCKER_IMAGE="rubyide:0.1.0"
 IDE_RUBY_ENV_ABC=1
 ```
 The `group` is not required, and: **`group`s are not supported right now**.
@@ -45,22 +45,52 @@ ide rake style:rubocop
 ```
 with configuration
 ```
-IDE_DOCKER_IMAGE="rubydev:0.1.0"
+IDE_DOCKER_IMAGE="rubyide:0.1.0"
 IDE_ENV_ABC=1
 ```
-
 About groups, see the description in Configuration section.
 
+
 ### What happens
-1. IDE determines that "ruby" `group` is needed and therefore docker image rubydev:0.1.0
-1. IDE tries to pull rubydev:0.1.0.
-2. IDE creates a container from rubydev:0.1.0 image with the following command:
+1. IDE determines that "ruby" `group` is needed and therefore docker image rubyide:0.1.0
+1. IDE tries to pull rubyide:0.1.0.
+2. IDE creates a container from rubyide:0.1.0 image with the following command:
 ```
 docker run --rm -v ${IDE_WORK}:/ide/work -v ${IDE_HOME}:/ide/identity \
   -e ABC=1 ${IDE_DOCKER_IMAGE} \
-  "cd /ide/work && rake style:rubocop"
+  "rake style:rubocop"
 ```
 4. IDE runs rake style:rubocop in the container in the /ide/work directory.
+
+### Quick start
+See the [Rakefile.rb](./Rakefile.rb). The example there serves also as integration
+ test and concerns `gitide` docker image. Run:
+```
+# build docker image
+$ rake itest:build_gitide
+$ cd examples/gitide
+# run the actual ide command
+$ ../../ide "git clone git@git.ai-traders.com:edu/bash.git && ls -la bash"
+```
+
+or run the rake task if you prefer:
+```
+$ rake itest:test_gitide
+```
+
+### General
+For debug output set `IDE_LOG_LEVEL=debug`.
+
+### Warning
+Due to current requirements, it only works on local docker host (docker daemon
+ must be installed locally).
+
+## Installation
+```bash
+sudo bash -c "`curl -L http://gitlab.ai-traders.com/lab/ide/blob/master/install.sh`"
+```
+
+Or just do what [install.sh](./install.sh) says.
 
 ## Configuration
 The whole configuration is put in `Idefile`. It is an environment variable style
@@ -69,12 +99,14 @@ The whole configuration is put in `Idefile`. It is an environment variable style
 
 Supported variables:
 * `IDE_DRIVER`, supported values: docker, docker-compose (won’t be implemented now), vagrant (won’t be implemented now), defaults to docker – will run docker run command
-* `IDE_HOME`, what on localhost should be mounted into container as /ide/identity, defaults to `HOME`
-* `IDE_WORK`, what on localhost should be mounted into container as /ide/work,
- this is your working copy, your project repository; defaults to current directory
-* `IDE_ENV_ABC=1`, will result in setting `ABC=1` inside the container
 * `IDE_DOCKER_IMAGE`, the only required setting, docker image (or in the future maybe openstack image) to use
 * `IDE_DOCKER_OPTIONS="--privileged"` will append the string into docker run command. This is a fallback, because I can’t predict all the ide usage but I think such a fallback will be needed.
+* `IDE_HOME`, what on localhost should be mounted into container as /ide/identity, defaults to `HOME`
+* `IDE_WORK`, what on localhost should be mounted into container as /ide/work,
+ this is your working copy, your project repository; defaults to current directory.
+ In order to let container see your working copy so that is has code to work on,
+ and, in order to let you later see any container's work result (code changes).
+* `IDE_ENV_ABC=1`, will result in setting `ABC=1` inside the container
 
 In order to allow end user to use different docker images for different tasks,
  groups are introduced. Example for `BUILD` group:
@@ -117,10 +149,13 @@ The entrypoint must take care of mapping any settings and secrets files from
 
 Thanks to that, we close all configuration problems of a particular project type
  in a single IDE image. You should know what your IDE image is capable of, what
- secrets it needs. Forgetting identity or config files is one of the most frequent
+ secrets and configuration it needs. Forgetting identity or config files is one of the most frequent
  causes of failed CI jobs. Here we move this problem to the earlier CI stages.
  Entrypoint should fail (or raise or exit with status 1) if any obligatory config
  or secret file does not exist (it should tell which files are missing).
+ In order to limit the requirements put on docker host, it seems better to generate
+ configuration files instead of requiring them to exist on docker host (unless
+ impossible or uncomfortable or configuration files contain secrets).
 
 The IDE image readme should note:
  * which configuration or secret files are needed
@@ -129,7 +164,8 @@ The IDE image readme should note:
 Frequently evolving IDE images are very ok. You should not just start using new
  tools without building and testing new dev image first.
 
-Do it in `ide-setup-identity.sh` script.
+Take care of configuration and secrets mapping in `ide-setup-identity.sh` script.
+
 #### UID GID problem
 The destined uid and gid are the same as the uid and gid of `/ide/work` directory.
  Thanks to [Tom's docker-uid-gid-fix](https://github.com/tomzo/docker-uid-gid-fix)
@@ -148,8 +184,32 @@ The entrypoint should invoke `ide-setup-identity.sh` and `ide-fix-uid-gid.sh` sc
 
 #### CMD
 Thanks to ENTRYPOINT taking care of all configuration, secrets, ownership, current
- directory, the CMD can be as simple as possbile, as if you ran it on fully
+ directory, the CMD can be as simple as possible, as if you ran it on fully
  provisioned instance. Example: `rake style:rubocop` or some mono command.
 
+Such a docker image can be ran:
+ * **not-interactively**: `docker run --rm -v ${PWD}/examples/gitide/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0 "git clone git@git.ai-traders.com:edu/bash.git && ls -la bash"`
+ * **interactively**: `docker run -ti --rm -v ${PWD}/examples/gitide/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0`
 
 See the [examples](./examples) directory.
+
+## Development
+There is a `Rakefile.rb` and rake tasks to be used:
+```
+$ rake style
+$ rake unit
+$ rake itest:build_gitide
+$ rake itest:test_gitide_dryrun
+$ rake itest:test_gitide
+```
+The `Rakefile.rb` contains guidelines how to install testing software. If you wish,
+ you can invoke them without rake.
+
+Style guides:
+ * https://github.com/progrium/bashstyle
+
+### TODO
+1. Support groups
+1. Apply https://github.com/progrium/bashstyle style guide
+1. Maybe allow local env variables like `IDE_*` override the variables set
+ in Idefile.

@@ -1,0 +1,158 @@
+#!/bin/bash
+
+helpfunc() {
+    echo "Usage: $0 [--group GROUP] [--idefile IDEFILE] COMMAND"
+    echo "  --help     Help. Display this message and quit."
+    echo "  --version  Version. Print version number and quit."
+    echo "  --group    Specify GROUP from Idefile"
+    echo "  --idefile  Specify IDEFILE, default is: ./Idefile"
+    echo "  --dryrun   Do not pull docker image, do not run docker run."
+    exit
+}
+
+log_debug() {
+    if [ "$IDE_LOG_LEVEL" == "debug" ]; then
+      echo -e "$(date "+%d-%m-%Y %T") $1"
+    fi
+}
+
+# Echoes the docker run command, all the arguments are verified already.
+# $1 is command to be run in docker container
+construct_docker_command() {
+  # initial part of the docker command
+  docker_cmd="docker run --rm -v $IDE_WORK:/ide/work -v $IDE_HOME:/ide/identity:ro"
+
+  # get all the bash variables set and grep for only the ones starting with
+  # IDE_ENV
+  env_in_docker=$( ( set -o posix ; set ) | grep IDE_ENV)
+  DOCKER_ENVS_ARRAY=()
+  # replace "IDE_ENV_" with nothing
+  for line in $env_in_docker ; do
+      one_env_var="${line//IDE_ENV_/}"
+      DOCKER_ENVS_ARRAY+=($one_env_var)
+  done
+  for env_var in "${DOCKER_ENVS_ARRAY[@]}" ; do
+      docker_cmd+=" -e $env_var"
+  done
+
+  if [ -n "$IDE_DOCKER_OPTIONS" ]; then
+    docker_cmd+=" $IDE_DOCKER_OPTIONS"
+  fi
+
+  docker_cmd+=" $IDE_DOCKER_IMAGE \"$1\""
+  echo "$docker_cmd"
+}
+
+groupname="default"
+idefile="${PWD}/Idefile"
+version="0.0.1"
+dryrun="false"
+while (( $# > 0 ))
+do
+    opt="$1"
+    shift
+
+    case $opt in
+    --help)
+        helpfunc
+        exit 0
+        ;;
+    --version)
+        echo "$0 version $version"
+        exit 0
+        ;;
+    --group)  # Example with an operand
+        echo "groupnames other than default are not supported"
+        exit 1;
+        # TODO: support groups
+        # groupname="$1"
+        # shift
+        ;;
+    --idefile)  # Example with an operand
+        idefile="$1"
+        shift
+        ;;
+    --dryrun)
+        dryrun="true"
+        ;;
+    --*)
+        echo "Invalid option: '$opt'" >&2
+        exit 1
+        ;;
+    -*)
+        echo "Invalid option: '$opt'" >&2
+        exit 1
+        ;;
+    *)
+        command="$opt"
+        # end of long options
+        break;
+        ;;
+   esac
+
+done
+
+# verify options
+if [ -z "$groupname" ]; then
+  echo "groupname not specified"
+  exit 1;
+fi
+if [ -z "$command" ]; then
+  echo "command not specified"
+  exit 1;
+fi
+if [ -z "$idefile" ]; then
+  echo "idefile not specified"
+  exit 1;
+fi
+if [ ! -f "$idefile" ]; then
+  echo "idefile: $idefile does not exist"
+  exit 1;
+fi
+log_debug "Starting ide, version: $version"
+log_debug "groupname: $groupname"
+log_debug "idefile: $idefile"
+
+# verify Idefile
+source "$idefile"
+if [ -z "$IDE_DOCKER_IMAGE" ]; then
+  echo "IDE_DOCKER_IMAGE not set"
+  exit 1;
+fi
+if [ -z "$IDE_DRIVER" ]; then
+  IDE_DRIVER="docker"
+  log_debug "IDE_DRIVER not set, setting to: $IDE_DRIVER"
+fi
+if [ "$IDE_DRIVER" != "docker" ]; then
+  echo "IDE_DRIVER set to $IDE_DRIVER, supported is only: docker"
+  exit 1
+fi
+if [ -z "$IDE_WORK" ]; then
+  IDE_WORK=$PWD
+  log_debug "IDE_WORK not set, setting to: $IDE_WORK"
+fi
+if [ ! -d "$IDE_WORK" ]; then
+  echo "IDE_WORK set to $IDE_WORK which does not exist"
+  exit 1
+fi
+if [ -z "$IDE_HOME" ]; then
+  IDE_HOME=$HOME
+  log_debug "IDE_HOME not set, setting to: $IDE_HOME"
+fi
+if [ ! -d "$IDE_HOME" ]; then
+  echo "IDE_HOME set to $IDE_HOME which does not exist"
+  exit 1
+fi
+
+# construct docker command
+docker_command=$(construct_docker_command "$command")
+log_debug "docker command would be:\n$docker_command"
+
+# run docker run
+if [[ "$dryrun" != "true" ]]; then
+  eval "$docker_command"
+  exit_status="$?"
+  if [[ "$exit_status" != "0" ]]; then
+    exit $exit_status
+  fi
+fi
