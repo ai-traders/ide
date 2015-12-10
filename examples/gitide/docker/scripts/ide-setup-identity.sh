@@ -2,7 +2,7 @@
 
 ###########################################################################
 # This file ensures files are mapped from /ide/identity into /home/ide.
-# Fails i eny required secret or configuration file is missing.
+# Fails if any required secret or configuration file is missing.
 ###########################################################################
 
 # This is the directory we expect to be mounted as docker volume.
