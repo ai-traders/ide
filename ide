@@ -11,7 +11,7 @@ helpfunc() {
 }
 
 log_debug() {
-    if [ "$IDE_LOG" == "debug" ]; then
+    if [ "$IDE_LOG_LEVEL" == "debug" ]; then
       echo -e "$(date "+%d-%m-%Y %T") $1"
     fi
 }
@@ -25,13 +25,13 @@ construct_docker_command() {
   # get all the bash variables set and grep for only the ones starting with
   # IDE_ENV
   env_in_docker=$( ( set -o posix ; set ) | grep IDE_ENV)
-  ARRAY=()
+  DOCKER_ENVS_ARRAY=()
   # replace "IDE_ENV_" with nothing
   for line in $env_in_docker ; do
       one_env_var="${line//IDE_ENV_/}"
-      ARRAY+=($one_env_var)
+      DOCKER_ENVS_ARRAY+=($one_env_var)
   done
-  for env_var in "${ARRAY[@]}" ; do
+  for env_var in "${DOCKER_ENVS_ARRAY[@]}" ; do
       docker_cmd+=" -e $env_var"
   done
 
@@ -41,44 +41,6 @@ construct_docker_command() {
 
   docker_cmd+=" $IDE_DOCKER_IMAGE \"$1\""
   echo "$docker_cmd"
-}
-
-get_image_name() {
-    # there can be two ':' in docker image name, e.g.:
-    # docker-registry.hostname.com:5000/some_image:0.1.0
-    while IFS=':' read -ra image_name_arr; do
-      # take all but the last part
-      unset image_name_arr[${#image_name_arr[@]}-1]
-      # join array elements with ':'
-      image_name=$(local IFS=":"; shift; echo "${image_name_arr[@]}";)
-    done <<< "$IDE_DOCKER_IMAGE"
-
-    echo "$image_name"
-}
-get_image_tag() {
-    # there can be two ':' in docker image name, e.g.:
-    # docker-registry.hostname.com:5000/some_image:0.1.0
-    while IFS=':' read -ra image_name_arr; do
-      for i in "${image_name_arr[@]}"; do
-          # this will be assigned with the last part after ':'
-          tag="$i"
-      done
-    done <<< "$IDE_DOCKER_IMAGE"
-
-    echo "$tag"
-}
-# $1 is docker image name
-# $2 is docker image tag
-docker_image_exists?() {
-  # multiline string with docker images tags
-  tags=$(docker images "$1" | awk '{print $2}')
-  for line in $tags ; do
-      if [[ "$line" == "$2" ]]; then
-        echo "true"
-        return;
-      fi
-  done
-  echo "false"
 }
 
 groupname="default"
@@ -180,27 +142,6 @@ fi
 if [ ! -d "$IDE_HOME" ]; then
   echo "IDE_HOME set to $IDE_HOME which does not exist"
   exit 1
-fi
-
-if [[ "$dryrun" != "true" ]]; then
-  # check if the image does not exist locally (if its name does not start with
-  # registry, then "library/" is prepended and "docker pull" would pull
-  # "library/$IDE_DOCKER_IMAGE" which be not what user wanted)
-  # Now, I'd like to do it with: "docker images $IDE_DOCKER_IMAGE" but it shows
-  # nothing for me. It works only if I don't set image tag, so:
-  image_name=$(get_image_name)
-  image_tag=$(get_image_tag)
-
-  if [[ $(docker_image_exists? "$image_name" "$image_tag") == "false" ]]; then
-    log_debug "pulling image $IDE_DOCKER_IMAGE"
-    docker pull "$IDE_DOCKER_IMAGE"
-    exit_status="$?"
-    if [[ "$exit_status" != "0" ]]; then
-      exit $exit_status
-    fi
-  else
-    log_debug "image $IDE_DOCKER_IMAGE exists locally"
-  fi
 fi
 
 # construct docker command

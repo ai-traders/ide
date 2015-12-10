@@ -56,7 +56,7 @@ describe "commandline options"
   describe "docker run command, using gitide"
     it "exits 0, constructs correct command"
       # do not use \"\" it will not be counted as empty string
-      message="$(cd examples/gitide && IDE_LOG=debug ${IDE_PATH} --dryrun some_command)"
+      message="$(cd examples/gitide && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun some_command)"
       assert equal "$?" "0"
       assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/examples/gitide/work:/ide/work\ -v\ ${HOME}:/ide/identity:ro\ gitide:0.1.0\ \\\"some_command\\\""
     end
@@ -64,7 +64,7 @@ describe "commandline options"
   describe "docker run command, using complexide"
     it "exits 0, constructs correct command"
       # do not use \"\" it will not be counted as empty string
-      message="$(IDE_LOG=debug ${IDE_PATH} --idefile test/complexide-usage/Idefile --dryrun some_command)"
+      message="$(IDE_LOG_LEVEL=debug ${IDE_PATH} --idefile test/complexide-usage/Idefile --dryrun some_command)"
       assert equal "$?" "0"
       assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/test/empty_work_dir:/ide/work\ -v\ ${PWD}/test/empty_home_dir:/ide/identity:ro\ -e\ ABC=1\ -e\ DEF=2\ -e\ GHI=3\ --privileged\ complexide:0.1.0\ \\\"some_command\\\""
     end
