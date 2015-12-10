@@ -84,8 +84,8 @@ do
         exit 1
         ;;
     *)
-        command="$opt"
-        # end of long options
+        command="$opt $@"
+        # the rest of arguments is the command
         break;
         ;;
    esac

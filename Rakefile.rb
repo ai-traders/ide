@@ -33,7 +33,7 @@ namespace 'itest' do
     Dir.chdir('./examples/gitide') do
       # changing current directory, because IDE_WORK in Idefile is set relative
       # to './examples/gitide'
-      Rake.sh('IDE_LOG_LEVEL=debug ../../ide --dryrun "echo sth"')
+      Rake.sh('IDE_LOG_LEVEL=debug ../../ide --dryrun echo sth')
     end
   end
   task :test_gitide do
