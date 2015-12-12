@@ -87,7 +87,7 @@ Due to current requirements, it only works on local docker host (docker daemon
 
 ## Installation
 ```bash
-sudo bash -c "`curl -L http://gitlab.ai-traders.com/lab/ide/blob/master/install.sh`"
+sudo bash -c "`curl -L http://gitlab.ai-traders.com/lab/ide/raw/master/install.sh`"
 ```
 
 Or just do what [install.sh](./install.sh) says.
