@@ -213,3 +213,9 @@ Style guides:
 1. Apply https://github.com/progrium/bashstyle style guide
 1. Maybe allow local env variables like `IDE_*` override the variables set
  in Idefile.
+
+### FAQ
+> Why not mount `/home/user` as `/home/ide` but as `/ide/work`?
+
+Because `/home/ide` has already some configuration provided by the docker
+ ide image and mounting it this way would shadow all the provisioned files.
