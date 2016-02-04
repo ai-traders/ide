@@ -49,6 +49,19 @@ construct_docker_command() {
   echo "$docker_cmd"
 }
 
+get_env_vars_file_name() {
+  echo ""
+  # todo: take date or this:
+  # http://stackoverflow.com/questions/8988824/generating-random-number-between-1-and-10-in-bash-shell-script
+}
+
+# Creates a file of format ENV_VAR_NAME="env var value" made up of current
+# environment variables.
+# $1 is a comma-separated list of blacklisted env variables.
+save_environment_variables() {
+
+}
+
 groupname="default"
 idefile="${PWD}/Idefile"
 version="0.0.3"
