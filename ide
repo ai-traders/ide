@@ -50,21 +50,56 @@ construct_docker_command() {
 }
 
 get_env_vars_file_name() {
-  echo ""
-  # todo: take date or this:
-  # http://stackoverflow.com/questions/8988824/generating-random-number-between-1-and-10-in-bash-shell-script
+  echo /tmp/ide/environment-`date +%Y-%m-%d_%H-%M-%S`
 }
 
 # Creates a file of format ENV_VAR_NAME="env var value" made up of current
 # environment variables.
-# $1 is a comma-separated list of blacklisted env variables.
+# $1 is a file path to whic we save to
 save_environment_variables() {
 
+  # get all the bash variables set
+  host_env=$(set -o posix ; set )
+
+  # decide which variables to preserve
+  DOCKER_ENVS_ARRAY=()
+  # split IDE_VARS_BLACKLIST with ',' as delimeter
+  blacklisted_variables=$(echo $IDE_VARS_BLACKLIST | tr "," "\n")
+  for env_var in $host_env ; do
+      env_var_name=$(echo $env_var | awk '{ gsub(/=.*/, ""); print }')
+
+      blacklisted="false"
+      for blacklisted_var in $blacklisted_variables ; do
+          if [[ "$blacklisted_var" == *"*" ]]; then
+              # this blacklisted variable ends with asterix, e.g. BASH*
+              # get its name without asterix, e.g. BASH
+              no_asterix_name=$(echo $blacklisted_var | awk '{ gsub(/\*/, ""); print }')
+
+              if [[ "$env_var_name" == "$no_asterix_name"* ]]; then
+                  blacklisted="true"
+                  break;
+              fi
+          fi
+
+          if [[ "$env_var_name" == "$blacklisted_var" ]]; then
+              blacklisted="true"
+              break;
+          fi
+      done
+      if [[ "$blacklisted" == "false" ]]; then
+          DOCKER_ENVS_ARRAY+=($env_var)
+      fi
+  done
+
+  log_debug "Writing environment variables to $1"
+  for env_var in "${DOCKER_ENVS_ARRAY[@]}" ; do
+      echo "$env_var" >> "$1"
+  done
 }
 
 groupname="default"
 idefile="${PWD}/Idefile"
-version="0.0.3"
+version="0.1.0"
 dryrun="false"
 while (( $# > 0 ))
 do
@@ -158,6 +193,15 @@ if [ ! -d "$IDE_HOME" ]; then
   echo "IDE_HOME set to $IDE_HOME which does not exist"
   exit 1
 fi
+if [ -z "$IDE_VARS_BLACKLIST" ]; then
+  IDE_VARS_BLACKLIST=BASH*,HOME,USERNAME,USER,LOGNAME,PATH,TERM,SHELL,MAIL,SUDO_*,WINDOWID,SSH_*,SESSION_*,GEM_HOME,GEM_PATH,GEM_ROOT,HOSTNAME,HOSTTYPE,IFS,PPID
+  log_debug "IDE_VARS_BLACKLIST not set, setting to: $IDE_VARS_BLACKLIST"
+fi
+
+env_file=$(get_env_vars_file_name)
+env_dir=$(dirname "${env_file}")
+mkdir -p ${env_dir}
+save_environment_variables "$env_file"
 
 # construct docker command
 docker_command=$(construct_docker_command "$command")
