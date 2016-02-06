@@ -112,8 +112,10 @@ if [ -z "$idefile" ]; then
   exit 1;
 fi
 if [ ! -f "$idefile" ]; then
-  idefile_full_path=$(readlink -f "$idefile")
-  echo "idefile: $idefile_full_path does not exist"
+  # do not get full path here with:
+  # idefile_full_path=$(readlink -f "$idefile")
+  # it will be null
+  echo "idefile: $idefile does not exist (relative to ${PWD})"
   exit 1;
 fi
 log_debug "Starting ide, version: $version"
