@@ -1,5 +1,11 @@
 #!/bin/bash
 
+log_debug() {
+    if [ "$IDE_LOG_LEVEL" == "debug" ]; then
+      echo -e "$(date "+%d-%m-%Y %T") $1"
+    fi
+}
+
 get_env_vars_file_name() {
   echo /tmp/ide/environment-`date +%Y-%m-%d_%H-%M-%S`
 }
@@ -8,43 +14,54 @@ get_env_vars_file_name() {
 # environment variables.
 # $1 is a file path to which we save to
 save_environment_variables() {
+  # Get all the environment variables set.
+  # The env command with no arguments will print a list of the "exported"
+  # environment variables and their values. These variables are made visible to
+  # subprocesses. But the env command prints some variables in 2 lines, e.g.:
+  # COMP_WORDBREAKS=
+  # "'><;|&(:
+  # Thus, and also because I don't need variables' values now, I prefer
+  # compgen -e.
+  host_env=$(compgen -e)
 
-  # get all the bash variables set
-  host_env=$(set -o posix ; set )
-
-  # decide which variables to preserve
   DOCKER_ENVS_ARRAY=()
   # split IDE_VARS_BLACKLIST with ',' as delimeter
   blacklisted_variables=$(echo $IDE_VARS_BLACKLIST | tr "," "\n")
   for env_var in $host_env ; do
-      env_var_name=$(echo $env_var | awk '{ gsub(/=.*/, ""); print }')
-
+      echo "dealing with $env_var"
       blacklisted="false"
+      env_var_value=$(printenv ${env_var})
       for blacklisted_var in $blacklisted_variables ; do
           if [[ "$blacklisted_var" == *"*" ]]; then
               # this blacklisted variable ends with asterix, e.g. BASH*
               # get its name without asterix, e.g. BASH
               no_asterix_name=$(echo $blacklisted_var | awk '{ gsub(/\*/, ""); print }')
 
-              if [[ "$env_var_name" == "$no_asterix_name"* ]]; then
-                  DOCKER_ENVS_ARRAY+=("IDE_${env_var}")
+              if [[ "$env_var" == "$no_asterix_name"* ]]; then
+                  DOCKER_ENVS_ARRAY+=("IDE_${env_var}=${env_var_value}")
                   blacklisted="true"
                   break;
               fi
-          elif [[ "$env_var_name" == "$blacklisted_var" ]]; then
-              DOCKER_ENVS_ARRAY+=("IDE_${env_var}")
+          elif [[ "$env_var" == "$blacklisted_var" ]]; then
+              DOCKER_ENVS_ARRAY+=("IDE_${env_var}=${env_var_value}")
               blacklisted="true"
               break;
           fi
       done
       if [[ "$blacklisted" == "false" ]]; then
           # this variable was not blacklisted, no need to add prefix before its name
-          DOCKER_ENVS_ARRAY+=($env_var)
+          DOCKER_ENVS_ARRAY+=("${env_var}=${env_var_value}")
       fi
   done
 
   log_debug "Writing environment variables to $1"
+  if [ -f "$1" ];then
+    rm "$1"
+  fi
   for env_var in "${DOCKER_ENVS_ARRAY[@]}" ; do
       echo "$env_var" >> "$1"
+  done
+  for env_var in $host_env ; do
+      echo "$env_var" >> "all"
   done
 }

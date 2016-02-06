@@ -14,12 +14,6 @@ helpfunc() {
     exit
 }
 
-log_debug() {
-    if [ "$IDE_LOG_LEVEL" == "debug" ]; then
-      echo -e "$(date "+%d-%m-%Y %T") $1"
-    fi
-}
-
 # Echoes the docker run command, all the arguments are verified already.
 # $1 is command to be run in docker container
 construct_docker_command() {
@@ -153,7 +147,7 @@ if [ ! -d "$IDE_IDENTITY" ]; then
   exit 1
 fi
 if [ -z "$IDE_VARS_BLACKLIST" ]; then
-  IDE_VARS_BLACKLIST=BASH*,HOME,USERNAME,USER,LOGNAME,PATH,TERM,SHELL,MAIL,SUDO_*,WINDOWID,SSH_*,SESSION_*,GEM_HOME,GEM_PATH,GEM_ROOT,HOSTNAME,HOSTTYPE,IFS,PPID
+  IDE_VARS_BLACKLIST=BASH*,HOME,USERNAME,USER,LOGNAME,PATH,TERM,SHELL,MAIL,SUDO_*,WINDOWID,SSH_*,SESSION_*,GEM_HOME,GEM_PATH,GEM_ROOT,HOSTNAME,HOSTTYPE,IFS,PPID,PWD,OLDPWD
   log_debug "IDE_VARS_BLACKLIST not set, setting to: $IDE_VARS_BLACKLIST"
 fi
 
