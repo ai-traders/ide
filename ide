@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/ide_functions
+
 helpfunc() {
     echo "Usage: $0 [--group GROUP] [--idefile IDEFILE] COMMAND"
     echo "  --help     Help. Display this message and quit."
@@ -20,11 +24,11 @@ log_debug() {
 # $1 is command to be run in docker container
 construct_docker_command() {
   # initial part of the docker command
-  docker_cmd="docker run --rm -v $IDE_WORK:/ide/work -v $IDE_HOME:/ide/identity:ro"
+  docker_cmd="docker run --rm -v $IDE_WORK:/ide/work -v $IDE_IDENTITY:/ide/identity:ro"
   if [ -t 0 ] ; then
     # interactive shell
     if [ -z "$command" ]; then
-      docker_cmd="docker run -ti --rm -v $IDE_WORK:/ide/work -v $IDE_HOME:/ide/identity:ro"
+      docker_cmd="docker run -ti --rm -v $IDE_WORK:/ide/work -v $IDE_IDENTITY:/ide/identity:ro"
     fi
   fi
 
@@ -47,54 +51,6 @@ construct_docker_command() {
 
   docker_cmd+=" $IDE_DOCKER_IMAGE \"$1\""
   echo "$docker_cmd"
-}
-
-get_env_vars_file_name() {
-  echo /tmp/ide/environment-`date +%Y-%m-%d_%H-%M-%S`
-}
-
-# Creates a file of format ENV_VAR_NAME="env var value" made up of current
-# environment variables.
-# $1 is a file path to whic we save to
-save_environment_variables() {
-
-  # get all the bash variables set
-  host_env=$(set -o posix ; set )
-
-  # decide which variables to preserve
-  DOCKER_ENVS_ARRAY=()
-  # split IDE_VARS_BLACKLIST with ',' as delimeter
-  blacklisted_variables=$(echo $IDE_VARS_BLACKLIST | tr "," "\n")
-  for env_var in $host_env ; do
-      env_var_name=$(echo $env_var | awk '{ gsub(/=.*/, ""); print }')
-
-      blacklisted="false"
-      for blacklisted_var in $blacklisted_variables ; do
-          if [[ "$blacklisted_var" == *"*" ]]; then
-              # this blacklisted variable ends with asterix, e.g. BASH*
-              # get its name without asterix, e.g. BASH
-              no_asterix_name=$(echo $blacklisted_var | awk '{ gsub(/\*/, ""); print }')
-
-              if [[ "$env_var_name" == "$no_asterix_name"* ]]; then
-                  blacklisted="true"
-                  break;
-              fi
-          fi
-
-          if [[ "$env_var_name" == "$blacklisted_var" ]]; then
-              blacklisted="true"
-              break;
-          fi
-      done
-      if [[ "$blacklisted" == "false" ]]; then
-          DOCKER_ENVS_ARRAY+=($env_var)
-      fi
-  done
-
-  log_debug "Writing environment variables to $1"
-  for env_var in "${DOCKER_ENVS_ARRAY[@]}" ; do
-      echo "$env_var" >> "$1"
-  done
 }
 
 groupname="default"
@@ -156,7 +112,8 @@ if [ -z "$idefile" ]; then
   exit 1;
 fi
 if [ ! -f "$idefile" ]; then
-  echo "idefile: $idefile does not exist"
+  idefile_full_path=$(readlink -f "$idefile")
+  echo "idefile: $idefile_full_path does not exist"
   exit 1;
 fi
 log_debug "Starting ide, version: $version"
@@ -185,12 +142,12 @@ if [ ! -d "$IDE_WORK" ]; then
   echo "IDE_WORK set to $IDE_WORK which does not exist"
   exit 1
 fi
-if [ -z "$IDE_HOME" ]; then
-  IDE_HOME=$HOME
-  log_debug "IDE_HOME not set, setting to: $IDE_HOME"
+if [ -z "$IDE_IDENTITY" ]; then
+  IDE_IDENTITY=$HOME
+  log_debug "IDE_IDENTITY not set, setting to: $IDE_IDENTITY"
 fi
-if [ ! -d "$IDE_HOME" ]; then
-  echo "IDE_HOME set to $IDE_HOME which does not exist"
+if [ ! -d "$IDE_IDENTITY" ]; then
+  echo "IDE_IDENTITY set to $IDE_IDENTITY which does not exist"
   exit 1
 fi
 if [ -z "$IDE_VARS_BLACKLIST" ]; then

@@ -1,4 +1,10 @@
-# 0.0.3 (02 January 2015)
+# 0.1.0 (06 February 2016)
+
+* `IDE_HOME` replaced with `IDE_IDENTITY`
+* implemented shpec matcher "do_match", because "match" has error
+ (shpec files cannot be in test directory or else custom matcher won't be read)
+
+# 0.0.3 (02 January 2016)
 
 Allow to specify no command - use docker's default then.
 

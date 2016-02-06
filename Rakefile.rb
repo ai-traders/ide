@@ -19,7 +19,10 @@ end
 # sudo sh -c "`curl -L https://raw.github.com/rylnd/shpec/master/install.sh`"
 namespace 'unit' do
   task :shpec do
-    Rake.sh('shpec test/shpec/ide.sh')
+    Dir["shpec/*.sh"].each do | file |
+      puts "Testing #{file} file..."
+      Rake.sh("shpec #{file}")
+    end
   end
 end
 

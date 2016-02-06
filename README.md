@@ -56,7 +56,7 @@ About groups, see the description in Configuration section.
 1. IDE tries to pull rubyide:0.1.0.
 2. IDE creates a container from rubyide:0.1.0 image with the following command:
 ```
-docker run --rm -v ${IDE_WORK}:/ide/work -v ${IDE_HOME}:/ide/identity \
+docker run --rm -v ${IDE_WORK}:/ide/work -v ${IDE_IDENTITY}:/ide/identity \
   -e ABC=1 ${IDE_DOCKER_IMAGE} \
   "rake style:rubocop"
 ```
@@ -101,7 +101,7 @@ Supported variables:
 * `IDE_DRIVER`, supported values: docker, docker-compose (won’t be implemented now), vagrant (won’t be implemented now), defaults to docker – will run docker run command
 * `IDE_DOCKER_IMAGE`, the only required setting, docker image (or in the future maybe openstack image) to use
 * `IDE_DOCKER_OPTIONS="--privileged"` will append the string into docker run command. This is a fallback, because I can’t predict all the ide usage but I think such a fallback will be needed.
-* `IDE_HOME`, what on localhost should be mounted into container as /ide/identity, defaults to `HOME`
+* `IDE_IDENTITY`, what on localhost should be mounted into container as /ide/identity, defaults to `HOME`
 * `IDE_WORK`, what on localhost should be mounted into container as /ide/work,
  this is your working copy, your project repository; defaults to current directory.
  In order to let container see your working copy so that is has code to work on,
@@ -132,12 +132,12 @@ Docker image must have an `ide` user (actually any not-root user is fine, use
 
 ### Directories
 `IDE_WORK` directory will be mounted as `/ide/work`.
-`IDE_HOME` directory will be ro mounted as `/ide/identity` (with all settings
+`IDE_IDENTITY` directory will be ro mounted as `/ide/identity` (with all settings
  and secrets). This may be trouble to support beside docker containers.
 So if your docker image already has `/ide/work` or `/ide/identity`, they will
  be overridden.
 
- Entrypoint should fail if `IDE_WORK`or `IDE_HOME` directories do not exist.
+ Entrypoint should fail if `IDE_WORK`or `IDE_IDENTITY` directories do not exist.
 
 ### CMD and ENTRYPOINT
 #### Configuration and secrets
