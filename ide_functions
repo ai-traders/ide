@@ -40,6 +40,30 @@ help_save_blacklisted_variable() {
   fi
 }
 
+env_var_already_in_array() {
+
+  # http://stackoverflow.com/questions/1063347/passing-arrays-as-parameters-in-bash
+  declare -a array=("${!1}")
+  #array="$1"
+  if [ -z "$array" ]; then
+    log_error "array not specified"
+    return 1;
+  fi
+  env_var="$2"
+  if [ -z "$env_var" ]; then
+    log_error "env_var not specified"
+    return 1;
+  fi
+  for element in ${array[*]} ; do
+      if [[ "$element" == "$env_var"* ]]; then
+        echo "true"
+        return 0
+      fi
+  done
+  echo "false"
+  return 0
+}
+
 # Creates a file ($1) of format ENV_VAR_NAME="env var value" made up of current
 # environment variables. Respects the collection of blacklisted variables ($2).
 # If any env variable is blacklisted, it will be saved with "IDE_" prefix.
@@ -100,14 +124,14 @@ save_environment_variables() {
               no_asterix_name=$(echo $blacklisted_var | awk '{ gsub(/\*/, ""); print }')
 
               if [[ "$env_var" == "$no_asterix_name"* ]]; then
-                  echo "${env_var} blacklisted asterix"
+                  log_debug "${env_var} blacklisted asterix"
                   var_name_value=$(help_save_blacklisted_variable ${env_var})
                   DOCKER_ENVS_ARRAY+=("${var_name_value}")
                   blacklisted="true"
                   break;
               fi
           elif [[ "$env_var" == "$blacklisted_var" ]]; then
-              echo "${env_var} blacklisted normal"
+              log_debug "${env_var} blacklisted normal"
               var_name_value=$(help_save_blacklisted_variable ${env_var})
               DOCKER_ENVS_ARRAY+=("${var_name_value}")
               blacklisted="true"
@@ -115,9 +139,23 @@ save_environment_variables() {
           fi
       done
       if [[ "$blacklisted" == "false" ]]; then
+          log_debug "${env_var} not blacklisted"
           # this variable was not blacklisted, no need to add prefix before its name
           env_var_value=$(printenv ${env_var})
           DOCKER_ENVS_ARRAY+=("${env_var}=${env_var_value}")
+      fi
+  done
+  for env_var in $host_env ; do
+    # now we are looking only for IDE_ variables, for which the no IDE_ variables
+    # are not set, e.g. IDE_ABC is set and ABC is not set. Without this,
+    # IDE_ABC would be skipped.
+      if [[ "$env_var" == "IDE_"* ]]; then
+        env_var_already_in_array=$(env_var_already_in_array $DOCKER_ENVS_ARRAY)
+          if [[ "$env_var_already_in_array" == "false"* ]]; then
+            log_debug "adding IDE_ variable: ${env_var}"
+            env_var_value=$(printenv ${env_var})
+            DOCKER_ENVS_ARRAY+=("${env_var}=${env_var_value}")
+          fi
       fi
   done
   for env_var in "${DOCKER_ENVS_ARRAY[@]}" ; do
