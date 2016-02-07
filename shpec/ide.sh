@@ -58,43 +58,47 @@ describe "commandline options"
       # do not use \"\" it will not be counted as empty string
       message="$(cd examples/gitide && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun some_command)"
       assert equal "$?" "0"
-      assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/examples/gitide/work:/ide/work\ -v\ ${HOME}:/ide/identity:ro\ gitide:0.1.0\ \\\"some_command\ \\\""
+      assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/examples/gitide/work:/ide/work\ -v\ ${HOME}:/ide/identity:ro\ --env-file="
+      assert match "$message" "gitide:0.1.0\ \\\"some_command\ \\\""
     end
     it "exits 0, constructs correct command longer"
       # do not use \"\" it will not be counted as empty string
       message="$(cd examples/gitide && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun some_command longer)"
       assert equal "$?" "0"
-      assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/examples/gitide/work:/ide/work\ -v\ ${HOME}:/ide/identity:ro\ gitide:0.1.0\ \\\"some_command\ longer\\\""
+      assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/examples/gitide/work:/ide/work\ -v\ ${HOME}:/ide/identity:ro\ --env-file="
+      assert match "$message" "gitide:0.1.0\ \\\"some_command\ longer\\\""
     end
     it "exits 0, constructs correct command longer longer"
       # do not use \"\" it will not be counted as empty string
       message="$(cd examples/gitide && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun some_command longer longer)"
       assert equal "$?" "0"
-      assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/examples/gitide/work:/ide/work\ -v\ ${HOME}:/ide/identity:ro\ gitide:0.1.0\ \\\"some_command\ longer\ longer\\\""
+      assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/examples/gitide/work:/ide/work\ -v\ ${HOME}:/ide/identity:ro\ --env-file="
+      assert match "$message" "gitide:0.1.0\ \\\"some_command\ longer\ longer\\\""
     end
   end
-  # describe "docker run command, using complexide"
-  #   it "exits 0, constructs correct command"
-  #     # do not use \"\" it will not be counted as empty string
-  #     message="$(IDE_LOG_LEVEL=debug ${IDE_PATH} --idefile test/complexide-usage/Idefile --dryrun some_command)"
-  #     assert equal "$?" "0"
-  #     assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/test/empty_work_dir:/ide/work\ -v\ ${PWD}/test/empty_home_dir:/ide/identity:ro\ -e\ ABC=1\ -e\ DEF=2\ -e\ GHI=3\ --privileged\ complexide:0.1.0\ \\\"some_command\ \\\""
-  #   end
-  # end
-#   describe "docker run command, using invalid-driver-ide"
-#     it "exits 1"
-#       # do not use \"\" it will not be counted as empty string
-#       message="$(${IDE_PATH} --idefile test/invalid-driver-ide-usage/Idefile --dryrun some_command)"
-#       assert equal "$?" "1"
-#       assert equal "$message" "IDE_DRIVER set to bla, supported is only: docker"
-#     end
-#   end
-#   describe "docker run command, using image-not-set-ide"
-#     it "exits 1"
-#       # do not use \"\" it will not be counted as empty string
-#       message="$(${IDE_PATH} --idefile test/image-not-set-ide-usage/Idefile --dryrun some_command)"
-#       assert equal "$?" "1"
-#       assert equal "$message" "IDE_DOCKER_IMAGE not set"
-#     end
-#   end
+  describe "docker run command, using complexide"
+    it "exits 0, constructs correct command"
+      # do not use \"\" it will not be counted as empty string
+      message="$(IDE_LOG_LEVEL=debug ABC=1 DEF=2 GHI=3 ${IDE_PATH} --idefile test/complexide-usage/Idefile --dryrun some_command)"
+      assert equal "$?" "0"
+      assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/test/empty_work_dir:/ide/work\ -v\ ${PWD}/test/empty_home_dir:/ide/identity:ro\ --env-file="
+      assert match "$message" "--privileged\ complexide:0.1.0\ \\\"some_command\ \\\""
+    end
+  end
+  describe "docker run command, using invalid-driver-ide"
+    it "exits 1"
+      # do not use \"\" it will not be counted as empty string
+      message="$(${IDE_PATH} --idefile test/invalid-driver-ide-usage/Idefile --dryrun some_command)"
+      assert equal "$?" "1"
+      assert equal "$message" "IDE_DRIVER set to bla, supported is only: docker"
+    end
+  end
+  describe "docker run command, using image-not-set-ide"
+    it "exits 1"
+      # do not use \"\" it will not be counted as empty string
+      message="$(${IDE_PATH} --idefile test/image-not-set-ide-usage/Idefile --dryrun some_command)"
+      assert equal "$?" "1"
+      assert equal "$message" "IDE_DOCKER_IMAGE not set"
+    end
+  end
 end

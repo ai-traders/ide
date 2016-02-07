@@ -92,7 +92,8 @@ save_environment_variables() {
       # TODO: what if someone has variable WORK and it is not blacklisted?
       # Then IDE_WORK will never be preserved. And that is fine.
       # TODO: what if someone has variable WORK and is it blacklisted?
-      # Its value will override IDE_WORK value. And that will make IDE fail.
+      # Its value will override IDE_WORK value. And that will make IDE fail
+      # but only in "ide in ide". Maybe do not allow to blacklist WORK and similar?
       if [[ "$env_var" == "IDE_"* ]]; then
         env_var_without_prefix=$(echo $env_var | awk '{ gsub(/IDE_/, ""); print }')
         log_debug "ccc ${env_var_without_prefix}"
@@ -140,7 +141,8 @@ save_environment_variables() {
           fi
       done
       if [[ "$blacklisted" == "false" ]]; then
-          log_debug "${env_var} not blacklisted"
+          # too much noise, so commented out: 
+          # log_debug "${env_var} not blacklisted"
           # this variable was not blacklisted, no need to add prefix before its name
           env_var_value=$(printenv ${env_var})
           DOCKER_ENVS_ARRAY+=("${env_var}=${env_var_value}")

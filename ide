@@ -16,7 +16,14 @@ helpfunc() {
 
 # Echoes the docker run command, all the arguments are verified already.
 # $1 is command to be run in docker container
+# $2 is the file with environment variables to be mounted into docker container
 construct_docker_command() {
+  env_file="$1"
+  if [ -z "$env_file" ]; then
+    log_error "env_file not specified"
+    return 1;
+  fi
+
   # initial part of the docker command
   docker_cmd="docker run --rm -v $IDE_WORK:/ide/work -v $IDE_IDENTITY:/ide/identity:ro"
   if [ -t 0 ] ; then
@@ -26,31 +33,22 @@ construct_docker_command() {
     fi
   fi
 
-  # get all the bash variables set and grep for only the ones starting with
-  # IDE_ENV
-  env_in_docker=$( ( set -o posix ; set ) | grep IDE_ENV)
-  DOCKER_ENVS_ARRAY=()
-  # replace "IDE_ENV_" with nothing
-  for line in $env_in_docker ; do
-      one_env_var="${line//IDE_ENV_/}"
-      DOCKER_ENVS_ARRAY+=($one_env_var)
-  done
-  for env_var in "${DOCKER_ENVS_ARRAY[@]}" ; do
-      docker_cmd+=" -e $env_var"
-  done
+  docker_cmd+=" --env-file=\"$env_file\""
 
   if [ -n "$IDE_DOCKER_OPTIONS" ]; then
     docker_cmd+=" $IDE_DOCKER_OPTIONS"
   fi
 
-  docker_cmd+=" $IDE_DOCKER_IMAGE \"$1\""
+  docker_cmd+=" $IDE_DOCKER_IMAGE \"$command\""
   echo "$docker_cmd"
 }
 
+# default values
 groupname="default"
 idefile="${PWD}/Idefile"
 version="0.1.0"
 dryrun="false"
+
 while (( $# > 0 ))
 do
     opt="$1"
@@ -154,10 +152,10 @@ fi
 env_file=$(get_env_vars_file_name)
 env_dir=$(dirname "${env_file}")
 mkdir -p ${env_dir}
-save_environment_variables "$env_file"
+save_environment_variables "$env_file" "$IDE_VARS_BLACKLIST"
 
 # construct docker command
-docker_command=$(construct_docker_command "$command")
+docker_command=$(construct_docker_command "$env_file" "$command")
 log_debug "docker command would be:\n$docker_command"
 
 # run docker run

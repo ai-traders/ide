@@ -46,7 +46,6 @@ ide rake style:rubocop
 with configuration
 ```
 IDE_DOCKER_IMAGE="rubyide:0.1.0"
-IDE_ENV_ABC=1
 ```
 About groups, see the description in Configuration section.
 
@@ -106,13 +105,11 @@ Supported variables:
  this is your working copy, your project repository; defaults to current directory.
  In order to let container see your working copy so that is has code to work on,
  and, in order to let you later see any container's work result (code changes).
-* `IDE_ENV_ABC=1`, will result in setting `ABC=1` inside the container
 
 In order to allow end user to use different docker images for different tasks,
  groups are introduced. Example for `BUILD` group:
 ```
 IDE_BUILD_DOCKER_IMAGE="mono-3.2.8"
-IDE_BUILD_ENV_ABC=1
 ```
 
 Setting the variables without `groups` can be treated as a fallback - configuration
