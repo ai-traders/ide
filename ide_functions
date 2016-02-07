@@ -40,29 +40,6 @@ help_save_blacklisted_variable() {
   fi
 }
 
-env_var_already_in_array() {
-
-  # http://stackoverflow.com/questions/1063347/passing-arrays-as-parameters-in-bash
-  declare -a array=("${!1}")
-  #array="$1"
-  if [ -z "$array" ]; then
-    log_error "array not specified"
-    return 1;
-  fi
-  env_var="$2"
-  if [ -z "$env_var" ]; then
-    log_error "env_var not specified"
-    return 1;
-  fi
-  for element in ${array[*]} ; do
-      if [[ "$element" == "$env_var"* ]]; then
-        echo "true"
-        return 0
-      fi
-  done
-  echo "false"
-  return 0
-}
 
 # Creates a file ($1) of format ENV_VAR_NAME="env var value" made up of current
 # environment variables. Respects the collection of blacklisted variables ($2).
@@ -73,6 +50,7 @@ env_var_already_in_array() {
 # exists, otherwise of PWD.
 # Variables can be also blacklisted with asterix, e.g. BASH*. This means that
 # any variable starting with BASH will be prefixed.
+# Variables with IDE_ prefix cannot be blacklisted.
 #
 # $1 is a file path to which we save to, string
 # $2 is the collection of blacklisted variables, string separated by commas
@@ -108,13 +86,36 @@ save_environment_variables() {
   # split blacklisted_variables_from_user with ',' as delimeter
   blacklisted_variables=$(echo $blacklisted_variables_from_user | tr "," "\n")
   for env_var in $host_env ; do
+      # now we are looking only for IDE_ variables, for which the no IDE_ variables
+      # are not set, e.g. IDE_ABC is set and ABC is not set. Without this,
+      # IDE_ABC would be skipped.
+      # TODO: what if someone has variable WORK and it is not blacklisted?
+      # Then IDE_WORK will never be preserved. And that is fine.
+      # TODO: what if someone has variable WORK and is it blacklisted?
+      # Its value will override IDE_WORK value. And that will make IDE fail.
       if [[ "$env_var" == "IDE_"* ]]; then
+        env_var_without_prefix=$(echo $env_var | awk '{ gsub(/IDE_/, ""); print }')
+        log_debug "ccc ${env_var_without_prefix}"
+        skip="false"
+        for element in $host_env ; do
+            if [[ "$element" == "$env_var_without_prefix" ]]; then
+              skip="true"
+              log_debug "skipping $element == ${env_var_without_prefix}"
+              break;
+            fi
+        done
+        if [[ "$skip" == "true" ]]; then
+          log_debug "skipping ${env_var}"
           # skip that variable in order not to save it twice
           continue;
-          # TODO: what if e.g. IDE_ABC is set and ABC is not? this would
-          # skip that incorrectly
+        else
+          env_var_value=$(printenv ${env_var})
+          DOCKER_ENVS_ARRAY+=("${env_var}=${env_var_value}")
+          log_debug "added ${env_var}=${env_var_value}"
+        fi
       fi
 
+      # now consider only variables without IDE_ prefix
       blacklisted="false"
       for blacklisted_var in $blacklisted_variables ; do
           if [[ "$blacklisted_var" == *"*" ]]; then
@@ -143,19 +144,6 @@ save_environment_variables() {
           # this variable was not blacklisted, no need to add prefix before its name
           env_var_value=$(printenv ${env_var})
           DOCKER_ENVS_ARRAY+=("${env_var}=${env_var_value}")
-      fi
-  done
-  for env_var in $host_env ; do
-    # now we are looking only for IDE_ variables, for which the no IDE_ variables
-    # are not set, e.g. IDE_ABC is set and ABC is not set. Without this,
-    # IDE_ABC would be skipped.
-      if [[ "$env_var" == "IDE_"* ]]; then
-        env_var_already_in_array=$(env_var_already_in_array $DOCKER_ENVS_ARRAY)
-          if [[ "$env_var_already_in_array" == "false"* ]]; then
-            log_debug "adding IDE_ variable: ${env_var}"
-            env_var_value=$(printenv ${env_var})
-            DOCKER_ENVS_ARRAY+=("${env_var}=${env_var_value}")
-          fi
       fi
   done
   for env_var in "${DOCKER_ENVS_ARRAY[@]}" ; do
