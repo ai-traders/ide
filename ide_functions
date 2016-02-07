@@ -6,25 +6,57 @@ log_debug() {
     fi
 }
 
+log_error() {
+  echo -e "\e[31merror: $1\e[0m"
+}
+
 get_env_vars_file_name() {
   echo /tmp/ide/environment-`date +%Y-%m-%d_%H-%M-%S`
 }
 
-# Creates a file of format ENV_VAR_NAME="env var value" made up of current
+# $1 is the environment variable name and does not start with IDE_
+# Example: $1 is ABC. If IDE_ABC is already set, this method returns
+# IDE_ABC=${IDE_ABC}. If IDE_ABC is not set, this method returns IDE_ABC=${ABC}.
+help_save_blacklisted_variable() {
+  env_var="$1"
+  if [ -z "$env_var" ]; then
+    log_error "env_var not specified"
+    return 1;
+  fi
+  if [[ "$env_var" == "IDE_"* ]]; then
+    log_error "env_var starts with IDE_"
+    return 1;
+  fi
+
+  ide_env_var="IDE_${env_var}"
+  ide_env_var_value=$(printenv ${ide_env_var})
+
+  if [ -z "$ide_env_var_value" ]; then
+      # "IDE_${env_var}" not set
+      env_var_value=$(printenv ${env_var})
+      echo "${ide_env_var}=${env_var_value}"
+  else
+      echo "${ide_env_var}=${ide_env_var_value}"
+  fi
+}
+
+# Creates a file ($1) of format ENV_VAR_NAME="env var value" made up of current
 # environment variables. Respects the collection of blacklisted variables ($2).
 # If any env variable is blacklisted, it will be saved with "IDE_" prefix.
-# If env var wuth "IDE_" prefix already exists, its value is taken, instead of
+# If env var with "IDE_" prefix already exists, its value is taken, instead of
 # the primary variable. E.g. PWD is blacklisted, so it will be saved as
-# "IDE_PWD=/some/path", and that "/some/path" is not a value of PWD, but a value
-# of IDE_PWD.
-# Variables can be also blacklisted with asterix, e.g. BASH*
+# "IDE_PWD=/some/path", and that "/some/path" is a value of IDE_PWD if already
+# exists, otherwise of PWD.
+# Variables can be also blacklisted with asterix, e.g. BASH*. This means that
+# any variable starting with BASH will be prefixed.
+#
 # $1 is a file path to which we save to, string
 # $2 is the collection of blacklisted variables, string separated by commas
 save_environment_variables() {
 
   env_file="$1"
   if [ -z "$env_file" ]; then
-    echo "env_file not specified"
+    log_error "env_file not specified"
     return 1;
   fi
   log_debug "Writing environment variables to $env_file"
@@ -34,7 +66,7 @@ save_environment_variables() {
 
   blacklisted_variables_from_user="$2"
   if [ -z "$blacklisted_variables_from_user" ]; then
-    echo "blacklisted_variables_from_user not specified"
+    log_error "blacklisted_variables_from_user not specified"
     return 1;
   fi
 
@@ -52,7 +84,12 @@ save_environment_variables() {
   # split blacklisted_variables_from_user with ',' as delimeter
   blacklisted_variables=$(echo $blacklisted_variables_from_user | tr "," "\n")
   for env_var in $host_env ; do
-      env_var_value=$(printenv ${env_var})
+      if [[ "$env_var" == "IDE_"* ]]; then
+          # skip that variable in order not to save it twice
+          continue;
+          # TODO: what if e.g. IDE_ABC is set and ABC is not? this would
+          # skip that incorrectly
+      fi
 
       blacklisted="false"
       for blacklisted_var in $blacklisted_variables ; do
@@ -63,30 +100,27 @@ save_environment_variables() {
               no_asterix_name=$(echo $blacklisted_var | awk '{ gsub(/\*/, ""); print }')
 
               if [[ "$env_var" == "$no_asterix_name"* ]]; then
-                echo "${env_var}=${env_var_value} blacklisted asterix"
-                  DOCKER_ENVS_ARRAY+=("IDE_${env_var}=${env_var_value}")
+                  echo "${env_var} blacklisted asterix"
+                  var_name_value=$(help_save_blacklisted_variable ${env_var})
+                  DOCKER_ENVS_ARRAY+=("${var_name_value}")
                   blacklisted="true"
                   break;
               fi
           elif [[ "$env_var" == "$blacklisted_var" ]]; then
-            echo "${env_var}=${env_var_value} blacklisted normal"
-            echo "IDE_${env_var}=${env_var_value}"
-              DOCKER_ENVS_ARRAY+=("IDE_${env_var}=${env_var_value}")
+              echo "${env_var} blacklisted normal"
+              var_name_value=$(help_save_blacklisted_variable ${env_var})
+              DOCKER_ENVS_ARRAY+=("${var_name_value}")
               blacklisted="true"
               break;
           fi
       done
       if [[ "$blacklisted" == "false" ]]; then
-        #echo "${env_var}=${env_var_value} NOT blacklisted"
           # this variable was not blacklisted, no need to add prefix before its name
+          env_var_value=$(printenv ${env_var})
           DOCKER_ENVS_ARRAY+=("${env_var}=${env_var_value}")
       fi
   done
   for env_var in "${DOCKER_ENVS_ARRAY[@]}" ; do
-    # echo "$env_var IN ARRAY"
       echo "$env_var" >> "$env_file"
-  done
-  for env_var in $host_env ; do
-      echo "$env_var" >> "all"
   done
 }
