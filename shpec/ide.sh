@@ -47,10 +47,14 @@ describe "commandline options"
       # do not use \"\" it will not be counted as empty string
       message="$(cd examples/gitide && ${IDE_PATH} --dryrun)"
       assert equal "$?" "0"
+      assert do_match "$message" "docker run -ti --rm -v"
+      assert do_match "$message" "gitide:0.1.0 \"\""
     end
     it "exits 0, if not zero-length command set"
       message="$(cd examples/gitide && ${IDE_PATH} --dryrun some_command)"
       assert equal "$?" "0"
+      assert do_match "$message" "docker run --rm -v"
+      assert do_match "$message" "gitide:0.1.0 \"some_command \""
     end
   end
   describe "docker run command, using gitide"

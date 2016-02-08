@@ -159,7 +159,7 @@ save_environment_variables "$env_file" "$IDE_VARS_BLACKLIST"
 
 # construct docker command
 docker_command=$(construct_docker_command "$env_file" "$command")
-log_debug "docker command would be:\n$docker_command"
+echo -e "docker command would be:\n${docker_command}"
 
 # run docker run
 if [[ "$dryrun" != "true" ]]; then
