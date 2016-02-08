@@ -6,12 +6,12 @@
 
 set -e
 
+/usr/bin/ide-setup-identity.sh
+/usr/bin/ide-fix-uid-gid.sh
+
 if [ -t 0 ] ; then
     # interactive shell
-
-    /usr/bin/ide-setup-identity.sh
-    /usr/bin/ide-fix-uid-gid.sh
-    echo "ide init finished (interactive shell)"
+    echo "ide init finished (interactive shell), using gitide"
 
     # No "set -e" here, you don't want to be logged out when sth returns not 0
     # in interactive shell. Example:
@@ -20,14 +20,10 @@ if [ -t 0 ] ; then
     # su: Authentication failure
     # # here logged out
     set +e
-    # No "-c" option
-    su - ide
 else
     # not interactive shell
-
-    /usr/bin/ide-setup-identity.sh
-    /usr/bin/ide-fix-uid-gid.sh
-    echo "ide init finished (not interactive shell)"
-
-    su - ide -c "$@"
+    echo "ide init finished (not interactive shell), using gitide"
+    set -e
 fi
+
+sudo -E -H -u ide /bin/bash -lc "$@"
