@@ -8,6 +8,7 @@
  e.g. ABC=123 is blacklisted, then it will be preserved as IDE_ABC=123.
 * split ide source code into 2 files: ide and ide_functions to make testing easier
 * #8208 Make docker run command visible not only in debug log
+* #8399 gitide should mount ~/.gitconfig
 
 # 0.0.3 (02 January 2016)
 
