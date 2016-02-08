@@ -11,7 +11,7 @@ log_error() {
 }
 
 get_env_vars_file_name() {
-  echo /tmp/ide/environment-`date +%Y-%m-%d_%H-%M-%S`
+  echo "/tmp/ide/environment-$(date +%Y-%m-%d_%H-%M-%S)"
 }
 
 # $1 is the environment variable name and does not start with IDE_
@@ -29,11 +29,11 @@ help_save_blacklisted_variable() {
   fi
 
   ide_env_var="IDE_${env_var}"
-  ide_env_var_value=$(printenv ${ide_env_var})
+  ide_env_var_value=$(printenv "${ide_env_var}")
 
   if [ -z "$ide_env_var_value" ]; then
       # "IDE_${env_var}" not set
-      env_var_value=$(printenv ${env_var})
+      env_var_value=$(printenv "${env_var}")
       echo "${ide_env_var}=${env_var_value}"
   else
       echo "${ide_env_var}=${ide_env_var_value}"
@@ -84,7 +84,7 @@ save_environment_variables() {
 
   DOCKER_ENVS_ARRAY=()
   # split blacklisted_variables_from_user with ',' as delimeter
-  blacklisted_variables=$(echo $blacklisted_variables_from_user | tr "," "\n")
+  blacklisted_variables=$(echo "$blacklisted_variables_from_user" | tr "," "\n")
   for env_var in $host_env ; do
       # now we are looking only for IDE_ variables, for which the no IDE_ variables
       # are not set, e.g. IDE_ABC is set and ABC is not set. Without this,
@@ -95,7 +95,7 @@ save_environment_variables() {
       # Its value will override IDE_WORK value. And that will make IDE fail
       # but only in "ide in ide". Maybe do not allow to blacklist WORK and similar?
       if [[ "$env_var" == "IDE_"* ]]; then
-        env_var_without_prefix=$(echo $env_var | awk '{ gsub(/IDE_/, ""); print }')
+        env_var_without_prefix=$(echo "$env_var" | awk '{ gsub(/IDE_/, ""); print }')
         log_debug "ccc ${env_var_without_prefix}"
         skip="false"
         for element in $host_env ; do
@@ -110,7 +110,7 @@ save_environment_variables() {
           # skip that variable in order not to save it twice
           continue;
         else
-          env_var_value=$(printenv ${env_var})
+          env_var_value=$(printenv "${env_var}")
           DOCKER_ENVS_ARRAY+=("${env_var}=${env_var_value}")
           log_debug "added ${env_var}=${env_var_value}"
         fi
@@ -123,28 +123,28 @@ save_environment_variables() {
               # this blacklisted variable ends with asterix, e.g. BASH*
               # get its name without asterix, e.g. BASH
               # echo "$blacklisted_var ends with *"
-              no_asterix_name=$(echo $blacklisted_var | awk '{ gsub(/\*/, ""); print }')
+              no_asterix_name=$(echo "$blacklisted_var" | awk '{ gsub(/\*/, ""); print }')
 
               if [[ "$env_var" == "$no_asterix_name"* ]]; then
                   log_debug "${env_var} blacklisted asterix"
-                  var_name_value=$(help_save_blacklisted_variable ${env_var})
+                  var_name_value=$(help_save_blacklisted_variable "${env_var}")
                   DOCKER_ENVS_ARRAY+=("${var_name_value}")
                   blacklisted="true"
                   break;
               fi
           elif [[ "$env_var" == "$blacklisted_var" ]]; then
               log_debug "${env_var} blacklisted normal"
-              var_name_value=$(help_save_blacklisted_variable ${env_var})
+              var_name_value=$(help_save_blacklisted_variable "${env_var}")
               DOCKER_ENVS_ARRAY+=("${var_name_value}")
               blacklisted="true"
               break;
           fi
       done
       if [[ "$blacklisted" == "false" ]]; then
-          # too much noise, so commented out: 
+          # too much noise, so commented out:
           # log_debug "${env_var} not blacklisted"
           # this variable was not blacklisted, no need to add prefix before its name
-          env_var_value=$(printenv ${env_var})
+          env_var_value=$(printenv "${env_var}")
           DOCKER_ENVS_ARRAY+=("${env_var}=${env_var_value}")
       fi
   done

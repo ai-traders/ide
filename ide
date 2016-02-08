@@ -2,7 +2,7 @@
 
 # http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source ${DIR}/ide_functions
+source "${DIR}/ide_functions"
 
 helpfunc() {
     echo "Usage: $0 [--group GROUP] [--idefile IDEFILE] COMMAND"
@@ -86,7 +86,10 @@ do
         exit 1
         ;;
     *)
-        command="$opt $@"
+        # we want to assign N elements as 1 element
+        # https://github.com/koalaman/shellcheck/wiki/SC2124
+        # this would trigger style violation: command="$opt $@"
+        command="$opt $*"
         # the rest of arguments is the command
         break;
         ;;
@@ -145,13 +148,13 @@ if [ ! -d "$IDE_IDENTITY" ]; then
   exit 1
 fi
 if [ -z "$IDE_VARS_BLACKLIST" ]; then
-  IDE_VARS_BLACKLIST=BASH*,HOME,USERNAME,USER,LOGNAME,PATH,TERM,SHELL,MAIL,SUDO_*,WINDOWID,SSH_*,SESSION_*,GEM_HOME,GEM_PATH,GEM_ROOT,HOSTNAME,HOSTTYPE,IFS,PPID,PWD,OLDPWD
+  IDE_VARS_BLACKLIST="BASH*,HOME,USERNAME,USER,LOGNAME,PATH,TERM,SHELL,MAIL,SUDO_*,WINDOWID,SSH_*,SESSION_*,GEM_HOME,GEM_PATH,GEM_ROOT,HOSTNAME,HOSTTYPE,IFS,PPID,PWD,OLDPWD"
   log_debug "IDE_VARS_BLACKLIST not set, setting to: $IDE_VARS_BLACKLIST"
 fi
 
 env_file=$(get_env_vars_file_name)
 env_dir=$(dirname "${env_file}")
-mkdir -p ${env_dir}
+mkdir -p "${env_dir}"
 save_environment_variables "$env_file" "$IDE_VARS_BLACKLIST"
 
 # construct docker command

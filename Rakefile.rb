@@ -10,7 +10,7 @@ task unit: ['unit:shpec']
 # 2. run: apt-get install shellcheck
 namespace 'style' do
   task :shellcheck do
-    Rake.sh('shellcheck ide')
+    Rake.sh('shellcheck ide*')
   end
 end
 
