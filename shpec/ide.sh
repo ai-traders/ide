@@ -43,18 +43,49 @@ describe "commandline options"
     end
   end
   describe "command"
-    it "exits 0, if zero-length command set"
-      # do not use \"\" it will not be counted as empty string
-      message="$(cd examples/gitide && ${IDE_PATH} --dryrun)"
-      assert equal "$?" "0"
-      assert do_match "$message" "docker run -ti --rm -v"
-      assert do_match "$message" "gitide:0.1.0 \"\""
+    describe "command not set"
+      it "runs non-interactively if invoked non-interactively"
+        # do not use \"\" it will not be counted as empty string
+        message="$(/bin/bash -c "cd examples/gitide && ${IDE_PATH} --dryrun")"
+        assert equal "$?" "0"
+        assert do_match "$message" "docker run --rm -v"
+        assert do_match "$message" "gitide:0.1.0"
+        # we don't want quotes if $command not set
+        assert do_not_match "$message" "gitide:0.1.0 \"\""
+        # this fails on workstation, where terminal is interactive
+        # TODO: how to test it? note that I already put test in "/bin/bash -c"
+        # assert do_not_match "$message" " -ti"
+      end
+      it "runs interactively if invoked interactively"
+        # do not use \"\" it will not be counted as empty string
+        message="$(cd examples/gitide && ${IDE_PATH} --dryrun)"
+        assert equal "$?" "0"
+        assert do_match "$message" "docker run --rm -v"
+        # this probably fails on ci, where terminal is non-interactive
+        # TODO: how to test it?
+        assert do_match "$message" " -ti gitide:0.1.0"
+        # we don't want quotes if $command not set
+        assert do_not_match "$message" "gitide:0.1.0 \"\""
+      end
     end
-    it "exits 0, if not zero-length command set"
-      message="$(cd examples/gitide && ${IDE_PATH} --dryrun some_command)"
-      assert equal "$?" "0"
-      assert do_match "$message" "docker run --rm -v"
-      assert do_match "$message" "gitide:0.1.0 \"some_command \""
+    describe "command set"
+      it "runs non-interactively if invoked non-interactively"
+        message="$(cd examples/gitide && ${IDE_PATH} --dryrun some_command)"
+        assert equal "$?" "0"
+        assert do_match "$message" "docker run --rm -v"
+        assert do_match "$message" "gitide:0.1.0 \"some_command \""
+        # this fails on workstation, where terminal is interactive
+        # TODO: how to test it?
+        # assert do_not_match "$message" " -ti"
+      end
+      it "runs interactively if invoked interactively"
+        message="$(cd examples/gitide && ${IDE_PATH} --dryrun some_command)"
+        assert equal "$?" "0"
+        assert do_match "$message" "docker run --rm -v"
+        # this probably fails on ci, where terminal is non-interactive
+        # TODO: how to test it?
+        assert do_match "$message" " -ti gitide:0.1.0 \"some_command \""
+      end
     end
   end
   describe "docker run command, using gitide"
@@ -86,7 +117,8 @@ describe "commandline options"
       message="$(IDE_LOG_LEVEL=debug ABC=1 DEF=2 GHI=3 ${IDE_PATH} --idefile test/complexide-usage/Idefile --dryrun some_command)"
       assert equal "$?" "0"
       assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/test/empty_work_dir:/ide/work\ -v\ ${PWD}/test/empty_home_dir:/ide/identity:ro\ --env-file="
-      assert match "$message" "--privileged\ complexide:0.1.0\ \\\"some_command\ \\\""
+      # TODO: this will probably fail on ci
+      assert match "$message" "--privileged\ -ti\ complexide:0.1.0\ \\\"some_command\ \\\""
     end
   end
   describe "docker run command, using invalid-driver-ide"
