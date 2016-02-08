@@ -71,6 +71,33 @@ save_environment_variables() {
     log_error "blacklisted_variables_from_user not specified"
     return 1;
   fi
+  # split blacklisted_variables_from_user with ',' as delimeter
+  blacklisted_variables=$(echo "$blacklisted_variables_from_user" | tr "," "\n")
+
+  for blacklisted_env_var in ${blacklisted_variables} ; do
+      # do not allow to blacklist any environment variable which is
+      # used by ide with "IDE_" prefix
+      if [[ "$blacklisted_env_var" == "WORK" ]]; then
+        log_error "blacklisted WORK environment variable"
+        return 1;
+      fi
+      if [[ "$blacklisted_env_var" == "IDENTITY" ]]; then
+        log_error "blacklisted IDENTITY environment variable"
+        return 1;
+      fi
+      if [[ "$blacklisted_env_var" == "DRIVER" ]]; then
+        log_error "blacklisted DRIVER environment variable"
+        return 1;
+      fi
+      if [[ "$blacklisted_env_var" == "DOCKER_IMAGE" ]]; then
+        log_error "blacklisted DOCKER_IMAGE environment variable"
+        return 1;
+      fi
+      if [[ "$blacklisted_env_var" == "DOCKER_OPTIONS" ]]; then
+        log_error "blacklisted DOCKER_OPTIONS environment variable"
+        return 1;
+      fi
+  done
 
   # Get all the environment variables set.
   # The env command with no arguments will print a list of the "exported"
@@ -83,17 +110,16 @@ save_environment_variables() {
   host_env=$(compgen -e)
 
   DOCKER_ENVS_ARRAY=()
-  # split blacklisted_variables_from_user with ',' as delimeter
-  blacklisted_variables=$(echo "$blacklisted_variables_from_user" | tr "," "\n")
   for env_var in $host_env ; do
       # now we are looking only for IDE_ variables, for which the no IDE_ variables
       # are not set, e.g. IDE_ABC is set and ABC is not set. Without this,
       # IDE_ABC would be skipped.
-      # TODO: what if someone has variable WORK and it is not blacklisted?
+      # * what if someone has variable WORK and it is not blacklisted?
       # Then IDE_WORK will never be preserved. And that is fine.
-      # TODO: what if someone has variable WORK and is it blacklisted?
+      # * what if someone has variable WORK and is it blacklisted?
       # Its value will override IDE_WORK value. And that will make IDE fail
-      # but only in "ide in ide". Maybe do not allow to blacklist WORK and similar?
+      # but only in "ide in ide". -- do not allow to blacklist WORK and similar
+      # done above
       if [[ "$env_var" == "IDE_"* ]]; then
         env_var_without_prefix=$(echo "$env_var" | awk '{ gsub(/IDE_/, ""); print }')
         log_debug "ccc ${env_var_without_prefix}"

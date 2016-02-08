@@ -16,6 +16,21 @@ describe "save_environment_variables"
       assert equal "$?" "1"
       assert do_match "$message" "error: blacklisted_variables_from_user not specified"
     end
+    it "returns 1 if blacklisted_variables_from_user set to WORK"
+      message="$(/bin/bash -c "source ${IDE_PATH} && save_environment_variables ${env_file} WORK")"
+      assert equal "$?" "1"
+      assert do_match "$message" "error: blacklisted WORK environment variable"
+    end
+    it "returns 1 if blacklisted_variables_from_user set to IDENTITY"
+      message="$(/bin/bash -c "source ${IDE_PATH} && save_environment_variables ${env_file} IDENTITY")"
+      assert equal "$?" "1"
+      assert do_match "$message" "error: blacklisted IDENTITY environment variable"
+    end
+    it "returns 1 if blacklisted_variables_from_user set to ABC,DRIVER,AAA"
+      message="$(/bin/bash -c "source ${IDE_PATH} && save_environment_variables ${env_file} ABC,DRIVER,AAA*")"
+      assert equal "$?" "1"
+      assert do_match "$message" "error: blacklisted DRIVER environment variable"
+    end
   end
 
   describe "when correctly initialized -- returns 0 and saves correctly to file"
