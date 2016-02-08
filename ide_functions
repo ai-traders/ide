@@ -122,7 +122,6 @@ save_environment_variables() {
       # done above
       if [[ "$env_var" == "IDE_"* ]]; then
         env_var_without_prefix=$(echo "$env_var" | awk '{ gsub(/IDE_/, ""); print }')
-        log_debug "ccc ${env_var_without_prefix}"
         skip="false"
         for element in $host_env ; do
             if [[ "$element" == "$env_var_without_prefix" ]]; then
@@ -152,14 +151,14 @@ save_environment_variables() {
               no_asterix_name=$(echo "$blacklisted_var" | awk '{ gsub(/\*/, ""); print }')
 
               if [[ "$env_var" == "$no_asterix_name"* ]]; then
-                  log_debug "${env_var} blacklisted asterix"
+                  log_debug "${env_var} blacklisted because of $blacklisted_var"
                   var_name_value=$(help_save_blacklisted_variable "${env_var}")
                   DOCKER_ENVS_ARRAY+=("${var_name_value}")
                   blacklisted="true"
                   break;
               fi
           elif [[ "$env_var" == "$blacklisted_var" ]]; then
-              log_debug "${env_var} blacklisted normal"
+              log_debug "${env_var} blacklisted"
               var_name_value=$(help_save_blacklisted_variable "${env_var}")
               DOCKER_ENVS_ARRAY+=("${var_name_value}")
               blacklisted="true"
