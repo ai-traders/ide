@@ -1,0 +1,131 @@
+{
+  "name" : "ide.ci",
+  "group" : "ide",
+  "label_template": "${git}",
+  "materials" : [
+    {
+      "type" : "git",
+      "name" : "git",
+      "url" : "git@git.ai-traders.com:lab/ide.git",
+      "branch" : "ci"
+    }
+  ],
+  "stages" : [
+    {
+      "name" : "style-unit",
+      "clean_working_directory": true,
+      "jobs" : [
+        {
+          "name" : "shellcheck",
+          "resources" : ["docker","small"],
+          "tasks" : [
+            {
+              "type": "plugin",
+              "run_if": "passed",
+              "configuration": [
+                {
+                  "key": "script",
+                  "value": "ide rake go:style:shellcheck"
+                }
+              ],
+              "plugin_configuration": {
+                "id": "script-executor",
+                "version": "1"
+              }
+            }
+          ]
+        },
+        {
+          "name" : "shpec",
+          "resources" : ["docker","small"],
+          "tasks" : [
+            {
+              "type": "plugin",
+              "run_if": "passed",
+              "configuration": [
+                {
+                  "key": "script",
+                  "value": "ide rake go:unit:shpec"
+                }
+              ],
+              "plugin_configuration": {
+                "id": "script-executor",
+                "version": "1"
+              }
+            }
+          ]
+        },
+        {
+          "name" : "repocritic",
+          "resources" : ["docker","small"],
+          "tasks" : [
+            {
+              "type": "plugin",
+              "run_if": "passed",
+              "configuration": [
+                {
+                  "key": "script",
+                  "value": "ide rake go:style:repocritic"
+                }
+              ],
+              "plugin_configuration": {
+                "id": "script-executor",
+                "version": "1"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name" : "itest",
+      "jobs" : [
+        {
+          "name" : "itest",
+          "resources" : ["docker","small"],
+          "tasks" : [
+            {
+              "type": "plugin",
+              "run_if": "passed",
+              "configuration": [
+                {
+                  "key": "script",
+                  "value": "ide rake go:itest:itest"
+                }
+              ],
+              "plugin_configuration": {
+                "id": "script-executor",
+                "version": "1"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name" : "release",
+      "jobs" : [
+        {
+          "name" : "release",
+          "resources" : ["docker","small"],
+          "tasks" : [
+            {
+              "type": "plugin",
+              "run_if": "passed",
+              "configuration": [
+                {
+                  "key": "script",
+                  "value": "ide rake go:release:code"
+                }
+              ],
+              "plugin_configuration": {
+                "id": "script-executor",
+                "version": "1"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -14,22 +14,33 @@ namespace 'style' do
   end
 end
 
-
 # install shpec with (https://github.com/rylnd/shpec):
 # sudo sh -c "`curl -L https://raw.github.com/rylnd/shpec/master/install.sh`"
 namespace 'unit' do
   task :shpec do
-    Rake.sh("shpec shpec/ide*.sh")
-  end
-  task :shpec_matchers do
-    Rake.sh("shpec shpec/matchers.sh")
+    Rake.sh("shpec shpec/*.sh")
   end
 end
 
 namespace 'itest' do
+  # if running interactively fails, try sth like:
+  # docker run -ti --rm -v /home/ewa/code/ide/examples/gitide/work:/ide/work -v /home/ewa:/ide/identity:ro --env-file="/tmp/ide/environment-2016-02-08_14-49-07" --entrypoint="/bin/bash" gitide:0.1.0 -c "/bin/bash"
+  desc 'do not run on workstation'
+  task :test_install do
+    Rake.sh('./install.sh')
+    ide_installed = `ide --version 2>&1`
+    if ide_installed.include?('/usr/bin/ide version')
+      puts 'success, ide is installed'
+    else
+      fail
+    end
+  end
+
   task :build_gitide do
+    version = File.read('./examples/gitide/docker/scripts/docker_image_version.txt')
+      .chomp()
     Dir.chdir('./examples/gitide/docker') do
-      Rake.sh('docker build -t gitide:0.1.1 .')
+      Rake.sh("docker build -t gitide:#{version} .")
     end
   end
   task :test_gitide_dryrun do
@@ -54,6 +65,25 @@ namespace 'itest' do
         '"git clone git@git.ai-traders.com:edu/bash.git && ls -la bash && pwd"')
     end
   end
-  # if running interactively fails, try sth like:
-  # docker run -ti --rm -v /home/ewa/code/ide/examples/gitide/work:/ide/work -v /home/ewa:/ide/identity:ro --env-file="/tmp/ide/environment-2016-02-08_14-49-07" --entrypoint="/bin/bash" gitide:0.1.0 -c "/bin/bash"
+end
+
+# mapped tasks for Go Server, no desc
+namespace 'go' do
+  namespace 'style' do
+    task :shellcheck
+      Rake::Task['style:shellcheck'].invoke
+    end
+  end
+  namespace 'unit' do
+    task :shpec
+      Rake::Task['unit:shpec'].invoke
+    end
+  end
+  namespace 'itest' do
+    task :itest
+      Rake::Task['itest:build_gitide'].invoke
+      Rake::Task['itest:test_gitide_dryrun'].invoke
+      Rake::Task['itest:test_gitide'].invoke
+    end
+  end
 end
