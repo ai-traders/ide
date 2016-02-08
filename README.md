@@ -223,6 +223,8 @@ fi
 sudo -E -H -u ide /bin/bash -lc "$@"
 ```
 
+It would be nice if entrypoint said, which docker image name and tag it uses.
+
 #### CMD
 Thanks to ENTRYPOINT taking care of all configuration, secrets, ownership, current
  directory, the CMD can be as simple as possible, as if you ran it on fully

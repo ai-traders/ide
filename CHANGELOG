@@ -6,7 +6,7 @@
 * IDE_ENV_ settings are obsolete
 * all variables will be preserved, but some are blacklisted. When a variable,
  e.g. ABC=123 is blacklisted, then it will be preserved as IDE_ABC=123.
-* split ide source code into 2 files: ide and ide_functions to make testing easier
+* #8707 split ide source code into 2 files: ide and ide_functions to make testing easier
 * #8208 Make docker run command visible not only in debug log
 * #8399 gitide should mount ~/.gitconfig
 * #8732 ide run interactively if current terminal is interactive

@@ -14,11 +14,7 @@ if [ -t 0 ] ; then
     echo "ide init finished (interactive shell), using gitide"
 
     # No "set -e" here, you don't want to be logged out when sth returns not 0
-    # in interactive shell. Example:
-    # ide@d5daccdfcd04:~$ exec su - ide
-    # Password:
-    # su: Authentication failure
-    # # here logged out
+    # in interactive shell.
     set +e
 else
     # not interactive shell
