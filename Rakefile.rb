@@ -19,7 +19,10 @@ end
 # sudo sh -c "`curl -L https://raw.github.com/rylnd/shpec/master/install.sh`"
 namespace 'unit' do
   task :shpec do
-    Rake.sh("shpec shpec/*.sh")
+    Rake.sh("shpec shpec/ide*.sh")
+  end
+  task :shpec_matchers do
+    Rake.sh("shpec shpec/matchers.sh")
   end
 end
 
@@ -44,4 +47,6 @@ namespace 'itest' do
         '"git clone git@git.ai-traders.com:edu/bash.git && ls -la bash && pwd"')
     end
   end
+  # if running interactively fails, try sth like:
+  # docker run -ti --rm -v /home/ewa/code/ide/examples/gitide/work:/ide/work -v /home/ewa:/ide/identity:ro --env-file="/tmp/ide/environment-2016-02-08_14-49-07" --entrypoint="/bin/bash" gitide:0.1.0 -c "/bin/bash"
 end
