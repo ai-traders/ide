@@ -144,6 +144,10 @@ Thanks to that, we close all configuration problems of a particular project type
  configuration files instead of requiring them to exist on docker host (unless
  impossible or uncomfortable or configuration files contain secrets).
 
+**Advice:** if you copy from IDE_IDENTITY whole directories like `.ssh` or `.chef`,
+ it is usually better to first copy the whole directory (so that any secrets
+ are copied) and then (either or not) generate some configs.
+
 **Watch out for symlinks**: https://aitraders.tpondemand.com/entity/8464 . E.g.
   if you have dotfiles repository and you have such symlinks in your HOME like:
   `/home/user/.gitconfig -> /home/user/code/dotfiles/.gitconfig`, it is not a standard

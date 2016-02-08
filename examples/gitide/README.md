@@ -13,7 +13,7 @@ Those files are used inside gitide docker image:
  to ensure current directory is `/ide/work`.
 
 ## Usage
-By default current directory is `/ide/work`. Example command:
+By default current directory in docker container is `/ide/work`. Example command:
 ```bash
 ide "git clone git@git.ai-traders.com:edu/bash.git && ls -la bash && pwd"
 ```
