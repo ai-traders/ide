@@ -208,6 +208,10 @@ The `Rakefile.rb` contains guidelines how to install testing software. If you wi
 Style guides:
  * https://github.com/progrium/bashstyle
 
+Git branches apply as in AI-Traders cookbooks or gems: create your feature branch
+ from master and if you are ready to have it ci tested, merge your feature branch
+ onto ci branch. Then work on ci branch until all tests on ci are passed.
+
 ### TODO
 1. Support groups
 1. Apply https://github.com/progrium/bashstyle style guide
