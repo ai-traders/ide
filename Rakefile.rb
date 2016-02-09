@@ -1,47 +1,18 @@
-
-desc 'Runs unit tests: ShellCheck'
-task style: ['style:shellcheck']
-desc 'Runs unit tests: Shpec'
-task unit: ['unit:shpec']
-
-# install shellcheck with (https://github.com/koalaman/shellcheck):
-# 1. add to your apt source:
-# deb http://archive.ubuntu.com/ubuntu/ trusty-backports restricted main universe
-# 2. run: apt-get install shellcheck
-namespace 'style' do
-  task :shellcheck do
-    Rake.sh('shellcheck ide')
+# only those tasks need additional ruby dependencies (gems)
+rule(/.*repocritic|.*release:code|.*validate_repo/) do |task|
+  ENV['BUNDLE_GEMFILE'] = File.expand_path("#{File.dirname(__FILE__)}/Gemfile")
+  unless ENV['SKIP_ALL_DEPENDENCIES'] || ENV['SKIP_RUBY_DEPENDENCIES']
+    puts "running bundle install for rake task: #{task.name}"
+    sh 'bundle install'
   end
+  inner_rakefile = File.expand_path(
+    "#{File.dirname(__FILE__)}/InnerRakefile.rb")
+  sh "bundle exec rake #{task.name} -f #{inner_rakefile}"
 end
 
-
-# install shpec with (https://github.com/rylnd/shpec):
-# sudo sh -c "`curl -L https://raw.github.com/rylnd/shpec/master/install.sh`"
-namespace 'unit' do
-  task :shpec do
-    Rake.sh('shpec test/shpec/ide.sh')
-  end
-end
-
-namespace 'itest' do
-  task :build_gitide do
-    Dir.chdir('./examples/gitide/docker') do
-      Rake.sh('docker build -t gitide:0.1.0 .')
-    end
-  end
-  task :test_gitide_dryrun do
-    Dir.chdir('./examples/gitide') do
-      # changing current directory, because IDE_WORK in Idefile is set relative
-      # to './examples/gitide'
-      Rake.sh('IDE_LOG_LEVEL=debug ../../ide --dryrun echo sth')
-    end
-  end
-  task :test_gitide do
-    Dir.chdir('./examples/gitide') do
-      # changing current directory, because IDE_WORK in Idefile is set relative
-      # to './examples/gitide'
-      Rake.sh('IDE_LOG_LEVEL=debug ../../ide '\
-        '"git clone git@git.ai-traders.com:edu/bash.git && ls -la bash && pwd"')
-    end
-  end
+# any other rake task
+rule(//) do |task|
+  inner_rakefile = File.expand_path(
+    "#{File.dirname(__FILE__)}/InnerRakefile.rb")
+  sh "bundle exec rake #{task.name} -f #{inner_rakefile}"
 end

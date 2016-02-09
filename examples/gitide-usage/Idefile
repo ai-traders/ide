@@ -1,0 +1,2 @@
+IDE_DOCKER_IMAGE="gitide:0.1.1"
+IDE_WORK="${PWD}/work"

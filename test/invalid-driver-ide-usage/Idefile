@@ -1,4 +1,4 @@
 IDE_DRIVER="bla"
 IDE_DOCKER_IMAGE="complexide:0.1.0"
 IDE_WORK="${PWD}/test/empty_work_dir"
-IDE_HOME="${PWD}/test/empty_home_dir"
+IDE_IDENTITY="${PWD}/test/empty_home_dir"

@@ -9,7 +9,7 @@
 
 # This is the directory we expect to be mounted as docker volume.
 # From that directory we know uid and gid.
-DIRECTORY=/ide/work
+DIRECTORY="/ide/work"
 OWNER_USERNAME=ide
 OWNER_GROUPNAME=ide
 

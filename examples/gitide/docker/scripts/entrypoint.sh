@@ -6,28 +6,23 @@
 
 set -e
 
+/usr/bin/ide-setup-identity.sh
+/usr/bin/ide-fix-uid-gid.sh
+
+source /etc/docker_metadata.txt
+GREEN='\033[0;32m'
+NC='\033[0m'
 if [ -t 0 ] ; then
     # interactive shell
-
-    /usr/bin/ide-setup-identity.sh
-    /usr/bin/ide-fix-uid-gid.sh
-    echo "ide init finished (interactive shell)"
+    echo -e "${GREEN}ide init finished (interactive shell), using ${this_image_name}:${this_image_tag}${NC}"
 
     # No "set -e" here, you don't want to be logged out when sth returns not 0
-    # in interactive shell. Example:
-    # ide@d5daccdfcd04:~$ exec su - ide
-    # Password:
-    # su: Authentication failure
-    # # here logged out
+    # in interactive shell.
     set +e
-    # No "-c" option
-    su - ide
 else
     # not interactive shell
-
-    /usr/bin/ide-setup-identity.sh
-    /usr/bin/ide-fix-uid-gid.sh
-    echo "ide init finished (not interactive shell)"
-
-    su - ide -c "$@"
+    echo -e "${GREEN}ide init finished (not interactive shell), using ${this_image_name}:${this_image_tag}${NC}"
+    set -e
 fi
+
+sudo -E -H -u ide /bin/bash -lc "$@"

@@ -1,0 +1,25 @@
+# 0.1.0 (09 February 2016)
+
+* `IDE_HOME` replaced with `IDE_IDENTITY`
+* implemented shpec matcher "do_match", because "match" has error
+ (shpec files cannot be in test directory or else custom matcher won't be read)
+* IDE_ENV_ settings are obsolete
+* all variables will be preserved, but some are blacklisted. When a variable,
+ e.g. ABC=123 is blacklisted, then it will be preserved as IDE_ABC=123.
+* #8707 split ide source code into 2 files: ide and ide_functions to make testing easier
+* #8208 Make docker run command visible not only in debug log
+* #8399 gitide should mount ~/.gitconfig
+* #8732 ide run interactively if current terminal is interactive
+* #8733 ide released by ci agent
+
+# 0.0.3 (02 January 2016)
+
+Allow to specify no command - use docker's default then.
+
+# 0.0.2 (10 December 2015)
+
+Quotes are not needed, you can run: `ide echo sth`
+
+# 0.0.1 (10 December 2015)
+
+Initial release

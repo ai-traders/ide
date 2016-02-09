@@ -6,7 +6,10 @@ Build/test/release your software in an isolated environment. Currently only dock
 ## Features (specification)
 1. End user can run `ide <command>` and this will run a docker container and
  invoke a `command` inside.
-1. End user can use different docker images for different tasks. - not supported right now
+1. End user can run `ide` and this will run a docker container interactively with
+ default (set in Dockerfile) command invoked inside.
+1. End user can use different docker images for different tasks. He can use
+ different Idefiles for this purpose.
 
 ## Why
 1. For Continuous Integration: this moves out your project requirements from CI
@@ -23,44 +26,39 @@ Build/test/release your software in an isolated environment. Currently only dock
 ## Usage
 Run it from bash terminal:
 ```bash
-ide [--group GROUP] [--idefile IDEFILE] COMMAND  
+ide [--idefile IDEFILE] [COMMAND]
 ```
 Example command:
 ```bash
-ide --group=ruby rake style:rubocop
+ide rake style:rubocop
 ```
 Example configuration:
 ```
-IDE_RUBY_DOCKER_IMAGE="rubyide:0.1.0"
-IDE_RUBY_ENV_ABC=1
-```
-The `group` is not required, and: **`group`s are not supported right now**.
- Use the default group by invoking:
-```bash
-ide COMMAND
-```
-e.g.:
-```bash
-ide rake style:rubocop
-```
-with configuration
-```
 IDE_DOCKER_IMAGE="rubyide:0.1.0"
-IDE_ENV_ABC=1
 ```
-About groups, see the description in Configuration section.
 
+Without setting a `COMMAND`, a docker container will be run with default
+ docker image command.
+
+### Warnings
+Due to current requirements, it only works on local docker host (docker daemon
+ must be installed locally).
 
 ### What happens
-1. IDE determines that "ruby" `group` is needed and therefore docker image rubyide:0.1.0
-1. IDE tries to pull rubyide:0.1.0.
-2. IDE creates a container from rubyide:0.1.0 image with the following command:
+1. IDE determines that docker image rubyide:0.1.0 is needed
+1. IDE pulls rubyide:0.1.0.
+1. IDE decides which environment variables must be preserved into docker container
+ and which must be escaped with a prefix `IDE_`. They are saved to a file e.g.
+ `/tmp/ide/environment-2016-02-08_17-56-19`.
+1. IDE creates a container from rubyide:0.1.0 image with the following command:
 ```
-docker run --rm -v ${IDE_WORK}:/ide/work -v ${IDE_HOME}:/ide/identity \
-  -e ABC=1 ${IDE_DOCKER_IMAGE} \
+docker run --rm -v ${IDE_WORK}:/ide/work -v ${IDE_IDENTITY}:/ide/identity \
+  --env-file /tmp/ide/environment-2016-02-08_17-56-19 ${IDE_DOCKER_IMAGE} \
   "rake style:rubocop"
 ```
-4. IDE runs rake style:rubocop in the container in the /ide/work directory.
+  If your terminal was running interactively, then `-ti` is added to `docker run`
+  command.
+1. IDE runs rake style:rubocop in the container in the /ide/work directory.
 
 ### Quick start
 See the [Rakefile.rb](./Rakefile.rb). The example there serves also as integration
@@ -78,12 +76,7 @@ or run the rake task if you prefer:
 $ rake itest:test_gitide
 ```
 
-### General
 For debug output set `IDE_LOG_LEVEL=debug`.
-
-### Warning
-Due to current requirements, it only works on local docker host (docker daemon
- must be installed locally).
 
 ## Installation
 ```bash
@@ -98,25 +91,19 @@ The whole configuration is put in `Idefile`. It is an environment variable style
  project.
 
 Supported variables:
-* `IDE_DRIVER`, supported values: docker, docker-compose (won’t be implemented now), vagrant (won’t be implemented now), defaults to docker – will run docker run command
-* `IDE_DOCKER_IMAGE`, the only required setting, docker image (or in the future maybe openstack image) to use
-* `IDE_DOCKER_OPTIONS="--privileged"` will append the string into docker run command. This is a fallback, because I can’t predict all the ide usage but I think such a fallback will be needed.
-* `IDE_HOME`, what on localhost should be mounted into container as /ide/identity, defaults to `HOME`
+* `IDE_DRIVER`, supported values: docker, docker-compose (won’t be implemented now),
+ vagrant (won’t be implemented now), defaults to docker – will run docker run command
+* `IDE_DOCKER_IMAGE`, the only required setting, docker image (or in the future
+ maybe openstack image) to use
+* `IDE_DOCKER_OPTIONS="--privileged"` will append the string into docker run command.
+ This is a fallback, because I can’t predict all the ide usage but I think such a fallback will be needed.
+* `IDE_IDENTITY`, what on localhost should be mounted into container as
+ `/ide/identity`, defaults to `HOME`
 * `IDE_WORK`, what on localhost should be mounted into container as /ide/work,
  this is your working copy, your project repository; defaults to current directory.
  In order to let container see your working copy so that is has code to work on,
  and, in order to let you later see any container's work result (code changes).
-* `IDE_ENV_ABC=1`, will result in setting `ABC=1` inside the container
 
-In order to allow end user to use different docker images for different tasks,
- groups are introduced. Example for `BUILD` group:
-```
-IDE_BUILD_DOCKER_IMAGE="mono-3.2.8"
-IDE_BUILD_ENV_ABC=1
-```
-
-Setting the variables without `groups` can be treated as a fallback - configuration
- for a default `group`.
 
 ## Docker image specification
 ### Name
@@ -132,18 +119,18 @@ Docker image must have an `ide` user (actually any not-root user is fine, use
 
 ### Directories
 `IDE_WORK` directory will be mounted as `/ide/work`.
-`IDE_HOME` directory will be ro mounted as `/ide/identity` (with all settings
+`IDE_IDENTITY` directory will be ro mounted as `/ide/identity` (with all settings
  and secrets). This may be trouble to support beside docker containers.
 So if your docker image already has `/ide/work` or `/ide/identity`, they will
  be overridden.
 
- Entrypoint should fail if `IDE_WORK`or `IDE_HOME` directories do not exist.
+ Entrypoint should fail if `IDE_WORK`or `IDE_IDENTITY` directories do not exist.
 
 ### CMD and ENTRYPOINT
 #### Configuration and secrets
 The entrypoint must take care of mapping any settings and secrets files from
- `/ide/identity/` into `/home/ide/`. Also map any files from `ide/identity/.bashrc.d/`
- into `/etc/profile.d/`, because in docker we will run not-interactively, but as
+ IDE_IDENTITY into `/home/ide/`. Also you can map any files from `$IDE_IDENTITY/.bashrc.d/`
+ into `/etc/profile.d/`, because in docker we will run as
  a logged linux user. All these mappings should be done by **copying** and changing
  ownership and setting permissions to `ide` user.
 
@@ -156,6 +143,19 @@ Thanks to that, we close all configuration problems of a particular project type
  In order to limit the requirements put on docker host, it seems better to generate
  configuration files instead of requiring them to exist on docker host (unless
  impossible or uncomfortable or configuration files contain secrets).
+
+**Advice:** if you copy from IDE_IDENTITY whole directories like `.ssh` or `.chef`,
+ it is usually better to first copy the whole directory (so that any secrets
+ are copied) and then (either or not) generate some configs.
+
+**Watch out for symlinks**: https://aitraders.tpondemand.com/entity/8464 . E.g.
+  if you have dotfiles repository and you have such symlinks in your HOME like:
+  `/home/user/.gitconfig -> /home/user/code/dotfiles/.gitconfig`, it is not a standard
+  symlink, so when copying files from IDE_IDENTITY to `/home/ide`, you would copy
+  `/ide/identity/.gitconfig`, not `/ide/identity/code/dotfiles/.gitconfig`. Note
+  that inside docker container this symlink is: `/ide/identity/.gitconfig -> /home/user/code/dotfiles/.gitconfig`
+  and `/home/user/code/dotfiles/.gitconfig` does not exist.
+  The only known workaround: do not have symlinks, use plain files.
 
 The IDE image readme should note:
  * which configuration or secret files are needed
@@ -180,7 +180,54 @@ Do it in `ide-fix-uid-gid.sh` script.
 #### ENTRYPOINT
 The entrypoint should invoke `ide-setup-identity.sh` and `ide-fix-uid-gid.sh` scripts.
  It should enable end user to run the docker image interactively or not. It should
- also change the current directory into `/ide/work`.
+ also change the current directory into `/ide/work` (this may be done in
+ `/home/ide/.profile`).
+
+ If you choose `su` command to change user from root to ide, then you will have
+ problems that the only possible command to invoke interactively is `/bin/bash`
+ (https://aitraders.tpondemand.com/entity/8189 ). Example entrypoint.sh with `su`:
+```bash
+#!/bin/bash
+set -e
+if [ -t 0 ] ; then
+    /usr/bin/ide-setup-identity.sh
+    /usr/bin/ide-fix-uid-gid.sh
+    echo "ide init finished (interactive shell)"
+
+    set +e
+    # No "-c" option
+    su - ide
+else
+    /usr/bin/ide-setup-identity.sh
+    /usr/bin/ide-fix-uid-gid.sh
+    echo "ide init finished (not interactive shell)"
+
+    su - ide -c "$@"
+fi
+```
+
+  You can instead use `sudo`, but do remember that **`sudo` must be installed in
+  the docker image**. Example entrypoint.sh:
+```bash
+#!/bin/bash
+set -e
+/usr/bin/ide-setup-identity.sh
+/usr/bin/ide-fix-uid-gid.sh
+
+if [ -t 0 ] ; then
+    # interactive shell
+    echo "ide init finished (interactive shell)"
+    set +e
+else
+    # not interactive shell
+    echo "ide init finished (not interactive shell)"
+    set -e
+fi
+
+sudo -E -H -u ide /bin/bash -lc "$@"
+```
+
+It would be nice if entrypoint said, which docker image name and tag it uses.
 
 #### CMD
 Thanks to ENTRYPOINT taking care of all configuration, secrets, ownership, current
@@ -190,6 +237,7 @@ Thanks to ENTRYPOINT taking care of all configuration, secrets, ownership, curre
 Such a docker image can be ran:
  * **not-interactively**: `docker run --rm -v ${PWD}/examples/gitide/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0 "git clone git@git.ai-traders.com:edu/bash.git && ls -la bash"`
  * **interactively**: `docker run -ti --rm -v ${PWD}/examples/gitide/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0`
+ * **interactively**: `docker run -ti --rm -v ${PWD}/examples/gitide/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0 "env && /bin/bash"`
 
 See the [examples](./examples) directory.
 
@@ -213,7 +261,7 @@ Git branches apply as in AI-Traders cookbooks or gems: create your feature branc
  onto ci branch. Then work on ci branch until all tests on ci are passed.
 
 ### TODO
-1. Support groups
-1. Apply https://github.com/progrium/bashstyle style guide
-1. Maybe allow local env variables like `IDE_*` override the variables set
- in Idefile.
+1. Support groups?
+1. Apply https://github.com/progrium/bashstyle style guide.
+1. Maybe do not use Rubyide to release IDE? This demands implementing OVersion
+ in bash. And not using gitrake gem.
