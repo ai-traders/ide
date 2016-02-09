@@ -244,8 +244,23 @@ Such a docker image can be ran:
  * **interactively**: `docker run -ti --rm -v ${PWD}/examples/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0`
  * **interactively**: `docker run -ti --rm -v ${PWD}/examples/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0 "env && /bin/bash"`
 
-See the [examples](./examples) directory.
+See the [examples](./examples) directory and also:
+ * http://gitlab.ai-traders.com/lab/docs/blob/master/ReleaseCycle/DockerImageIDE.md
+ * http://gitlab.ai-traders.com/lab/docs/blob/master/ReleaseCycle/DockerImage.md
 
+## Docker in Docker
+If your ide docker image should have docker daemon:
+ * use overlay docker storage driver (#8149)
+ * set `/var/lib/docker` as docker volume (#8268)
+ * run such ide docker container with `--privileged`
+
+Without the above, you'll see e.g.:
+```
+dpkg: error: error removing old backup file '/var/lib/dpkg/status-old': Operation not permitted
+E: Sub-process /usr/bin/dpkg returned an error code (2)
+```
+
+Examples are: chefide and ideide.
 
 ### FAQ
 > Why not mount `/home/user` as `/home/ide` but as `/ide/work`?

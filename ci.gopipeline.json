@@ -101,8 +101,8 @@
       "name" : "itest",
       "jobs" : [
         {
-          "name" : "itest",
-          "resources" : ["docker","small"],
+          "name" : "test_install",
+          "resources" : ["docker", "small"],
           "tasks" : [
             {
               "type": "plugin",
@@ -110,7 +110,27 @@
               "configuration": [
                 {
                   "key": "script",
-                  "value": "ide rake go:itest:itest"
+                  "value": "ide rake go:itest:test_install"
+                }
+              ],
+              "plugin_configuration": {
+                "id": "script-executor",
+                "version": "1"
+              }
+            }
+          ]
+        },
+        {
+          "name" : "build_and_test_image",
+          "resources" : ["build_docker"],
+          "tasks" : [
+            {
+              "type": "plugin",
+              "run_if": "passed",
+              "configuration": [
+                {
+                  "key": "script",
+                  "value": "ide rake go:itest:build_and_test_image"
                 }
               ],
               "plugin_configuration": {

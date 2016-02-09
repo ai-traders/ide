@@ -24,9 +24,9 @@ end
 namespace 'itest' do
   # if running interactively fails, try sth like:
   # docker run -ti --rm -v /home/ewa/code/ide/examples/gitide/work:/ide/work -v /home/ewa:/ide/identity:ro --env-file="/tmp/ide/environment-2016-02-08_14-49-07" --entrypoint="/bin/bash" gitide:0.1.0 -c "/bin/bash"
-  desc 'do not run on workstation'
+  desc 'Test install.sh; do not run on workstation'
   task :test_install do
-    Rake.sh('./install.sh')
+    Rake.sh('sudo ./install.sh')
     ide_installed = `ide --version 2>&1`
     if ide_installed.include?('/usr/bin/ide version')
       puts 'success, ide is installed'
@@ -79,10 +79,13 @@ namespace 'go' do
     end
   end
   namespace 'itest' do
-    task :itest do
+    task :build_and_test_image do
       Rake::Task['itest:build_gitide'].invoke
       Rake::Task['itest:test_gitide_dryrun'].invoke
       Rake::Task['itest:test_gitide'].invoke
+    end
+    task :test_install do
+      Rake::Task['itest:test_install'].invoke
     end
   end
 end
