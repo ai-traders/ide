@@ -25,7 +25,7 @@
               "configuration": [
                 {
                   "key": "script",
-                  "value": "ide --idefile Rubyide rake go:git:destructive_validate_repo"
+                  "value": "ide --idefile RubyIdefile rake go:git:destructive_validate_repo"
                 }
               ],
               "plugin_configuration": {
@@ -85,7 +85,7 @@
               "configuration": [
                 {
                   "key": "script",
-                  "value": "ide --idefile Rubyide rake go:style:repocritic"
+                  "value": "ide --idefile RubyIdefile rake go:style:repocritic"
                 }
               ],
               "plugin_configuration": {
@@ -135,7 +135,7 @@
               "configuration": [
                 {
                   "key": "script",
-                  "value": "ide --idefile Rubyide rake go:release:code"
+                  "value": "ide --idefile RubyIdefile rake go:release:code"
                 }
               ],
               "plugin_configuration": {
