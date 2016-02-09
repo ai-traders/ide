@@ -16,6 +16,26 @@
       "clean_working_directory": true,
       "jobs" : [
         {
+          "name" : "validate_repo",
+          "resources" : ["docker","small"],
+          "tasks" : [
+            {
+              "type": "plugin",
+              "run_if": "passed",
+              "configuration": [
+                {
+                  "key": "script",
+                  "value": "ide --idefile Rubyide rake go:git:destructive_validate_repo"
+                }
+              ],
+              "plugin_configuration": {
+                "id": "script-executor",
+                "version": "1"
+              }
+            }
+          ]
+        },
+        {
           "name" : "shellcheck",
           "resources" : ["docker","small"],
           "tasks" : [
@@ -65,7 +85,7 @@
               "configuration": [
                 {
                   "key": "script",
-                  "value": "ide rake go:style:repocritic"
+                  "value": "ide --idefile Rubyide rake go:style:repocritic"
                 }
               ],
               "plugin_configuration": {
@@ -115,7 +135,7 @@
               "configuration": [
                 {
                   "key": "script",
-                  "value": "ide rake go:release:code"
+                  "value": "ide --idefile Rubyide rake go:release:code"
                 }
               ],
               "plugin_configuration": {
