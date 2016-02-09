@@ -71,7 +71,7 @@ do
         exit 0
         ;;
     --group)  # Example with an operand
-        echo "groupnames other than default are not supported"
+        log_error "groupnames other than default are not supported"
         exit 1;
         # TODO: support groups
         # groupname="$1"
@@ -85,11 +85,11 @@ do
         dryrun="true"
         ;;
     --*)
-        echo "Invalid option: '$opt'" >&2
+        log_error "Invalid option: '$opt'" >&2
         exit 1
         ;;
     -*)
-        echo "Invalid option: '$opt'" >&2
+        log_error "Invalid option: '$opt'" >&2
         exit 1
         ;;
     *)
@@ -106,18 +106,18 @@ done
 
 # verify options
 if [ -z "$groupname" ]; then
-  echo "groupname not specified"
+  log_error "groupname not specified"
   exit 1;
 fi
 if [ -z "$idefile" ]; then
-  echo "idefile not specified"
+  log_error "idefile not specified"
   exit 1;
 fi
 if [ ! -f "$idefile" ]; then
   # do not get full path here with:
   # idefile_full_path=$(readlink -f "$idefile")
   # it will be null
-  echo "idefile: $idefile does not exist (relative to ${PWD})"
+  log_error "idefile: $idefile does not exist (relative to ${PWD})"
   exit 1;
 fi
 log_debug "Starting ide, version: $version"
@@ -127,7 +127,7 @@ log_debug "idefile: $idefile"
 # verify Idefile
 source "$idefile"
 if [ -z "$IDE_DOCKER_IMAGE" ]; then
-  echo "IDE_DOCKER_IMAGE not set"
+  log_error "IDE_DOCKER_IMAGE not set"
   exit 1;
 fi
 if [ -z "$IDE_DRIVER" ]; then
@@ -135,7 +135,7 @@ if [ -z "$IDE_DRIVER" ]; then
   log_debug "IDE_DRIVER not set, setting to: $IDE_DRIVER"
 fi
 if [ "$IDE_DRIVER" != "docker" ]; then
-  echo "IDE_DRIVER set to $IDE_DRIVER, supported is only: docker"
+  log_error "IDE_DRIVER set to $IDE_DRIVER, supported is only: docker"
   exit 1
 fi
 if [ -z "$IDE_WORK" ]; then
@@ -143,7 +143,7 @@ if [ -z "$IDE_WORK" ]; then
   log_debug "IDE_WORK not set, setting to: $IDE_WORK"
 fi
 if [ ! -d "$IDE_WORK" ]; then
-  echo "IDE_WORK set to $IDE_WORK which does not exist"
+  log_error "IDE_WORK set to $IDE_WORK which does not exist"
   exit 1
 fi
 if [ -z "$IDE_IDENTITY" ]; then
@@ -151,7 +151,7 @@ if [ -z "$IDE_IDENTITY" ]; then
   log_debug "IDE_IDENTITY not set, setting to: $IDE_IDENTITY"
 fi
 if [ ! -d "$IDE_IDENTITY" ]; then
-  echo "IDE_IDENTITY set to $IDE_IDENTITY which does not exist"
+  log_error "IDE_IDENTITY set to $IDE_IDENTITY which does not exist"
   exit 1
 fi
 if [ -z "$IDE_VARS_BLACKLIST" ]; then

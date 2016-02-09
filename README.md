@@ -159,7 +159,11 @@ Thanks to that, we close all configuration problems of a particular project type
 
 The IDE image readme should note:
  * which configuration or secret files are needed
- * what is available by default, e.g. must I run `chef exec rake` or can just `rake`
+ * what is available by default, e.g. must I run `chef exec rake` or can just `rake`,
+ what is current directory in docker container
+ * example Idefile
+ * example command
+
 
 Frequently evolving IDE images are very ok. You should not just start using new
  tools without building and testing new dev image first.
@@ -227,7 +231,8 @@ fi
 sudo -E -H -u ide /bin/bash -lc "$@"
 ```
 
-It would be nice if entrypoint said, which docker image name and tag it uses.
+It would be nice if entrypoint said, which docker image name and tag it uses
+ (gitide does that).
 
 #### CMD
 Thanks to ENTRYPOINT taking care of all configuration, secrets, ownership, current
@@ -235,9 +240,9 @@ Thanks to ENTRYPOINT taking care of all configuration, secrets, ownership, curre
  provisioned instance. Example: `rake style:rubocop` or some mono command.
 
 Such a docker image can be ran:
- * **not-interactively**: `docker run --rm -v ${PWD}/examples/gitide/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0 "git clone git@git.ai-traders.com:edu/bash.git && ls -la bash"`
- * **interactively**: `docker run -ti --rm -v ${PWD}/examples/gitide/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0`
- * **interactively**: `docker run -ti --rm -v ${PWD}/examples/gitide/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0 "env && /bin/bash"`
+ * **not-interactively**: `docker run --rm -v ${PWD}/examples/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0 "git clone git@git.ai-traders.com:edu/bash.git && ls -la bash"`
+ * **interactively**: `docker run -ti --rm -v ${PWD}/examples/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0`
+ * **interactively**: `docker run -ti --rm -v ${PWD}/examples/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0 "env && /bin/bash"`
 
 See the [examples](./examples) directory.
 

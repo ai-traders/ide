@@ -9,54 +9,60 @@
 
 # This is the directory we expect to be mounted as docker volume.
 # From that directory we know uid and gid.
-DIRECTORY="/ide/work"
-OWNER_USERNAME=ide
-OWNER_GROUPNAME=ide
+ide_home="/home/ide"
+ide_work="/ide/work"
+owner_username="ide"
+owner_groupname="ide"
 
-if [ -z "$DIRECTORY" ]; then
-  echo "Directory not specified"
+if [ -z "$ide_work" ]; then
+  echo "ide_work not specified"
   exit 1;
 fi
 
-if [ -z "$OWNER_USERNAME" ]; then
+if [ -z "$ide_home" ]; then
+  echo "ide_home not specified"
+  exit 1;
+fi
+
+if [ -z "$owner_username" ]; then
   echo "Username not specified"
   exit 1;
 fi
-if [ -z "$OWNER_GROUPNAME" ]; then
+if [ -z "$owner_groupname" ]; then
   echo "Groupname not specified"
   exit 1;
 fi
-if [ ! -d "$DIRECTORY" ]; then
-  echo "$DIRECTORY does not exist, expected to be mounted as docker volume"
+if [ ! -d "$ide_work" ]; then
+  echo "$ide_work does not exist, expected to be mounted as docker volume"
   exit 1;
 fi
 
 ret=false
-getent passwd $OWNER_USERNAME >/dev/null 2>&1 && ret=true
-
+getent passwd "$owner_username" >/dev/null 2>&1 && ret=true
 if ! $ret; then
-    echo "User $OWNER_USERNAME does not exist"
+    echo "User $owner_username does not exist"
     exit 1;
 fi
+
 ret=false
-getent passwd $OWNER_GROUPNAME >/dev/null 2>&1 && ret=true
+getent passwd "$owner_groupname" >/dev/null 2>&1 && ret=true
 if ! $ret; then
-    echo "Group $OWNER_GROUPNAME does not exist"
+    echo "Group $owner_groupname does not exist"
     exit 1;
 fi
 
-NEWUID=$(ls --numeric-uid-gid -d $DIRECTORY | awk '{ print $3 }')
-NEWGID=$(ls --numeric-uid-gid -d $DIRECTORY | awk '{ print $4 }')
+newuid=$(ls --numeric-uid-gid -d "$ide_work" | awk '{ print $3 }')
+newgid=$(ls --numeric-uid-gid -d "$ide_work" | awk '{ print $4 }')
 
-usermod -u $NEWUID $OWNER_USERNAME
-groupmod -g $NEWGID $OWNER_GROUPNAME
+usermod -u "$newuid" "$owner_username"
+groupmod -g "$newgid" "$owner_groupname"
 # Might be needed if the image has files which should be owned by
 # this user and group. When we know more about user and group, then
 # this find might be at smaller scope.
 # In this case, image has only /home/ide owned by 1000
-# find /home/ide -user 1000 -exec chown -h $NEWUID {} \;
-# find /home/ide -group 1000 -exec chgrp -h $NEWGID {} \;
-chown $NEWUID:$NEWGID -R /home/ide
+# find /home/ide -user 1000 -exec chown -h $newuid {} \;
+# find /home/ide -group 1000 -exec chgrp -h $newgid {} \;
+chown $newuid:$newgid -R "$ide_home"
 
 # do not chown the /ide/work directory, it already has proper uid and gid,
 # besides, when /ide/work is very big, chown would take much time
