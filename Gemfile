@@ -3,6 +3,7 @@ source 'http://rubygems-cache.ai-traders.com'
 
 source 'http://gems.ai-traders.com/' do
   gem 'git'
+  gem 'gitrake'
   gem 'oversion'
   gem 'gemrake'
   gem 'repocritic'

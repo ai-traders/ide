@@ -1,8 +1,5 @@
-# Do not declare those because of the error "Don't know how to build task 'style'"
-# when running in ideide docker image
-# Rake::Task['style'].clear
 desc 'Runs unit tests: ShellCheck'
-task style: ['style:shellcheck', 'style:repocritic']
+task style: ['style:shellcheck']
 desc 'Runs unit tests: Shpec'
 task unit: ['unit:shpec']
 
