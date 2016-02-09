@@ -241,6 +241,13 @@ Such a docker image can be ran:
 
 See the [examples](./examples) directory.
 
+
+### FAQ
+> Why not mount `/home/user` as `/home/ide` but as `/ide/work`?
+
+Because `/home/ide` has already some configuration provided by the docker
+ide image and mounting it this way would shadow all the provisioned files.
+
 ## Development
 There is a `Rakefile.rb` and rake tasks to be used:
 ```
@@ -260,7 +267,7 @@ Git branches apply as in AI-Traders cookbooks or gems: create your feature branc
  from master and if you are ready to have it ci tested, merge your feature branch
  onto ci branch. Then work on ci branch until all tests on ci are passed.
 
-### TODO
+### TODOs
 1. Support groups?
 1. Apply https://github.com/progrium/bashstyle style guide.
 1. Maybe do not use Rubyide to release IDE? This demands implementing OVersion
