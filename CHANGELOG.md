@@ -10,6 +10,7 @@
 * #8208 Make docker run command visible not only in debug log
 * #8399 gitide should mount ~/.gitconfig
 * #8732 ide run interactively if current terminal is interactive
+* #8733 ide released by ci agent
 
 # 0.0.3 (02 January 2016)
 

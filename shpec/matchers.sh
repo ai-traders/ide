@@ -12,7 +12,7 @@ describe "matchers"
     it "\"-ti\" matches \"-ti\""
       assert do_match "\"-ti\"" "\"-ti\""
     end
-    it "\"-ti\" matches \"-ti\""
+    it "\"-ti\" matches \"ti -rm\""
       assert do_match "-ti -rm" " -ti"
     end
   end

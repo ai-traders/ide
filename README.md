@@ -259,3 +259,5 @@ Style guides:
 ### TODO
 1. Support groups?
 1. Apply https://github.com/progrium/bashstyle style guide.
+1. Maybe do not use Rubyide to release IDE? This demands implementing OVersion
+ in bash. And not using gitrake gem.
