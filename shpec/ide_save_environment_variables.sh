@@ -80,11 +80,17 @@ describe "save_environment_variables"
       assert do_match "$file_contents" "^IDE_ZZZZ=1111"
       assert no_match "$file_contents" "^IDE_CDE=246"
     end
+    # This test shall not pass if you only set HOME and not IDE_HOME while
+    # IDE_HOME is set. Then, IDE_HOME has stronger precedence than HOME and the
+    # value of IDE_HOME will be saved under IDE_HOME name.
+    # However, if IDE_HOME was not set and you only set here HOME, then
+    # the value of HOME will be saved under IDE_HOME name.
+    # Same for any other IDE_* variables.
     it "real blacklisted_variables and almost real environment"
-      message="$(/bin/bash -c "source ${IDE_PATH} && SSH_AGENT_PID=29 \
+      message="$(/bin/bash -c "source ${IDE_PATH} && IDE_SSH_AGENT_PID=29 \
 GEM_HOME=/home/ewa/.chefdk/gem/ruby/2.1.0 GLADE_PIXMAP_PATH=: TERM=xterm \
 SHELL=/bin/bash XDG_MENU_PREFIX=xfce- VAGRANT_DEFAULT_PROVIDER=openstack \
-OS_REGION_NAME=RegionOne WINDOWID=52428804 HOME=/home/someone USER=someone \
+OS_REGION_NAME=RegionOne WINDOWID=52428804 IDE_HOME=/home/someone USER=someone \
 save_environment_variables ${env_file} \"${real_blacklisted}\"")"
       assert equal "$?" "0"
       file_contents=$(cat ${env_file})
