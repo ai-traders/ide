@@ -11,7 +11,20 @@ log_error() {
 }
 
 get_env_vars_file_name() {
-  echo "/tmp/ide/environment-$(date +%Y-%m-%d_%H-%M-%S)"
+  # This file name must contain a random number, the time in file name is
+  # insufficient. It already was a problem when 2 ci jobs were started in the
+  # same second, they wrote to the same file and 2 processes were reading the
+  # same file.
+
+  # I want to have a long random number, I know this method skews random numbers
+  # to the lower regions of boundaries and that it might not work in e.g.
+  # busybox docker image. But, is there bash in busybox? If we wanted to port IDE
+  # to work on busybox, this would probably demand more work than only
+  # other way of getting random numbers. See if this can help then:
+  # http://stackoverflow.com/questions/7642743/how-to-generate-random-numbers-in-the-busybox-shell
+  random1=$((RANDOM % 10000))
+  random2=$((RANDOM % 10000))
+  echo "/tmp/ide/environment-$(date +%Y-%m-%d_%H-%M-%S)-${random1}${random2}"
 }
 
 # $1 is the environment variable name and does not start with IDE_

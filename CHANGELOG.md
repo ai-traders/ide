@@ -1,3 +1,7 @@
+# 0.1.1 (17 Feb 2016)
+
+* #8783 save environment variables to a file containing random number
+
 # 0.1.0 (09 February 2016)
 
 * `IDE_HOME` replaced with `IDE_IDENTITY`
