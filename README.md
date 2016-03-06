@@ -254,8 +254,8 @@ The release cycle is very similar to the usual docker image release cycle, but
 ### Tests
 
 1. Whenever you build docker image from cookbook, **keep a separate recipe `_ide`**
- so that you can provision only with that recipe and test the configs.
-2. Always **test ide configs first**, in order to **fail fast**. Do not install
+ so that you can provision only with that recipe and test the configs. You can
+ then **test ide configs first**, in order to **fail fast**. Do not install
  anything but those 3 scripts: entrypoint.sh, ide-setup-identity.sh, ide-fix-uid-gid.sh.
  Use fake identity, verify that those files which must be copied are copied,
  verify that entrypoint.sh succeeds (or that it fails from a know cause, e.g.
@@ -290,7 +290,7 @@ The release cycle is very similar to the usual docker image release cycle, but
   I did it in http://gitlab.ai-traders.com/lab/docker-rubyide/blob/master/cookbook-ai_ruby_docker/ChefRakefile.rb#L111
     and it was a very bad and ugly idea but crucial back then, to realize what
   was the error. Maybe I could implement it in https://github.com/marcy-terui/kitchen-docker_cli/blob/master/lib/kitchen/driver/docker_cli.rb#L61*).
-  You can set it in KitchenDockerfile:
+  You can set entrypoint in KitchenDockerfile:
 
   ```ruby
   FROM <%= config[:image] %>
@@ -298,7 +298,11 @@ The release cycle is very similar to the usual docker image release cycle, but
   ENTRYPOINT ["/bin/bash"]
   ```
   Such an entrypoint demands updated docker run command in `.kitchen.yml` file,
-  e.g.: `command: -c "/sbin/my_init"`.
+  e.g.: `command: -c "/sbin/my_init"` or `-c 'while true; do sleep 1d; done;'`.
+  If you don't set command, docker logs will
+  show: `/bin/sh: /bin/sh: cannot execute binary file`, because the default
+  command set by kitchen-docker_cli is: `sh -c 'while true; do sleep 1d; done;'`.
+  Similar, if you set command to `/bin/bash`.
 4. In any `.kitchen.yml` files when **mounting docker volumes, always ensure
  absolute path**, and watch out for the gocd issue which does not set PWD env
  variable. Working example is
@@ -307,6 +311,9 @@ The release cycle is very similar to the usual docker image release cycle, but
           - <%= File.dirname(__FILE__) %>/test/integration/dummy_work:/ide/work
           - <%= File.dirname(__FILE__) %>/test/integration/dummy_identity:/ide/identity
  ```
+5. Whenever you use dummy identity (dummy configuration and secret files) for tests,
+ ensure, that they have proper permissions, e.g. `~/.ssh/id_rsa` has permissions:
+ `600`.
 5. In Test-Kitchen tests keep 1 spec file named: `a_ide_scripts_spec.rb` so that
  it is run as the first one and it sets ide identity for the rest of the tests.
 6. http://gitlab.ai-traders.com/lab/docs/blob/master/ReleaseCycle/DockerImage.md
