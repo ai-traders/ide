@@ -1,3 +1,3 @@
 IDE_DRIVER="docker"
-IDE_DOCKER_IMAGE="gitide:0.2.0"
-IDE_WORK="${PWD}/test/gitide-usage/work"
+IDE_DOCKER_IMAGE="docker-registry.ai-traders.com/gitide:0.2.0"
+IDE_WORK="${PWD}/work"

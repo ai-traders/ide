@@ -36,7 +36,7 @@ namespace 'itest' do
   end
 
   task :test_gitide_dryrun do
-    Rake.sh("docker pull gitide:0.2.0 .")
+    Rake.sh("docker pull docker-registry.ai-traders.com/gitide:0.2.0")
     Dir.chdir('./test/gitide-usage') do
       # with command
       Rake.sh('IDE_LOG_LEVEL=debug ../../ide --dryrun echo sth')
@@ -45,7 +45,7 @@ namespace 'itest' do
     end
   end
   task :test_gitide do
-    Rake.sh("docker pull gitide:0.2.0 .")
+    Rake.sh("docker pull docker-registry.ai-traders.com/gitide:0.2.0")
     if File.directory?('./test/gitide-usage/work/bash')
       FileUtils.rm_r('./test/gitide-usage/work/bash')
     end

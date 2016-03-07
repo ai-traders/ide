@@ -1,2 +1,2 @@
-test/gitide-usage/work/*
+test/gitide-usage/work/**
 tmp_env
