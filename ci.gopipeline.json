@@ -6,7 +6,7 @@
     {
       "type" : "git",
       "name" : "git",
-      "url" : "git@git.ai-traders.com:lab/ide.git",
+      "url" : "git@git.ai-traders.com:ide/ide.git",
       "branch" : "ci"
     }
   ],
