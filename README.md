@@ -11,10 +11,10 @@ Build/test/release your software in an isolated environment. Currently only dock
  Idefiles.
 
 ## Why
-1. For Continuous Integration: this moves out your project requirements from CI
- agents and workstation too. As a result CI agent does
- not even need mono, ruby, rake, chefdk, etc. It never needs to execute those
- commands locally. Instead it will always spin-up docker container
+1. To move out a project requirements from CI agents and workstation.
+ As a result, CI agent does not need mono, ruby, rake, chefdk, etc.
+ It never needs to execute those commands locally.
+ Instead it will always spin-up docker container
  or vm and run commands there. This means:
  * no need to update CI agent deployment whenever your project environment changes
  * CI agent needs only docker daemon and client, ide installed and secrets
@@ -22,33 +22,28 @@ Build/test/release your software in an isolated environment. Currently only dock
 2. The docker image used as your project isolated environment can be reused across
  CI agents and workstations.
 
-Thanks to that, we close all configuration problems of a particular project type
- in a single IDE image. You should know what your IDE image is capable of, what
- secrets and configuration it needs. Forgetting identity or config files is one
- of the most frequent
- causes of failed CI jobs. Here we move this problem to the earlier CI stages.
+Thanks to that, we close all configuration problems of a particular
+ project type in a single IDE image. You should know what your IDE image is
+ capable of, what secrets and configuration it needs. Forgetting configuration
+ or secret files was one of the most frequent causes of failed CI jobs for us.
 
 ## Usage
 Run it from bash terminal:
 ```bash
 ide [--idefile IDEFILE] [COMMAND]
 ```
-Example command:
-```bash
-ide rake style:rubocop
-```
-Example configuration:
-```
-IDE_DOCKER_IMAGE="rubyide:0.1.0"
-```
-
 Without setting a `COMMAND`, a docker container will be run with default
  docker image command.
 
-### Warnings, limitations
-Current implementation limitations:
-* works only on local docker host (docker daemon must be installed locally).
-* works only on Linux.
+
+Example: keep an `./Idefile`, e.g. like this:
+```
+IDE_DOCKER_IMAGE="rubyide:0.1.0"
+```
+and then run:
+```bash
+ide rake style:rubocop
+```
 
 ### What happens
 1. IDE determines that docker image rubyide:0.1.0 is needed
@@ -68,6 +63,11 @@ docker run --rm -v ${IDE_WORK}:/ide/work -v ${IDE_IDENTITY}:/ide/identity \
 
 For debug output set `IDE_LOG_LEVEL=debug`.
 
+### Warnings, limitations
+Current implementation limitations:
+* works only on local docker host (docker daemon must be installed locally).
+* works only on Linux.
+
 ### Configuration
 The whole configuration is put in `Idefile`. It is an environment variable style
  file (e.g `IDE_DRIVER=docker`). It should be put in a root directory of your
@@ -78,14 +78,14 @@ Supported variables:
  vagrant (won’t be implemented now), defaults to docker – will run docker run command
 * `IDE_DOCKER_IMAGE`, the only required setting, docker image (or in the future
  maybe openstack image) to use
-* `IDE_DOCKER_OPTIONS="--privileged"` will append the string into docker run command.
- This is a fallback, because I can’t predict all the ide usage but I think such a fallback will be needed.
+* `IDE_DOCKER_OPTIONS="--privileged"` will append the string into docker run command. This is a fallback, because I can’t predict all the ide usage but I think such a fallback will be needed.
 * `IDE_IDENTITY`, what on localhost should be mounted into container as
  `/ide/identity`, defaults to `HOME`
-* `IDE_WORK`, what on localhost should be mounted into container as /ide/work,
- this is your working copy, your project repository; defaults to current directory.
- In order to let container see your working copy so that is has code to work on,
- and, in order to let you later see any container's work result (code changes).
+* `IDE_WORK`, what on localhost should be mounted into container as
+ `/ide/work`, this is your working copy, your project repository;
+ defaults to current directory. Thanks to this, a container can see your
+ working copy so that is has code to work on, and you can see any container's
+ work result (code changes).
 
 ## Installation
 ```bash
@@ -96,7 +96,7 @@ Or just do what [install.sh](./install.sh) says.
 
 ## How to create ide Docker image?
 *This is a quite long documentation. You can skip it and go ahead to examples:
- [gitide](http://gitlab.ai-traders.com/lab/gitide) or [chefide](http://gitlab.ai-traders.com/chef/docker-chefide)*
+ [gitide](http://gitlab.ai-traders.com/lab/docker-gitide) (no cookbook) or [chefide](http://gitlab.ai-traders.com/chef/docker-chefide) (with cookbook)*
 
 Frequently evolving IDE images are very ok. You should not just start using new
  tools without building and testing new dev image first.
@@ -133,10 +133,11 @@ If your docker image already has `/ide/work` or `/ide/identity`, they will
 #### Configuration and secrets
 * Map any settings and secrets files from IDE_IDENTITY into `/home/ide/`. Do it
  by **copying** and changing ownership and setting permissions to `ide` user.
-* If you want, you can map any files from `$IDE_IDENTITY/.bashrc.d/` and from
- `/IDE_IDENTITY/profile.d/`, because your
+ Do it in **`/usr/bin/ide-setup-identity.sh` script**.
+* If you want, you can map any files from `${IDE_IDENTITY}/.bashrc.d/` and from
+ `${IDE_IDENTITY}/profile.d/`, because your
  entrypoint can ensure to run in login shell. If your host's shell is interactive,
- docker will be ran interactive shell too.
+ docker will be ran interactively too.
 * Exit with non 0 status if any obligatory config or secret file does not exist
  (tell which files are missing).
 * In order to limit the requirements put on docker host, it seems better to generate
@@ -151,18 +152,17 @@ If your docker image already has `/ide/work` or `/ide/identity`, they will
   container this symlink is: `/ide/identity/.gitconfig -> /home/user/code/dotfiles/.gitconfig`
   and `/home/user/code/dotfiles/.gitconfig` does not exist.
   The only known workaround: do not have symlinks, use plain files.
-* Take care of configuration and secrets mapping in `/usr/bin/ide-setup-identity.sh` script.
 
 #### UID GID problem
 * The destined uid and gid are the same as the uid and gid of `/ide/work` directory.
  Thanks to [Tom's docker-uid-gid-fix](https://github.com/tomzo/docker-uid-gid-fix)
  project, we are armed with PoC how to achieve this. We change the uid and gid of
  `ide` user with the destined uid and gid.
+ Do it in `/usr/bin/ide-fix-uid-gid.sh` script.
 * When docker image already contains files owned by `ide` user,
   (e.g. `/ide/home`), then after changing uid and gid we have to search for all
   those files and update their ownership.
 * Avoid mounting anything into `/ide/work` as root.
-* Do it in `/usr/bin/ide-fix-uid-gid.sh` script.
 
 #### ENTRYPOINT
 The entrypoint should:
@@ -171,25 +171,22 @@ The entrypoint should:
 * change the current directory into `/ide/work` (this may be done in
  `/home/ide/.profile`).
 
- If you choose `su` command to change user from root to ide, then you will have
- problems that the only possible command to invoke interactively is `/bin/bash`
+##### Examples
+You can choose `su` command to change user from root to ide. Disadvantage: the only possible command to invoke interactively is `/bin/bash`
  (https://aitraders.tpondemand.com/entity/8189 ). Example entrypoint.sh with `su`:
 ```bash
 #!/bin/bash
 set -e
-if [ -t 0 ] ; then
-    /usr/bin/ide-setup-identity.sh
-    /usr/bin/ide-fix-uid-gid.sh
-    echo "ide init finished (interactive shell)"
+/usr/bin/ide-setup-identity.sh
+/usr/bin/ide-fix-uid-gid.sh
 
+if [ -t 0 ] ; then
+    echo "ide init finished (interactive shell)"
     set +e
-    # No "-c" option
+    # No "su -c" option
     su - ide
 else
-    /usr/bin/ide-setup-identity.sh
-    /usr/bin/ide-fix-uid-gid.sh
     echo "ide init finished (not interactive shell)"
-
     su - ide -c "$@"
 fi
 ```
@@ -228,15 +225,11 @@ Such a docker image can be ran:
  * **interactively**: `docker run -ti --rm -v ${PWD}/examples/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0`
  * **interactively**: `docker run -ti --rm -v ${PWD}/examples/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0 "env && /bin/bash"`
 
-See the [examples](./examples) directory and also:
- * http://gitlab.ai-traders.com/lab/docs/blob/master/ReleaseCycle/DockerImageIDE.md
- * http://gitlab.ai-traders.com/lab/docs/blob/master/ReleaseCycle/DockerImage.md
-
 ### Docker in Docker
 If your ide docker image should have docker daemon:
  * use overlay docker storage driver (#8149)
  * set `/var/lib/docker` as docker volume (#8268)
- * run such ide docker container with `--privileged`
+ * run such ide docker container with `--privileged`, set `IDE_DOCKER_OPTIONS="--privileged"`
 
 Without the above, you'll see e.g.:
 ```
@@ -248,62 +241,35 @@ Examples are: chefide and ideide.
 
 ### IDE Docker image release cycle
 
-The release cycle is very similar to the usual docker image release cycle, but
- there are more tests.
+The release cycle is very similar to the [usual docker image release cycle](http://gitlab.ai-traders.com/lab/docs/blob/master/ReleaseCycle/DockerImage.md),
+ but there are more tests.
 
-### Tests
+### Tests and build
 
-1. Whenever you build docker image from cookbook, **keep a separate recipe `_ide`**
- so that you can provision only with that recipe and test the configs. You can
- then **test ide configs first**, in order to **fail fast**. Do not install
- anything but those 3 scripts: entrypoint.sh, ide-setup-identity.sh, ide-fix-uid-gid.sh.
- Use fake identity, verify that those files which must be copied are copied,
- verify that entrypoint.sh succeeds (or that it fails from a know cause, e.g.
- that docker daemon is not installed and thus cannot be started). A working rake task:
+#### ide_configs tests (Test-Kitchen tests on base docker image + recipe)
+Whenever you build **ide docker image from cookbook**, **test ide configs
+first**, in order to **fail fast**. How:
+   * **keep a separate recipe `_ide`**. It won't install
+   anything but those 3 scripts: entrypoint.sh, ide-setup-identity.sh, ide-fix-uid-gid.sh and create ide user.
+   * **use fake identity**: you can have many directories with dummy identity. Some should have sth wrong e.g. be missing some secrets.
+   Those dummy identities will be mounted as docker volumes.
+   * verify that `ide-setup-identity.sh` works: files which must be mapped are mapped, or if not, then that clear message is shown.
+   * verify that `entrypoint.sh` succeeds (or that it fails from a know cause, e.g. that docker daemon is not installed and thus cannot be started).
 
-  ```ruby
-  namespace 'itest' do
-    desc 'Verify ide configs before the big provisioning, to fail fast'
-    task 'ide_configs' do
-      ENV['KITCHEN_YAML'] = File.expand_path("#{__FILE__}/../.kitchen.yml")
-      Rake.sh('kitchen test config')
-    end
+A working rake task:
+
+```ruby
+namespace 'itest' do
+  desc 'Verify ide configs before the big provisioning, to fail fast'
+  task 'ide_configs' do
+    ENV['KITCHEN_YAML'] = File.expand_path("#{__FILE__}/../.kitchen.yml")
+    Rake.sh('kitchen test config')
   end
-  ```
-  You have to provide `config` kitchen suite (see chefide). You can test if some
-  file was mounted (as docker volume), copied, generated, etc.
-  This should be run **before the image is built**.
-2. Then run usual tests e.g. that some debian packages are installed.
- Run with test-kitchen, usually with serverspec, use dockerimagerake gem.
-3. Run end user tests, they can use ide or not. Using ide here means that ide
- would have to be installed also inside another ide docker image which you use
- to run tests in (e.g. chefide). That could be troublesome because ide changes fast.
- Here you test the end user usage of your ide docker image, with end user
-  entrypoint and volumes. Implement them as: **RSpec tests which run ide
-  commands and use Idefiles**.
-2. In `.kitchen.image.yml` do set **entrypoint which is not the ide entrypoint**!
- When Test-Kitchen cannot start a container, it says only:
- `Error response from daemon: Container <id> is not running`, it does not say why.
- And sometimes you want to allow `entrypoint.sh` to fail (e.g. in the above point,
- when nothing is installed and thus some daemons will not start).
-  *(It would be nice if Test-Kitchen would then run `docker logs container_name`,
-  I did it in http://gitlab.ai-traders.com/lab/docker-rubyide/blob/master/cookbook-ai_ruby_docker/ChefRakefile.rb#L111
-    and it was a very bad and ugly idea but crucial back then, to realize what
-  was the error. Maybe I could implement it in https://github.com/marcy-terui/kitchen-docker_cli/blob/master/lib/kitchen/driver/docker_cli.rb#L61*).
-  You can set entrypoint in KitchenDockerfile:
-
-  ```ruby
-  FROM <%= config[:image] %>
-
-  ENTRYPOINT ["/bin/bash"]
-  ```
-  Such an entrypoint demands updated docker run command in `.kitchen.yml` file,
-  e.g.: `command: -c "/sbin/my_init"` or `-c 'while true; do sleep 1d; done;'`.
-  If you don't set command, docker logs will
-  show: `/bin/sh: /bin/sh: cannot execute binary file`, because the default
-  command set by kitchen-docker_cli is: `sh -c 'while true; do sleep 1d; done;'`.
-  Similar, if you set command to `/bin/bash`.
-4. In any `.kitchen.yml` files when **mounting docker volumes, always ensure
+end
+```
+You have to provide `config` kitchen suite(s) (see [chefide .kitchen.yml](http://gitlab.ai-traders.com/chef/docker-chefide/blob/master/cookbook-ai_docker_chefdev/.kitchen.yml)). Run those
+tests run **before the image is built**, on you docker base image.
+In `.kitchen.yml` file, when **mounting docker volumes, always ensure
  absolute path**, and watch out for the gocd issue which does not set PWD env
  variable. Working example is
  ```
@@ -311,17 +277,62 @@ The release cycle is very similar to the usual docker image release cycle, but
           - <%= File.dirname(__FILE__) %>/test/integration/dummy_work:/ide/work
           - <%= File.dirname(__FILE__) %>/test/integration/dummy_identity:/ide/identity
  ```
-5. Whenever you use dummy identity (dummy configuration and secret files) for tests,
+
+#### Build docker image
+Now build the docker image. You should use dockerimagerake gem, it will
+ generate `imagerc` file after successful build.
+
+#### Test-kitchen tests on docker image
+After **docker image is built**, run usual test-kitchen tests e.g. that some
+debian packages are installed. You can run them using a rake task like
+`rake itest:kitchen:platform-suite`
+or `source imagerc && chef exec bundle exec kitchen verify platform-suite`.
+If your ide docker
+image requires some `IDE_` environment variable, you have to set it in
+`.kitchen.image.yml`, [example](http://gitlab.ai-traders.com/chef/docker-chefide/blob/master/cookbook-ai_docker_chefdev/.kitchen.yml#L18).
+In `.kitchen.image.yml` set **entrypoint which is not the ide entrypoint**!
+When Test-Kitchen cannot start a container, it says only:
+`Error response from daemon: Container <id> is not running`, it does not say why.
+And sometimes you want to allow `entrypoint.sh` to fail (e.g. in the above point,
+when nothing is installed and thus some daemons will not start).
+ You can set entrypoint in KitchenDockerfile:
+
+ ```ruby
+ FROM <%= config[:image] %>
+
+ ENTRYPOINT ["/bin/bash"]
+ ```
+ Such an entrypoint demands updated docker run command in `.kitchen.yml` file,
+ e.g.: `command: -c "/sbin/my_init"` or `-c 'while true; do sleep 1d; done;'`
+ (I tested both).
+ If you don't set command, docker logs will
+ show: `/bin/sh: /bin/sh: cannot execute binary file`, because the default
+ command set by kitchen-docker_cli is: `sh -c 'while true; do sleep 1d; done;'`.
+ Similarly, if you set command to `/bin/bash`.
+
+#### End user tests (RSpec)
+Put them into `test/integration/end_user`.
+
+Here you test the end user usage of your ide docker image, with end user
+entrypoint and volumes. Implement them as: **RSpec tests which run docker run
+commands and mount identity and work directories as docker volumes**. You can
+ use the same dummy identities as in ide_configs tests.
+ If your ide docker
+image requires some `IDE_` environment variable, you have to set it in docker
+run commands.
+
+Those tests can use ide or just docker run command. (*Using ide here means that ide
+ would have to be installed also inside another ide docker image which you use
+ to run tests in (e.g. chefide). That could be troublesome because ide changes fast.*)
+
+#### General advices
+* Whenever you use dummy identity (dummy configuration and secret files) for tests,
  ensure, that they have proper permissions, e.g. `~/.ssh/id_rsa` has permissions:
  `600`.
-5. In Test-Kitchen tests keep 1 spec file named: `a_ide_scripts_spec.rb` so that
+* In Test-Kitchen tests keep 1 spec file named: `a_ide_scripts_spec.rb` so that
  it is run as the first one and it sets ide identity for the rest of the tests.
-6. http://gitlab.ai-traders.com/lab/docs/blob/master/ReleaseCycle/DockerImage.md
- applies here.
-
-See also:
-* http://gitlab.ai-traders.com/lab/gem-dockerimagerake
-
+ (I think `01_ide_scripts_spec.rb` is not run as the first one).
+* see also: http://gitlab.ai-traders.com/lab/gem-dockerimagerake
 
 ## FAQ
 > Why not mount `/home/user` as `/home/ide` but as `/ide/work`?
