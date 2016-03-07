@@ -17,7 +17,7 @@ describe "commandline options"
   end
   describe "--idefile"
     it "exits 0, if --idefile not set and exists in curent directory"
-      message="$(cd examples/gitide-usage && ${IDE_PATH} --dryrun some_command)"
+      message="$(cd test/gitide-usage && ${IDE_PATH} --dryrun some_command)"
       assert equal "$?" "0"
     end
     it "exits 1, if --idefile not set and does not exist in curent directory"
@@ -46,7 +46,7 @@ describe "commandline options"
     describe "command not set"
       it "runs non-interactively if invoked non-interactively"
         # do not use \"\" it will not be counted as empty string
-        message="$(/bin/bash -c "cd examples/gitide-usage && ${IDE_PATH} --dryrun")"
+        message="$(/bin/bash -c "cd test/gitide-usage && ${IDE_PATH} --dryrun")"
         assert equal "$?" "0"
         assert do_match "$message" "docker run --rm -v"
         assert do_match "$message" "gitide:0.1.1"
@@ -58,7 +58,7 @@ describe "commandline options"
       end
       it "runs interactively if invoked interactively"
         # do not use \"\" it will not be counted as empty string
-        message="$(cd examples/gitide-usage && ${IDE_PATH} --dryrun)"
+        message="$(cd test/gitide-usage && ${IDE_PATH} --dryrun)"
         assert equal "$?" "0"
         assert do_match "$message" "docker run --rm -v"
         # this fails in ideide, where terminal is non-interactive
@@ -70,7 +70,7 @@ describe "commandline options"
     end
     describe "command set"
       it "runs non-interactively if invoked non-interactively"
-        message="$(cd examples/gitide-usage && ${IDE_PATH} --dryrun some_command)"
+        message="$(cd test/gitide-usage && ${IDE_PATH} --dryrun some_command)"
         assert equal "$?" "0"
         assert do_match "$message" "docker run --rm -v"
         assert do_match "$message" "gitide:0.1.1 \"some_command \""
@@ -79,7 +79,7 @@ describe "commandline options"
         # assert do_not_match "$message" " -ti"
       end
       it "runs interactively if invoked interactively"
-        message="$(cd examples/gitide-usage && ${IDE_PATH} --dryrun some_command)"
+        message="$(cd test/gitide-usage && ${IDE_PATH} --dryrun some_command)"
         assert equal "$?" "0"
         assert do_match "$message" "docker run --rm -v"
         # this probably fails in ideide, where terminal is non-interactive
@@ -91,23 +91,23 @@ describe "commandline options"
   describe "docker run command, using gitide"
     it "exits 0, constructs correct command"
       # do not use \"\" it will not be counted as empty string
-      message="$(cd examples/gitide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun some_command)"
+      message="$(cd test/gitide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun some_command)"
       assert equal "$?" "0"
-      assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/examples/gitide-usage/work:/ide/work\ -v\ ${HOME}:/ide/identity:ro\ --env-file="
+      assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/test/gitide-usage/work:/ide/work\ -v\ ${HOME}:/ide/identity:ro\ --env-file="
       assert match "$message" "gitide:0.1.1\ \\\"some_command\ \\\""
     end
     it "exits 0, constructs correct command longer"
       # do not use \"\" it will not be counted as empty string
-      message="$(cd examples/gitide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun some_command longer)"
+      message="$(cd test/gitide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun some_command longer)"
       assert equal "$?" "0"
-      assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/examples/gitide-usage/work:/ide/work\ -v\ ${HOME}:/ide/identity:ro\ --env-file="
+      assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/test/gitide-usage/work:/ide/work\ -v\ ${HOME}:/ide/identity:ro\ --env-file="
       assert match "$message" "gitide:0.1.1\ \\\"some_command\ longer\\\""
     end
     it "exits 0, constructs correct command longer longer"
       # do not use \"\" it will not be counted as empty string
-      message="$(cd examples/gitide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun some_command longer longer)"
+      message="$(cd test/gitide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun some_command longer longer)"
       assert equal "$?" "0"
-      assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/examples/gitide-usage/work:/ide/work\ -v\ ${HOME}:/ide/identity:ro\ --env-file="
+      assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/test/gitide-usage/work:/ide/work\ -v\ ${HOME}:/ide/identity:ro\ --env-file="
       assert match "$message" "gitide:0.1.1\ \\\"some_command\ longer\ longer\\\""
     end
   end

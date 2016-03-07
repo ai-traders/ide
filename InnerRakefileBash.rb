@@ -22,8 +22,6 @@ namespace 'unit' do
 end
 
 namespace 'itest' do
-  # if running interactively fails, try sth like:
-  # docker run -ti --rm -v /home/ewa/code/ide/examples/gitide/work:/ide/work -v /home/ewa:/ide/identity:ro --env-file="/tmp/ide/environment-2016-02-08_14-49-07" --entrypoint="/bin/bash" gitide:0.1.0 -c "/bin/bash"
   desc 'Test install.sh; do not run on workstation'
   task :test_install do
     Rake.sh('sudo ./install.sh')

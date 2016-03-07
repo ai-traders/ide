@@ -222,9 +222,9 @@ Thanks to ENTRYPOINT taking care of all configuration, secrets, ownership, curre
  provisioned instance. Example: `rake style:rubocop` or some mono command.
 
 Such a docker image can be ran:
- * **not-interactively**: `docker run --rm -v ${PWD}/examples/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0 "git clone git@git.ai-traders.com:edu/bash.git && ls -la bash"`
- * **interactively**: `docker run -ti --rm -v ${PWD}/examples/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0`
- * **interactively**: `docker run -ti --rm -v ${PWD}/examples/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0 "env && /bin/bash"`
+ * **not-interactively**: `docker run --rm -v ${PWD}/test/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0 "git clone git@git.ai-traders.com:edu/bash.git && ls -la bash"`
+ * **interactively**: `docker run -ti --rm -v ${PWD}/test/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0`
+ * **interactively**: `docker run -ti --rm -v ${PWD}/test/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0 "env && /bin/bash"`
 
 ### Docker in Docker
 If your ide docker image should have docker daemon:
@@ -328,7 +328,8 @@ Those tests can use ide or just docker run command. (*Using ide here means that 
 
 #### General advices
 * Whenever you use dummy identity (dummy configuration and secret files) for tests,
- it would be nice to ensure, that they have proper permissions, e.g. `~/.ssh/id_rsa` has permissions: `600`. Git does not preserve `600` permissions.
+ it would be nice to ensure, that they have proper permissions, e.g. `~/.ssh/id_rsa`
+  has permissions: `600`. Git does not preserve `600` permissions.
 * In Test-Kitchen tests keep 1 spec file named: `a_ide_scripts_spec.rb` so that
  it is run as the first one and it sets ide identity for the rest of the tests.
  (I think `01_ide_scripts_spec.rb` is not run as the first one).
@@ -345,22 +346,17 @@ There is a [Rakefile.rb](./Rakefile.rb) and rake tasks to be used:
 ```
 $ rake style
 $ rake unit
-$ rake itest:build_gitide
 $ rake itest:test_gitide_dryrun
 $ rake itest:test_gitide
 ```
 The `Rakefile.rb` contains guidelines how to install testing software. If you wish,
  you can invoke them without rake.
 
-Style guides:
- * https://github.com/progrium/bashstyle
-
 Git branches apply as in AI-Traders cookbooks or gems: create your feature branch
  from master and if you are ready to have it ci tested, merge your feature branch
  onto ci branch. Then work on ci branch until all tests on ci are passed.
 
 ### TODOs
-1. Support groups?
 1. Apply https://github.com/progrium/bashstyle style guide.
 1. Maybe do not use Rubyide to release IDE? This demands implementing OVersion
  in bash. And not using gitrake gem.
