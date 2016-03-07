@@ -28,6 +28,11 @@ construct_docker_command() {
   docker_cmd="docker run --rm -v $IDE_WORK:/ide/work -v $IDE_IDENTITY:/ide/identity:ro"
   docker_cmd+=" --env-file=\"$env_file\""
 
+  if [ -n "$DISPLAY" ]; then
+    # DISPLAY is set, enable running in graphical mode
+    docker_cmd+=" -v /tmp/.X11-unix:/tmp/.X11-unix"
+  fi
+
   if [ -n "$IDE_DOCKER_OPTIONS" ]; then
       docker_cmd+=" $IDE_DOCKER_OPTIONS"
   fi

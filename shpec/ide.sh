@@ -138,4 +138,14 @@ describe "commandline options"
       assert do_match "$message" "IDE_DOCKER_IMAGE not set"
     end
   end
+  describe "graphical mode"
+    it "exits 0, constructs correct command"
+      # do not use \"\" it will not be counted as empty string
+      message="$(cd test/gitide-usage && IDE_LOG_LEVEL=debug DISPLAY=bla ${IDE_PATH} --dryrun some_command)"
+      assert equal "$?" "0"
+      assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/test/gitide-usage/work:/ide/work\ -v\ ${HOME}:/ide/identity:ro\ --env-file="
+      assert do_match "$message" " -v\ /tmp/.X11-unix:/tmp/.X11-unix\ "
+      assert match "$message" "gitide:0.2.0\ \\\"some_command\ \\\""
+    end
+  end
 end

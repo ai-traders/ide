@@ -1,3 +1,7 @@
+# 0.2.0 (7 Mar 2016)
+
+* #8494 support graphical mode
+
 # 0.1.2 (7 Mar 2016)
 
 #8906 No changes in ide code, but:
