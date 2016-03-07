@@ -35,18 +35,9 @@ namespace 'itest' do
     end
   end
 
-  task :build_gitide do
-    version = File.read('./examples/gitide/docker/scripts/docker_image_version.txt')
-      .chomp()
-    Dir.chdir('./examples/gitide/docker') do
-      Rake.sh("docker build -t gitide:#{version} .")
-    end
-  end
   task :test_gitide_dryrun do
-    Dir.chdir('./examples/gitide-usage') do
-      # changing current directory, because IDE_WORK in Idefile is set relative
-      # to './examples/gitide-usage'
-
+    Rake.sh("docker pull gitide:0.2.0 .")
+    Dir.chdir('./test/gitide-usage') do
       # with command
       Rake.sh('IDE_LOG_LEVEL=debug ../../ide --dryrun echo sth')
       # no command
@@ -54,12 +45,11 @@ namespace 'itest' do
     end
   end
   task :test_gitide do
-    if File.directory?('./examples/gitide-usage/work/bash')
-      FileUtils.rm_r('./examples/gitide-usage/work/bash')
+    Rake.sh("docker pull gitide:0.2.0 .")
+    if File.directory?('./test/gitide-usage/work/bash')
+      FileUtils.rm_r('./test/gitide-usage/work/bash')
     end
-    Dir.chdir('./examples/gitide-usage') do
-      # changing current directory, because IDE_WORK in Idefile is set relative
-      # to './examples/gitide-usage'
+    Dir.chdir('./test/gitide-usage') do
       Rake.sh('IDE_LOG_LEVEL=debug ../../ide '\
         '"git clone git@git.ai-traders.com:edu/bash.git && ls -la bash && pwd"')
     end
@@ -79,8 +69,7 @@ namespace 'go' do
     end
   end
   namespace 'itest' do
-    task :build_and_test_image do
-      Rake::Task['itest:build_gitide'].invoke
+    task :test_image do
       Rake::Task['itest:test_gitide_dryrun'].invoke
       Rake::Task['itest:test_gitide'].invoke
     end

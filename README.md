@@ -96,7 +96,7 @@ Or just do what [install.sh](./install.sh) says.
 
 ## How to create ide Docker image?
 *This is a quite long documentation. You can skip it and go ahead to examples:
- [gitide](http://gitlab.ai-traders.com/lab/docker-gitide) (no cookbook) or [chefide](http://gitlab.ai-traders.com/chef/docker-chefide) (with cookbook)*
+ [gitide](http://gitlab.ai-traders.com/ide/docker-gitide) (no cookbook) or [chefide](http://gitlab.ai-traders.com/chef/docker-chefide) (with cookbook)*
 
 Frequently evolving IDE images are very ok. You should not just start using new
  tools without building and testing new dev image first.
@@ -114,6 +114,7 @@ The IDE image readme should note:
 what is current directory in docker container
 * example Idefile
 * example command
+* what is the development process
 
 ### Linux user
 Docker image must have an `ide` user (actually any not-root user is fine, use
@@ -327,8 +328,7 @@ Those tests can use ide or just docker run command. (*Using ide here means that 
 
 #### General advices
 * Whenever you use dummy identity (dummy configuration and secret files) for tests,
- ensure, that they have proper permissions, e.g. `~/.ssh/id_rsa` has permissions:
- `600`.
+ it would be nice to ensure, that they have proper permissions, e.g. `~/.ssh/id_rsa` has permissions: `600`. Git does not preserve `600` permissions.
 * In Test-Kitchen tests keep 1 spec file named: `a_ide_scripts_spec.rb` so that
  it is run as the first one and it sets ide identity for the rest of the tests.
  (I think `01_ide_scripts_spec.rb` is not run as the first one).

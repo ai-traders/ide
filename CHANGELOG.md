@@ -1,3 +1,10 @@
+# 0.1.2 (7 Mar 2016)
+
+#8906 No changes in ide code, but:
+* moved gitide into a separate git repository
+* updated readme so that docs on how to create an ide docker image
+ are all here
+
 # 0.1.1 (17 Feb 2016)
 
 * #8783 save environment variables to a file containing random number

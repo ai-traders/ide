@@ -121,7 +121,7 @@
           ]
         },
         {
-          "name" : "build_and_test_image",
+          "name" : "test_image",
           "resources" : ["build_docker"],
           "tasks" : [
             {
@@ -130,7 +130,7 @@
               "configuration": [
                 {
                   "key": "script",
-                  "value": "ide rake go:itest:build_and_test_image"
+                  "value": "ide rake go:itest:test_image"
                 }
               ],
               "plugin_configuration": {
