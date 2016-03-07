@@ -222,9 +222,9 @@ Thanks to ENTRYPOINT taking care of all configuration, secrets, ownership, curre
  provisioned instance. Example: `rake style:rubocop` or some mono command.
 
 Such a docker image can be ran:
- * **not-interactively**: `docker run --rm -v ${PWD}/test/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0 "git clone git@git.ai-traders.com:edu/bash.git && ls -la bash"`
- * **interactively**: `docker run -ti --rm -v ${PWD}/test/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0`
- * **interactively**: `docker run -ti --rm -v ${PWD}/test/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.1.0 "env && /bin/bash"`
+ * **not-interactively**: `docker run --rm -v ${PWD}/test/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.2.0 "git clone git@git.ai-traders.com:edu/bash.git && ls -la bash"`
+ * **interactively**: `docker run -ti --rm -v ${PWD}/test/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.2.0`
+ * **interactively**: `docker run -ti --rm -v ${PWD}/test/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.2.0 "env && /bin/bash"`
 
 ### Docker in Docker
 If your ide docker image should have docker daemon:

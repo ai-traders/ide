@@ -49,9 +49,9 @@ describe "commandline options"
         message="$(/bin/bash -c "cd test/gitide-usage && ${IDE_PATH} --dryrun")"
         assert equal "$?" "0"
         assert do_match "$message" "docker run --rm -v"
-        assert do_match "$message" "gitide:0.1.1"
+        assert do_match "$message" "gitide:0.2.0"
         # we don't want quotes if $command not set
-        assert do_not_match "$message" "gitide:0.1.1 \"\""
+        assert do_not_match "$message" "gitide:0.2.0 \"\""
         # this fails on workstation, where terminal is interactive
         # TODO: how to test it? note that I already put test in "/bin/bash -c"
         # assert do_not_match "$message" " -ti"
@@ -63,9 +63,9 @@ describe "commandline options"
         assert do_match "$message" "docker run --rm -v"
         # this fails in ideide, where terminal is non-interactive
         # TODO: how to test it?
-        # assert do_match "$message" " -ti gitide:0.1.1"
+        # assert do_match "$message" " -ti gitide:0.2.0"
         # we don't want quotes if $command not set
-        assert do_not_match "$message" "gitide:0.1.1 \"\""
+        assert do_not_match "$message" "gitide:0.2.0 \"\""
       end
     end
     describe "command set"
@@ -73,7 +73,7 @@ describe "commandline options"
         message="$(cd test/gitide-usage && ${IDE_PATH} --dryrun some_command)"
         assert equal "$?" "0"
         assert do_match "$message" "docker run --rm -v"
-        assert do_match "$message" "gitide:0.1.1 \"some_command \""
+        assert do_match "$message" "gitide:0.2.0 \"some_command \""
         # this fails on workstation, where terminal is interactive
         # TODO: how to test it?
         # assert do_not_match "$message" " -ti"
@@ -84,7 +84,7 @@ describe "commandline options"
         assert do_match "$message" "docker run --rm -v"
         # this probably fails in ideide, where terminal is non-interactive
         # TODO: how to test it?
-        # assert do_match "$message" " -ti gitide:0.1.1 \"some_command \""
+        # assert do_match "$message" " -ti gitide:0.2.0 \"some_command \""
       end
     end
   end
@@ -94,21 +94,21 @@ describe "commandline options"
       message="$(cd test/gitide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun some_command)"
       assert equal "$?" "0"
       assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/test/gitide-usage/work:/ide/work\ -v\ ${HOME}:/ide/identity:ro\ --env-file="
-      assert match "$message" "gitide:0.1.1\ \\\"some_command\ \\\""
+      assert match "$message" "gitide:0.2.0\ \\\"some_command\ \\\""
     end
     it "exits 0, constructs correct command longer"
       # do not use \"\" it will not be counted as empty string
       message="$(cd test/gitide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun some_command longer)"
       assert equal "$?" "0"
       assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/test/gitide-usage/work:/ide/work\ -v\ ${HOME}:/ide/identity:ro\ --env-file="
-      assert match "$message" "gitide:0.1.1\ \\\"some_command\ longer\\\""
+      assert match "$message" "gitide:0.2.0\ \\\"some_command\ longer\\\""
     end
     it "exits 0, constructs correct command longer longer"
       # do not use \"\" it will not be counted as empty string
       message="$(cd test/gitide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun some_command longer longer)"
       assert equal "$?" "0"
       assert match "$message" "docker\ run\ --rm\ -v\ ${PWD}/test/gitide-usage/work:/ide/work\ -v\ ${HOME}:/ide/identity:ro\ --env-file="
-      assert match "$message" "gitide:0.1.1\ \\\"some_command\ longer\ longer\\\""
+      assert match "$message" "gitide:0.2.0\ \\\"some_command\ longer\ longer\\\""
     end
   end
   describe "docker run command, using complexide"
