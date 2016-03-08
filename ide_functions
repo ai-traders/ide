@@ -10,11 +10,16 @@ log_error() {
   echo -e "\e[31merror: $1\e[0m"
 }
 
-get_env_vars_file_name() {
-  # This file name must contain a random number, the time in file name is
-  # insufficient. It already was a problem when 2 ci jobs were started in the
+# Returns an identificator that can be reused later in many places,
+# e.g. as some file name or as docker container name.
+# e.g. ide-gitide-usage-2016-03-08_18-51-09-68509321
+get_run_id() {
+  directory_name=$(basename ${PWD})
+  directory_name_no_space=$(echo "${directory_name}" | sed 's/ /_/g')
+  # It must contain a random number, the time is insufficient.
+  # It already was a problem when 2 ci jobs were started in the
   # same second, they wrote to the same file and 2 processes were reading the
-  # same file.
+  # same file (it concerns function: get_env_vars_file_name).
 
   # I want to have a long random number, I know this method skews random numbers
   # to the lower regions of boundaries and that it might not work in e.g.
@@ -24,7 +29,19 @@ get_env_vars_file_name() {
   # http://stackoverflow.com/questions/7642743/how-to-generate-random-numbers-in-the-busybox-shell
   random1=$((RANDOM % 10000))
   random2=$((RANDOM % 10000))
-  echo "/tmp/ide/environment-$(date +%Y-%m-%d_%H-%M-%S)-${random1}${random2}"
+  echo "ide-${directory_name_no_space}-$(date +%Y-%m-%d_%H-%M-%S)-${random1}${random2}"
+}
+
+# Returns a name of a file which will contain environment variables.
+# e.g. /tmp/ide/environment-ide-gitide-usage-2016-03-08_18-51-09-68509321
+get_env_vars_file_name() {
+
+  run_id="$1"
+  if [ -z "$run_id" ]; then
+    log_error "run_id not specified"
+    return 1;
+  fi
+  echo "/tmp/ide/environment-${run_id}"
 }
 
 # $1 is the environment variable name and does not start with IDE_
