@@ -14,8 +14,8 @@ log_error() {
 # e.g. as some file name or as docker container name.
 # e.g. ide-gitide-usage-2016-03-08_18-51-09-68509321
 get_run_id() {
-  directory_name=$(basename ${PWD})
-  directory_name_no_space=$(echo "${directory_name}" | sed 's/ /_/g')
+  directory_name=$(basename "${PWD}")
+  directory_name_no_space="${directory_name/ /_}"
   # It must contain a random number, the time is insufficient.
   # It already was a problem when 2 ci jobs were started in the
   # same second, they wrote to the same file and 2 processes were reading the

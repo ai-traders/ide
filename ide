@@ -192,7 +192,7 @@ log_debug "run_interactively: $run_interactively"
 # it serves here as an identificator, will be used as docker container name
 # and as a part of env_file
 run_id=$(get_run_id)
-env_file=$(get_env_vars_file_name ${run_id})
+env_file=$(get_env_vars_file_name "${run_id}")
 env_dir=$(dirname "${env_file}")
 mkdir -p "${env_dir}"
 save_environment_variables "$env_file" "$IDE_VARS_BLACKLIST"
@@ -204,7 +204,7 @@ echo -e "docker command will be:\n${GREEN}${docker_command}${NC}"
 on_control_c()
 {
     log_error "Ctrl+c caught by IDE."
-    if [[ $(docker inspect -f {{.State.Running}} $run_id ) == "false" ]]; then
+    if [[ $(docker inspect -f "{{.State.Running}}" "$run_id" ) == "false" ]]; then
       # If Ctrl+c was typed fast enough, docker container is not running, but
       # it is created. If that is the case, remove it.
       log_error "I will remove docker container: $run_id (it was created but not started)"
@@ -225,9 +225,8 @@ if [[ "$dryrun" != "true" ]]; then
     # run in the background so that user has a moment to run ctrl+c
     # until container did not stop
     eval "${docker_command}" &
+    wait
   fi
-  docker_command_pid=$!
-  wait $docker_command_pid
   exit_status="$?"
   log_debug "ide exit status: $exit_status"
   if [[ "$exit_status" != "0" ]]; then
