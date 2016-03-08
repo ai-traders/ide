@@ -58,7 +58,7 @@ construct_docker_command() {
 # default values
 groupname="default"
 idefile="${PWD}/Idefile"
-version="0.1.1"
+version="0.2.0"
 dryrun="false"
 
 while (( $# > 0 ))
