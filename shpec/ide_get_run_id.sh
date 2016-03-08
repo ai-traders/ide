@@ -1,4 +1,4 @@
-describe "get_run_id and simialr"
+describe "get_run_id and similar"
   # make absolute path out of relative
   IDE_PATH=$(readlink -f "./ide_functions")
 
