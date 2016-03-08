@@ -86,7 +86,7 @@ Supported variables:
  defaults to current directory. Thanks to this, a container can see your
  working copy so that is has code to work on, and you can see any container's
  work result (code changes).
-* if DISPLAY variable is set (an environment variable), then you can use ide
+* if DISPLAY environment variable is set (to anything at all), then you can use ide
  with graphical applications.
 
 ## Installation

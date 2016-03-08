@@ -106,5 +106,13 @@ save_environment_variables ${env_file} \"${real_blacklisted}\"")"
       assert do_match "$file_contents" "^IDE_USER="
       assert no_match "$file_contents" "^USER="
     end
+    it "DISPLAY set"
+      message="$(/bin/bash -c "source ${IDE_PATH} && DISPLAY=bla ABC=123 CDE=246 save_environment_variables ${env_file} \" \"")"
+      assert equal "$?" "0"
+      file_contents=$(cat ${env_file})
+      assert match "$file_contents" "ABC=123"
+      assert match "$file_contents" "CDE=246"
+      assert match "$file_contents" "DISPLAY=unix:0.0"
+    end
   end
 end

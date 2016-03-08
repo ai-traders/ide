@@ -186,6 +186,11 @@ save_environment_variables() {
           DOCKER_ENVS_ARRAY+=("${env_var}=${env_var_value}")
       fi
   done
+  if [ -n "$DISPLAY" ]; then
+    # DISPLAY is set, enable running in graphical mode.
+    # No matter what was its value, always set it to: unix:0.0
+    DOCKER_ENVS_ARRAY+=("DISPLAY=unix:0.0")
+  fi
   for env_var in "${DOCKER_ENVS_ARRAY[@]}" ; do
       echo "$env_var" >> "$env_file"
   done
