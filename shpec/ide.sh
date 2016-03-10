@@ -148,4 +148,14 @@ describe "commandline options"
       assert match "$message" "gitide:0.2.0\ \\\"some_command\ \\\""
     end
   end
+  describe "docker-compose run command, using defaults"
+    it "exits 0, constructs correct command"
+      # do not use \"\" it will not be counted as empty string
+      message="$(cd test/docker-compose-idefiles/default && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun some_command)"
+      assert equal "$?" "0"
+      assert do_match "$message" "ENV_FILE=\""
+      assert do_match "$message" "docker-compose\ -f\ ${PWD}/test/docker-compose-idefiles/default/docker-compose.yml\ -p"
+      assert do_match "$message" "run\ --rm\ default\ \"some_command \""
+    end
+  end
 end

@@ -9,7 +9,7 @@
 * add option `--force_not_interactive` so that if we run from terminal and our
  shell is interactive, we can still force ide to run docker container without
  `-ti` options. It is necessary for testing ide.
- The other way round `--force_interactive` would make no sense, because if your
+ The other way round, `--force_interactive`, would make no sense, because if your
  shell is already not-interactive, you cannot make it interactive.
 * the environment file produced by ide has similar name to the docker container
 * the environment file produced by ide is removed in the end

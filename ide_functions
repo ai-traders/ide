@@ -213,14 +213,39 @@ save_environment_variables() {
   done
 }
 
-# Echoes the docker-compose run command, all the arguments are verified already.
+# Echoes the first part of docker-compose command.
+# $1 is the file with environment variables to be mounted into docker container
+# $2 is docker-compose project name
+# $3 is the docker-compose yaml file path
+function construct_docker_compose_command_part1() {
+  env_file="$1"
+  docker_compose_file="$2"
+  run_id="$3"
+  if [ -z "$env_file" ]; then
+    log_error "env_file not specified"
+    return 1;
+  fi
+  if [ -z "$docker_compose_file" ]; then
+    log_error "docker_compose_file not specified"
+    return 1;
+  fi
+  if [ -z "$run_id" ]; then
+    log_error "run_id not specified"
+    return 1;
+  fi
+
+  docker_compose_cmd="ENV_FILE=\"${env_file}\" docker-compose -f ${docker_compose_file} -p ${run_id}"
+  echo "$docker_compose_cmd"
+}
+
+# Echoes the docker-compose run command.
 # $1 is the file with environment variables to be mounted into docker container
 # $2 is the true/false whether to run interactively
-# $3 is the string with random number
+# $3 is docker-compose project name
 # $4 is the docker-compose yaml file path
 # $5 is command to be run in docker container
 # $6 are docker compose options
-construct_docker_compose_command() {
+function construct_docker_compose_run_command() {
   env_file="$1"
   run_interactively="$2"
   run_id="$3"
@@ -229,25 +254,18 @@ construct_docker_compose_command() {
   command="$5"
   # can be unset
   ide_docker_compose_options="$6"
-  if [ -z "$env_file" ]; then
-    log_error "env_file not specified"
-    return 1;
-  fi
-  if [ -z "$run_id" ]; then
-    log_error "run_id not specified"
-    return 1;
-  fi
   if [ -z "$run_interactively" ]; then
     log_error "run_interactively not specified"
     return 1;
   fi
-  if [ -z "$docker_compose_file" ]; then
-    log_error "docker_compose_file not specified"
-    return 1;
-  fi
 
   # initial part of the docker compose command
-  docker_compose_cmd="ENV_FILE_NAME=\"${env_file}\" docker-compose -f ${docker_compose_file} -p ${run_id} run --rm"
+  docker_compose_cmd=$(construct_docker_compose_command_part1 "${env_file}" "${docker_compose_file}" "${run_id}")
+  if [[ "$?" != "0" ]]; then
+    log_error "$docker_compose_cmd"
+    return 1
+  fi
+  docker_compose_cmd+=" run --rm"
 
   if [[ "$run_interactively" == "false" ]]; then
       docker_compose_cmd+=" -T"
@@ -264,6 +282,42 @@ construct_docker_compose_command() {
       docker_compose_cmd+=" \"$command\""
   fi
 
+  echo "$docker_compose_cmd"
+}
+
+# Echoes the docker-compose stop command.
+# $1 is the file with environment variables to be mounted into docker container
+# $2 is docker-compose project name
+# $3 is the docker-compose yaml file path
+function construct_docker_compose_stop_command() {
+  env_file="$1"
+  docker_compose_file="$2"
+  run_id="$3"
+
+  docker_compose_cmd=$(construct_docker_compose_command_part1 "${env_file}" "${docker_compose_file}" "${run_id}")
+  if [[ "$?" != "0" ]]; then
+    log_error "$docker_compose_cmd"
+    return 1
+  fi
+  docker_compose_cmd+=" stop"
+  echo "$docker_compose_cmd"
+}
+
+# Echoes the docker-compose rm command.
+# $1 is the file with environment variables to be mounted into docker container
+# $2 is docker-compose project name
+# $3 is the docker-compose yaml file path
+function construct_docker_compose_rm_command() {
+  env_file="$1"
+  docker_compose_file="$2"
+  run_id="$3"
+
+  docker_compose_cmd=$(construct_docker_compose_command_part1 "${env_file}" "${docker_compose_file}" "${run_id}")
+  if [[ "$?" != "0" ]]; then
+    log_error "$docker_compose_cmd"
+    return 1
+  fi
+  docker_compose_cmd+=" rm -f"
   echo "$docker_compose_cmd"
 }
 

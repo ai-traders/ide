@@ -155,7 +155,7 @@ if [ -z "$IDE_DRIVER" ]; then
   IDE_DRIVER="docker"
   log_debug "IDE_DRIVER not set, setting to: $IDE_DRIVER"
 fi
-if [ "$IDE_DRIVER" != "docker" ]; then
+if [ "$IDE_DRIVER" != "docker" ] && [ "$IDE_DRIVER" != "docker-compose" ]; then
   log_error "IDE_DRIVER set to $IDE_DRIVER, supported are: docker, docker-compose"
   exit 1
 fi
@@ -249,11 +249,13 @@ elif [[ "$IDE_DRIVER" == "docker-compose" ]]; then
     exit 1;
   fi
 
-  verify_docker_compose_file "$docker_compose_file"
+  verify_docker_compose_file "$IDE_DOCKER_COMPOSE_FILE"
 
   # construct docker-compose command
-  docker_compose_command=$(construct_docker_compose_command "$env_file" "$run_interactively" "$run_id" "$docker_compose_file" "$command" "$ide_docker_compose_options")
-  echo -e "docker-compose command will be:\n${GREEN}${docker_command}${NC}"
+  docker_compose_command=$(construct_docker_compose_run_command "$env_file" "$run_interactively" "$run_id" "$IDE_DOCKER_COMPOSE_FILE" "$command" "$ide_docker_compose_options")
+  docker_compose_stop_command=$(construct_docker_compose_stop_command "$env_file" "$run_interactively" "$run_id")
+  docker_compose_rm_command=$(construct_docker_compose_rm_command "$env_file" "$run_interactively" "$run_id")
+  echo -e "docker-compose run command will be:\n${GREEN}${docker_compose_command}${NC}"
 
   on_control_c()
   {
@@ -273,6 +275,8 @@ elif [[ "$IDE_DRIVER" == "docker-compose" ]]; then
       wait
     fi
     exit_status="$?"
+    eval "${docker_compose_stop_command}"
+    eval "${docker_compose_rm_command}"
     log_debug "ide exit status: $exit_status"
     if [[ "$exit_status" != "0" ]]; then
       log_error "fail! exit status: $exit_status"
