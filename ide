@@ -15,62 +15,6 @@ helpfunc() {
     exit
 }
 
-# Echoes the docker run command, all the arguments are verified already.
-# $1 is the file with environment variables to be mounted into docker container
-# $2 is the true/false whether to run interactively
-# $3 is the string with random number
-# $4 is command to be run in docker container
-construct_docker_command() {
-  env_file="$1"
-  run_interactively="$2"
-  run_id="$3"
-  # command can be left not specified, so let it be the last argument
-  command="$4"
-  if [ -z "$env_file" ]; then
-    log_error "env_file not specified"
-    return 1;
-  fi
-  if [ -z "$run_id" ]; then
-    log_error "run_id not specified"
-    return 1;
-  fi
-  if [ -z "$run_interactively" ]; then
-    log_error "run_interactively not specified"
-    return 1;
-  fi
-
-  # initial part of the docker command
-  docker_cmd="docker run --rm -v $IDE_WORK:/ide/work -v $IDE_IDENTITY:/ide/identity:ro"
-  docker_cmd+=" --env-file=\"$env_file\""
-
-  if [ -n "$DISPLAY" ]; then
-    # DISPLAY is set, enable running in graphical mode
-    docker_cmd+=" -v /tmp/.X11-unix:/tmp/.X11-unix"
-  fi
-
-  if [ -n "$IDE_DOCKER_OPTIONS" ]; then
-      docker_cmd+=" $IDE_DOCKER_OPTIONS"
-  fi
-
-  if [[ "$run_interactively" == "true" ]]; then
-      docker_cmd+=" -ti"
-  fi
-
-  docker_cmd+=" --name ${run_id}"
-
-  if [ -n "$command" ]; then
-      # $command set
-      docker_cmd+=" $IDE_DOCKER_IMAGE \"$command\""
-  else
-      # $command not set
-      # why? Because, if $command is set, then we want to quote it.
-      # And when $command is not set, we don't want quotes.
-      docker_cmd+=" $IDE_DOCKER_IMAGE"
-  fi
-
-  echo "$docker_cmd"
-}
-
 # default values
 idefile="${PWD}/Idefile"
 version="0.3.0"
@@ -188,7 +132,7 @@ if [[ "$IDE_DRIVER" == "docker" ]]; then
   fi
 
   # construct docker command
-  docker_command=$(construct_docker_command "$env_file" "$run_interactively" "$run_id" "$command")
+  docker_command=$(construct_docker_command "$env_file" "$run_interactively" "$run_id" "$IDE_DOCKER_IMAGE" "$IDE_WORK" "$IDE_IDENTITY" "$command" "$IDE_DOCKER_OPTIONS")
   echo -e "docker command will be:\n${GREEN}${docker_command}${NC}"
 
   on_control_c()
@@ -238,7 +182,7 @@ elif [[ "$IDE_DRIVER" == "docker-compose" ]]; then
   verify_docker_compose_file "$IDE_DOCKER_COMPOSE_FILE"
 
   # construct docker-compose command
-  docker_compose_command=$(construct_docker_compose_run_command "$env_file" "$run_interactively" "$run_id" "$IDE_DOCKER_COMPOSE_FILE" "$command" "$ide_docker_compose_options")
+  docker_compose_command=$(construct_docker_compose_run_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$run_interactively" "$command" "$ide_docker_compose_options")
   docker_compose_stop_command=$(construct_docker_compose_stop_command "$env_file" "$run_interactively" "$run_id")
   docker_compose_rm_command=$(construct_docker_compose_rm_command "$env_file" "$run_interactively" "$run_id")
   echo -e "docker-compose run command will be:\n${GREEN}${docker_compose_command}${NC}"

@@ -84,7 +84,7 @@ help_save_blacklisted_variable() {
 #
 # $1 is a file path to which we save to, string
 # $2 is the collection of blacklisted variables, string separated by commas
-save_environment_variables() {
+function save_environment_variables() {
 
   env_file="$1"
   if [ -z "$env_file" ]; then
@@ -213,14 +213,91 @@ save_environment_variables() {
   done
 }
 
+# Echoes the docker run command.
+# $1 is the file with environment variables to be mounted into docker container
+# $2 is the true/false whether to run interactively
+# $3 is docker container name
+# $4 is docker image name
+# $5 is IDE_WORK
+# $6 is IDE_IDENTITY
+# $7 is command to be run in docker container
+# $8 are docker options
+function construct_docker_command() {
+  env_file="$1"
+  run_interactively="$2"
+  container_name="$3"
+  image_name="$4"
+  ide_work="$5"
+  ide_identity="$6"
+  # can be unset
+  command="$7"
+  # can be unset
+  ide_docker_options="$8"
+  if [ -z "$env_file" ]; then
+    log_error "env_file not specified"
+    return 1;
+  fi
+  if [ -z "$run_interactively" ]; then
+    log_error "run_interactively not specified"
+    return 1;
+  fi
+  if [ -z "$container_name" ]; then
+    log_error "container_name not specified"
+    return 1;
+  fi
+  if [ -z "$image_name" ]; then
+    log_error "image_name not specified"
+    return 1;
+  fi
+  if [ -z "$ide_work" ]; then
+    log_error "ide_work not specified"
+    return 1;
+  fi
+  if [ -z "$ide_identity" ]; then
+    log_error "ide_identity not specified"
+    return 1;
+  fi
+
+  # initial part of the docker command
+  docker_cmd="docker run --rm -v $ide_work:/ide/work -v $ide_identity:/ide/identity:ro"
+  docker_cmd+=" --env-file=\"$env_file\""
+
+  if [ -n "$DISPLAY" ]; then
+    # DISPLAY is set, enable running in graphical mode
+    docker_cmd+=" -v /tmp/.X11-unix:/tmp/.X11-unix"
+  fi
+
+  if [ -n "$ide_docker_options" ]; then
+      docker_cmd+=" $ide_docker_options"
+  fi
+
+  if [[ "$run_interactively" == "true" ]]; then
+      docker_cmd+=" -ti"
+  fi
+
+  docker_cmd+=" --name ${container_name}"
+
+  if [ -n "$command" ]; then
+      # $command set
+      docker_cmd+=" $image_name \"$command\""
+  else
+      # $command not set
+      # why? Because, if $command is set, then we want to quote it.
+      # And when $command is not set, we don't want quotes.
+      docker_cmd+=" $image_name"
+  fi
+
+  echo "$docker_cmd"
+}
+
 # Echoes the first part of docker-compose command.
 # $1 is the file with environment variables to be mounted into docker container
-# $2 is docker-compose project name
-# $3 is the docker-compose yaml file path
+# $2 is the docker-compose yaml file path
+# $3 is docker-compose project name
 function construct_docker_compose_command_part1() {
   env_file="$1"
   docker_compose_file="$2"
-  run_id="$3"
+  project_name="$3"
   if [ -z "$env_file" ]; then
     log_error "env_file not specified"
     return 1;
@@ -229,42 +306,45 @@ function construct_docker_compose_command_part1() {
     log_error "docker_compose_file not specified"
     return 1;
   fi
-  if [ -z "$run_id" ]; then
-    log_error "run_id not specified"
+  if [ -z "$project_name" ]; then
+    log_error "project_name not specified"
     return 1;
   fi
 
-  docker_compose_cmd="ENV_FILE=\"${env_file}\" docker-compose -f ${docker_compose_file} -p ${run_id}"
+  docker_compose_cmd="ENV_FILE=\"${env_file}\" docker-compose -f ${docker_compose_file} -p ${project_name}"
   echo "$docker_compose_cmd"
 }
 
 # Echoes the docker-compose run command.
 # $1 is the file with environment variables to be mounted into docker container
-# $2 is the true/false whether to run interactively
+# $2 is the docker-compose yaml file path
 # $3 is docker-compose project name
-# $4 is the docker-compose yaml file path
+# $4 is the true/false whether to run interactively
 # $5 is command to be run in docker container
 # $6 are docker compose options
 function construct_docker_compose_run_command() {
   env_file="$1"
-  run_interactively="$2"
-  run_id="$3"
-  docker_compose_file="$4"
+  docker_compose_file="$2"
+  project_name="$3"
+  run_interactively="$4"
   # can be unset
   command="$5"
   # can be unset
   ide_docker_compose_options="$6"
+
+  # initial part of the docker compose command
+  docker_compose_cmd=$(construct_docker_compose_command_part1 "${env_file}" "${docker_compose_file}" "${project_name}")
+  if [[ "$?" != "0" ]]; then
+    log_error "$docker_compose_cmd"
+    return 1
+  fi
+  
+  # first let construct_docker_compose_command_part1 fail, then fail here
   if [ -z "$run_interactively" ]; then
     log_error "run_interactively not specified"
     return 1;
   fi
 
-  # initial part of the docker compose command
-  docker_compose_cmd=$(construct_docker_compose_command_part1 "${env_file}" "${docker_compose_file}" "${run_id}")
-  if [[ "$?" != "0" ]]; then
-    log_error "$docker_compose_cmd"
-    return 1
-  fi
   docker_compose_cmd+=" run --rm"
 
   if [[ "$run_interactively" == "false" ]]; then
@@ -292,9 +372,9 @@ function construct_docker_compose_run_command() {
 function construct_docker_compose_stop_command() {
   env_file="$1"
   docker_compose_file="$2"
-  run_id="$3"
+  project_name="$3"
 
-  docker_compose_cmd=$(construct_docker_compose_command_part1 "${env_file}" "${docker_compose_file}" "${run_id}")
+  docker_compose_cmd=$(construct_docker_compose_command_part1 "${env_file}" "${docker_compose_file}" "${project_name}")
   if [[ "$?" != "0" ]]; then
     log_error "$docker_compose_cmd"
     return 1
@@ -310,9 +390,9 @@ function construct_docker_compose_stop_command() {
 function construct_docker_compose_rm_command() {
   env_file="$1"
   docker_compose_file="$2"
-  run_id="$3"
+  project_name="$3"
 
-  docker_compose_cmd=$(construct_docker_compose_command_part1 "${env_file}" "${docker_compose_file}" "${run_id}")
+  docker_compose_cmd=$(construct_docker_compose_command_part1 "${env_file}" "${docker_compose_file}" "${project_name}")
   if [[ "$?" != "0" ]]; then
     log_error "$docker_compose_cmd"
     return 1
