@@ -8,13 +8,6 @@ describe "commandline options"
       assert equal "$message" "${IDE_PATH} version 0.3.0"
     end
   end
-  describe "--group"
-    it "exits 1, groups are not supported"
-      message="$(${IDE_PATH} --dryrun --group \"\")"
-      assert equal "$?" "1"
-      assert do_match "$message" "error: groupnames other than default are not supported"
-    end
-  end
   describe "--idefile"
     it "exits 0, if --idefile not set and exists in curent directory"
       message="$(cd test/gitide-usage && ${IDE_PATH} --dryrun some_command)"

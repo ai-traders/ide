@@ -7,10 +7,9 @@ GREEN='\033[0;32m'
 NC='\033[0m'
 
 helpfunc() {
-    echo "Usage: $0 [--group GROUP] [--idefile IDEFILE] COMMAND"
+    echo "Usage: $0 [--idefile IDEFILE] COMMAND"
     echo "  --help     Help. Display this message and quit."
     echo "  --version  Version. Print version number and quit."
-    echo "  --group    Specify GROUP from Idefile"
     echo "  --idefile  Specify IDEFILE, default is: ./Idefile"
     echo "  --dryrun   Do not pull docker image, do not run docker run."
     exit
@@ -73,7 +72,6 @@ construct_docker_command() {
 }
 
 # default values
-groupname="default"
 idefile="${PWD}/Idefile"
 version="0.3.0"
 dryrun="false"
@@ -91,13 +89,6 @@ do
     --version)
         echo "$0 version $version"
         exit 0
-        ;;
-    --group)  # Example with an operand
-        log_error "groupnames other than default are not supported"
-        exit 1;
-        # TODO: support groups
-        # groupname="$1"
-        # shift
         ;;
     --idefile)  # Example with an operand
         idefile="$1"
@@ -130,10 +121,6 @@ do
 done
 
 # verify options
-if [ -z "$groupname" ]; then
-  log_error "groupname not specified"
-  exit 1;
-fi
 if [ -z "$idefile" ]; then
   log_error "idefile not specified"
   exit 1;
@@ -146,7 +133,6 @@ if [ ! -f "$idefile" ]; then
   exit 1;
 fi
 log_debug "Starting ide, version: $version"
-log_debug "groupname: $groupname"
 log_debug "idefile: $idefile"
 
 # verify Idefile
