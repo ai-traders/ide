@@ -127,7 +127,7 @@ describe "commandline options"
       # do not use \"\" it will not be counted as empty string
       message="$(${IDE_PATH} --idefile test/invalid-driver-ide-usage/Idefile --dryrun some_command)"
       assert equal "$?" "1"
-      assert do_match "$message" "IDE_DRIVER set to bla, supported is only: docker"
+      assert do_match "$message" "IDE_DRIVER set to bla, supported are: docker, docker-compose"
     end
   end
   describe "docker run command, using image-not-set-ide"

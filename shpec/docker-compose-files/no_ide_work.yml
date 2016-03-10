@@ -1,0 +1,14 @@
+rsync:
+  image: "nabeken/docker-volume-container-rsync:latest"
+  ports:
+  - "10873:873"
+  volumes:
+  - /ide/work/rsync_target:/docker
+default:
+  image: "docker-registry.ai-traders.com/gitide:0.2.0"
+  links:
+  - rsync
+  volumes:
+  - ${IDE_IDENTITY}:/ide/identity:ro
+  env_file:
+  - ${ENV_FILE}

@@ -1,3 +1,7 @@
+# 0.4.0 (10 Mar 2016)
+
+* #8598 support docker-compose driver
+
 # 0.3.0 (8 Mar 2016)
 
 * #8744 stop docker container when running not-interactively and pressing ctrl+c.

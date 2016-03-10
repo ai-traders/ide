@@ -17,8 +17,10 @@ helpfunc() {
 }
 
 # Echoes the docker run command, all the arguments are verified already.
-# $1 is command to be run in docker container
-# $2 is the file with environment variables to be mounted into docker container
+# $1 is the file with environment variables to be mounted into docker container
+# $2 is the true/false whether to run interactively
+# $3 is the string with random number
+# $4 is command to be run in docker container
 construct_docker_command() {
   env_file="$1"
   run_interactively="$2"
@@ -149,20 +151,16 @@ log_debug "idefile: $idefile"
 
 # verify Idefile
 source "$idefile"
-if [ -z "$IDE_DOCKER_IMAGE" ]; then
-  log_error "IDE_DOCKER_IMAGE not set"
-  exit 1;
-fi
 if [ -z "$IDE_DRIVER" ]; then
   IDE_DRIVER="docker"
   log_debug "IDE_DRIVER not set, setting to: $IDE_DRIVER"
 fi
 if [ "$IDE_DRIVER" != "docker" ]; then
-  log_error "IDE_DRIVER set to $IDE_DRIVER, supported is only: docker"
+  log_error "IDE_DRIVER set to $IDE_DRIVER, supported are: docker, docker-compose"
   exit 1
 fi
 if [ -z "$IDE_WORK" ]; then
-  IDE_WORK=$PWD
+  IDE_WORK="$PWD"
   log_debug "IDE_WORK not set, setting to: $IDE_WORK"
 fi
 if [ ! -d "$IDE_WORK" ]; then
@@ -170,7 +168,7 @@ if [ ! -d "$IDE_WORK" ]; then
   exit 1
 fi
 if [ -z "$IDE_IDENTITY" ]; then
-  IDE_IDENTITY=$HOME
+  IDE_IDENTITY="$HOME"
   log_debug "IDE_IDENTITY not set, setting to: $IDE_IDENTITY"
 fi
 if [ ! -d "$IDE_IDENTITY" ]; then
@@ -197,41 +195,89 @@ env_dir=$(dirname "${env_file}")
 mkdir -p "${env_dir}"
 save_environment_variables "$env_file" "$IDE_VARS_BLACKLIST"
 
-# construct docker command
-docker_command=$(construct_docker_command "$env_file" "$run_interactively" "$run_id" "$command")
-echo -e "docker command will be:\n${GREEN}${docker_command}${NC}"
-
-on_control_c()
-{
-    log_error "Ctrl+c caught by IDE."
-    if [[ $(docker inspect -f "{{.State.Running}}" "$run_id" ) == "false" ]]; then
-      # If Ctrl+c was typed fast enough, docker container is not running, but
-      # it is created. If that is the case, remove it.
-      log_error "I will remove docker container: $run_id (it was created but not started)"
-      docker rm "$run_id"
-    else
-      log_error "I will stop docker container: $run_id"
-      # this can still take some time (up to 10 seconds)
-      docker stop "$run_id"
-    fi
-}
-trap 'on_control_c' INT
-
-# run docker run
-if [[ "$dryrun" != "true" ]]; then
-  if [[ "$run_interactively" == "true" ]]; then
-    eval "${docker_command}"
-  else
-    # run in the background so that user has a moment to run ctrl+c
-    # until container did not stop
-    eval "${docker_command}" &
-    wait
+if [[ "$IDE_DRIVER" == "docker" ]]; then
+  if [ -z "$IDE_DOCKER_IMAGE" ]; then
+    log_error "IDE_DOCKER_IMAGE not set"
+    exit 1;
   fi
-  exit_status="$?"
-  log_debug "ide exit status: $exit_status"
-  if [[ "$exit_status" != "0" ]]; then
-    log_error "fail! exit status: $exit_status"
-    exit $exit_status
+
+  # construct docker command
+  docker_command=$(construct_docker_command "$env_file" "$run_interactively" "$run_id" "$command")
+  echo -e "docker command will be:\n${GREEN}${docker_command}${NC}"
+
+  on_control_c()
+  {
+      log_error "Ctrl+c caught by IDE."
+      if [[ $(docker inspect -f "{{.State.Running}}" "$run_id" ) == "false" ]]; then
+        # If Ctrl+c was typed fast enough, docker container is not running, but
+        # it is created. If that is the case, remove it.
+        log_error "I will remove docker container: $run_id (it was created but not started)"
+        docker rm "$run_id"
+      else
+        log_error "I will stop docker container: $run_id"
+        # this can still take some time (up to 10 seconds)
+        docker stop "$run_id"
+      fi
+  }
+  trap 'on_control_c' INT
+
+  # run docker run
+  if [[ "$dryrun" != "true" ]]; then
+    if [[ "$run_interactively" == "true" ]]; then
+      eval "${docker_command}"
+    else
+      # run in the background so that user has a moment to run ctrl+c
+      # until container did not stop
+      eval "${docker_command}" &
+      wait
+    fi
+    exit_status="$?"
+    log_debug "ide exit status: $exit_status"
+    if [[ "$exit_status" != "0" ]]; then
+      log_error "fail! exit status: $exit_status"
+      exit $exit_status
+    fi
+  fi
+elif [[ "$IDE_DRIVER" == "docker-compose" ]]; then
+  if [ -z "$IDE_DOCKER_COMPOSE_FILE" ]; then
+    IDE_DOCKER_COMPOSE_FILE="${PWD}/docker-compose.yml"
+    log_debug "IDE_DOCKER_COMPOSE_FILE not set, setting to: $IDE_DOCKER_COMPOSE_FILE"
+  fi
+  if [ ! -f "$IDE_DOCKER_COMPOSE_FILE" ]; then
+    # do not get full path here (see comment on idefile)
+    log_error "IDE_DOCKER_COMPOSE_FILE set to $IDE_DOCKER_COMPOSE_FILE which does not exist"
+    exit 1;
+  fi
+
+  verify_docker_compose_file "$docker_compose_file"
+
+  # construct docker-compose command
+  docker_compose_command=$(construct_docker_compose_command "$env_file" "$run_interactively" "$run_id" "$docker_compose_file" "$command" "$ide_docker_compose_options")
+  echo -e "docker-compose command will be:\n${GREEN}${docker_command}${NC}"
+
+  on_control_c()
+  {
+      log_error "Ctrl+c caught by IDE."
+      log_error "TODO"
+  }
+  trap 'on_control_c' INT
+
+  # run docker-compose run
+  if [[ "$dryrun" != "true" ]]; then
+    if [[ "$run_interactively" == "true" ]]; then
+      eval "${docker_compose_command}"
+    else
+      # run in the background so that user has a moment to run ctrl+c
+      # until container did not stop
+      eval "${docker_compose_command}" &
+      wait
+    fi
+    exit_status="$?"
+    log_debug "ide exit status: $exit_status"
+    if [[ "$exit_status" != "0" ]]; then
+      log_error "fail! exit status: $exit_status"
+      exit $exit_status
+    fi
   fi
 fi
 

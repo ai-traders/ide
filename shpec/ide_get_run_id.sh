@@ -5,6 +5,7 @@ describe "get_run_id and similar"
   describe 'get_run_id'
     it "returns file name"
       message="$(/bin/bash -c "source ${IDE_PATH} && get_run_id")"
+      assert equal "$?" "0"
       # e.g. ide-gitide-usage-2016-03-08_18-51-09-68509321
       # {2,} == match at least 2 occurrences of a char
       assert do_match "$message" "ide-"
@@ -15,6 +16,7 @@ describe "get_run_id and similar"
     it "returns file name"
       run_id="some-random-string-666"
       message="$(/bin/bash -c "source ${IDE_PATH} && get_env_vars_file_name ${run_id}")"
+      assert equal "$?" "0"
       # e.g. /tmp/ide/environment-2016-02-17_16-32-29-68192406
       # {2,} == match at least 2 occurrences of a char
       assert do_match "$message" "/tmp/ide/environment-some-random-string-666"

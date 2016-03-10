@@ -212,3 +212,87 @@ save_environment_variables() {
       echo "$env_var" >> "$env_file"
   done
 }
+
+# Echoes the docker-compose run command, all the arguments are verified already.
+# $1 is the file with environment variables to be mounted into docker container
+# $2 is the true/false whether to run interactively
+# $3 is the string with random number
+# $4 is the docker-compose yaml file path
+# $5 is command to be run in docker container
+# $6 are docker compose options
+construct_docker_compose_command() {
+  env_file="$1"
+  run_interactively="$2"
+  run_id="$3"
+  docker_compose_file="$4"
+  # can be unset
+  command="$5"
+  # can be unset
+  ide_docker_compose_options="$6"
+  if [ -z "$env_file" ]; then
+    log_error "env_file not specified"
+    return 1;
+  fi
+  if [ -z "$run_id" ]; then
+    log_error "run_id not specified"
+    return 1;
+  fi
+  if [ -z "$run_interactively" ]; then
+    log_error "run_interactively not specified"
+    return 1;
+  fi
+  if [ -z "$docker_compose_file" ]; then
+    log_error "docker_compose_file not specified"
+    return 1;
+  fi
+
+  # initial part of the docker compose command
+  docker_compose_cmd="ENV_FILE_NAME=\"${env_file}\" docker-compose -f ${docker_compose_file} -p ${run_id} run --rm"
+
+  if [[ "$run_interactively" == "false" ]]; then
+      docker_compose_cmd+=" -T"
+  fi
+
+  if [ -n "$ide_docker_compose_options" ]; then
+      docker_compose_cmd+=" $ide_docker_compose_options"
+  fi
+
+  docker_compose_cmd+=" default"
+
+  if [ -n "$command" ]; then
+      # $command set
+      docker_compose_cmd+=" \"$command\""
+  fi
+
+  echo "$docker_compose_cmd"
+}
+
+function verify_docker_compose_file(){
+  docker_compose_file="$1"
+  if [ -z "$docker_compose_file" ]; then
+    log_error "docker_compose_file not specified"
+    return 1;
+  fi
+
+  contents=$(cat "$docker_compose_file")
+  if [[ $(echo "$contents" | grep "IDE_IDENTITY" -c) == "0" ]]; then
+    log_error "$docker_compose_file does not contain IDE_IDENTITY"
+    exit 1
+  fi
+  if [[ $(echo "$contents" | grep "IDE_WORK" -c) == "0" ]]; then
+    log_error "$docker_compose_file does not contain IDE_WORK"
+    exit 1
+  fi
+  if [[ $(echo "$contents" | grep "ENV_FILE" -c) == "0" ]]; then
+    log_error "$docker_compose_file does not contain ENV_FILE"
+    exit 1
+  fi
+  if [[ $(echo "$contents" | grep "IDE_IDENTITY" | grep ":ro" -c) == "0" ]]; then
+    log_error "$docker_compose_file does not contain \":ro\" when mounting IDE_IDENTITY"
+    exit 1
+  fi
+  if [[ $(echo "$contents" | grep "^default:" -c) == "0" ]]; then
+    log_error "$docker_compose_file does not contain \"default\" container"
+    exit 1
+  fi
+}
