@@ -1,4 +1,5 @@
-# this acts more like integration tests with dry run
+# This acts more like integration tests, but since dry run is used here,
+# I treat it as unit tests.
 describe "commandline options"
   # make absolute path out of relative
   IDE_PATH=$(readlink -f "./ide")
