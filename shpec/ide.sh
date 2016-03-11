@@ -7,7 +7,7 @@ describe "commandline options"
   describe "--version"
     it "outputs the current version number"
       message="$(${IDE_PATH} --version)"
-      assert equal "$message" "${IDE_PATH} version"
+      assert do_match "$message" "${IDE_PATH} version"
     end
   end
   describe "--idefile"
