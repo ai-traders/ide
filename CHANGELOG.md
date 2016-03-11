@@ -1,3 +1,8 @@
+# 0.4.4 (11 Mar 2016)
+
+* do not `git push` to ci branch when bumping version or else CI
+ pipeline will run in a loop
+
 # 0.4.3 (11 Mar 2016)
 
 * fix failing tests, which were false positive on CI due to:

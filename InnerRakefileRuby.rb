@@ -19,7 +19,7 @@ namespace 'release' do
       # if version_file was modified
       Rake.sh("git add #{version_file}")
       Rake.sh("git commit -m \"bump to #{version}\"")
-      Rake.sh('git push')
+      # do not push here, unless you want to run CI pipeline in a loop
     end
   end
 
