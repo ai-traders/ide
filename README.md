@@ -88,14 +88,40 @@ work result (code changes).
    maybe openstack image) to use
   * `IDE_DOCKER_OPTIONS` will append the string into docker run command. This is
   a fallback, because I can’t predict all the ide usage but I think such
-  a fallback will be needed. Use it e.g. to set "--privileged" or publish ports.
-  * if DISPLAY environment variable is set (to anything at all), then you can use ide
+  a fallback will be needed. Use it e.g. to set `--privileged` or publish ports.
+  * if `DISPLAY` environment variable is set (to anything at all), then you can use ide
   with graphical applications.
 * variables only for **docker-compose driver**:
   * `IDE_DOCKER_COMPOSE_FILE`, the file used by docker-compose. Default: `docker-compose.yml`.
   * `IDE_DOCKER_COMPOSE_OPTIONS` will append the string into docker-compose run
    command. This is a fallback, because I can’t predict all the ide usage but I
-   think such a fallback will be needed. Use it e.g. to set "--service-ports".
+   think such a fallback will be needed. Use it e.g. to set `--service-ports`.
+
+Example Idefile for docker-compose driver:
+```bash
+IDE_DRIVER="docker-compose"
+```
+Example docker-compose.yml:
+```yml
+alpine:
+  image: "alpine:3.2"
+  entrypoint: ["/bin/sh", "-c"]
+  # Uncomment this if you want to test with long running command
+  # I chose short running command because it is faster to stop this container.
+  # command: ["while true; do sleep 1d; done;"]
+  command: ["true"]
+default:
+  image: "docker-registry.ai-traders.com/gitide:0.2.0"
+  links:
+  - alpine
+  volumes:
+  - ${IDE_IDENTITY}:/ide/identity:ro
+  - ${IDE_WORK}:/ide/work
+  env_file:
+  - ${ENV_FILE}
+```
+It **has to** contain: "IDE_IDENTITY", "IDE_WORK", "ENV_FILE" and mount the
+ IDE_IDENTITY with `:ro`.
 
 ## Installation
 ```bash
