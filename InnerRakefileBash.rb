@@ -3,6 +3,13 @@ task style: ['style:shellcheck']
 desc 'Runs unit tests: Shpec'
 task unit: ['unit:shpec']
 
+class String
+  def cyan
+    "\033[36m#{self}\033[0m"
+  end
+end
+
+
 # install shellcheck with (https://github.com/koalaman/shellcheck):
 # 1. add to your apt source:
 # deb http://archive.ubuntu.com/ubuntu/ trusty-backports restricted main universe
@@ -34,6 +41,7 @@ namespace 'itest' do
   end
 
   task :test_docker_dryrun do
+    puts '----------------------------------------------------------'.cyan
     Dir.chdir('./test/docker/gitide-usage') do
       # with command
       Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --dryrun echo sth')
@@ -42,6 +50,7 @@ namespace 'itest' do
     end
   end
   task :test_docker do
+    puts '----------------------------------------------------------'.cyan
     if File.directory?('./test/docker/gitide-usage/work/bash')
       FileUtils.rm_r('./test/docker/gitide-usage/work/bash')
     end
@@ -50,8 +59,28 @@ namespace 'itest' do
         '"git clone git@git.ai-traders.com:edu/bash.git && ls -la bash && pwd"')
     end
   end
+  desc 'Test that IDE preserves not 0 exit status'
+  task :test_docker_fail do
+    puts '----------------------------------------------------------'.cyan
+    rescued = false
+    begin
+    Dir.chdir('./test/docker/gitide-usage') do
+      # exit with some weird exit status
+      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --force_not_interactive '\
+        '"echo abc && exit 164"')
+    end
+    rescue
+      rescued = true
+    end
+    if rescued
+      puts 'Succesfully rescued'
+    else
+      fail 'This should fail, but did not!'
+    end
+  end
 
   task :test_docker_compose_dryrun do
+    puts '----------------------------------------------------------'.cyan
     Dir.chdir('./test/docker-compose/default') do
       # with command
       Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --dryrun echo sth')
@@ -60,12 +89,32 @@ namespace 'itest' do
     end
   end
   task :test_docker_compose do
+    puts '----------------------------------------------------------'.cyan
     if File.directory?('./test/docker-compose/default/work/bash')
       FileUtils.rm_r('./test/docker-compose/default/work/bash')
     end
     Dir.chdir('./test/docker-compose/default') do
       Rake.sh('IDE_LOG_LEVEL=debug ../../../ide '\
         '"git clone git@git.ai-traders.com:edu/bash.git && ls -la bash && pwd"')
+    end
+  end
+  desc 'Test that IDE preserves not 0 exit status'
+  task :test_docker_compose_fail do
+    puts '----------------------------------------------------------'.cyan
+    rescued = false
+    begin
+    Dir.chdir('./test/docker-compose/default') do
+      # exit with some weird exit status
+      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --force_not_interactive '\
+        '"echo abc && exit 164"')
+    end
+    rescue
+      rescued = true
+    end
+    if rescued
+      puts 'Succesfully rescued'
+    else
+      fail 'This should fail, but did not!'
     end
   end
 end

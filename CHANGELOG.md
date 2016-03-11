@@ -1,3 +1,7 @@
+# 0.4.1 (11 Mar 2016)
+
+* #8932 fix: ide does not preserve exit status when not-interactive
+
 # 0.4.0 (11 Mar 2016) (released by mistake as 0.3.1)
 
 * #8598 support docker-compose driver

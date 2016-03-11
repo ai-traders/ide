@@ -162,7 +162,9 @@ if [[ "$IDE_DRIVER" == "docker" ]]; then
       # run in the background so that correct exit status (130) is returned
       # and on_control_c is invoked faster
       eval "${docker_command}" &
-      wait
+      # if in below line there is no "$!", then the exit_status more below
+      # is incorrect
+      wait "$!"
     fi
     exit_status="$?"
     log_debug "ide exit status: $exit_status"
@@ -208,7 +210,9 @@ elif [[ "$IDE_DRIVER" == "docker-compose" ]]; then
       # run in the background so that correct exit status (130) is returned
       # and on_control_c is invoked faster
       eval "${docker_compose_command}" &
-      wait
+      # if in below line there is no "$!", then the exit_status more below
+      # is incorrect
+      wait "$!"
     fi
     exit_status="$?"
     # even if all the containers are stopped, this won't fail
