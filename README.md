@@ -101,7 +101,7 @@ Example Idefile for docker-compose driver:
 ```bash
 IDE_DRIVER="docker-compose"
 ```
-Example docker-compose.yml:
+Example docker-compose.yml version 1:
 ```yml
 alpine:
   image: "alpine:3.2"
@@ -120,8 +120,34 @@ default:
   env_file:
   - ${ENV_FILE}
 ```
-It **has to** contain: "IDE_IDENTITY", "IDE_WORK", "ENV_FILE" and mount the
- IDE_IDENTITY with `:ro`.
+It **has to** contain: "IDE_IDENTITY", "IDE_WORK", "ENV_FILE", mount the
+ IDE_IDENTITY with `:ro` and contain a "default" docker container.
+ If you want other containers, in docker-compose.yml file, to be ran too, you
+ have to link them like above.
+
+Example docker-compose.yml version 2:
+```yml
+version: '2'
+services:
+  alpine:
+    image: "alpine:3.2"
+    entrypoint: ["/bin/sh", "-c"]
+    # Uncomment this if you want to test with long running command
+    # I chose short running command because it is faster to stop this container.
+    # command: ["while true; do sleep 1d; done;"]
+    command: ["true"]
+  default:
+    image: "docker-registry.ai-traders.com/gitide:0.2.0"
+    depends_on:
+    - alpine
+    volumes:
+    - ${IDE_IDENTITY}:/ide/identity:ro
+    - ${IDE_WORK}:/ide/work
+    env_file:
+    - ${ENV_FILE}
+```
+The same requirements apply as for docker-compose.yml version 1, but here you can
+ also use `depends_on` docker-compose configuration.
 
 ## Installation
 ```bash

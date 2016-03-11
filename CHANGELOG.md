@@ -1,7 +1,8 @@
 # 0.4.2 (11 Mar 2016)
 
+* more readme on docker-compose driver
 * development:
-   * use ideide 0.1.0 with docker-compose installed
+   * #8933 use ideide 0.1.0 with docker-compose installed
    * #8935 bump version file automatically
 
 # 0.4.1 (11 Mar 2016)
