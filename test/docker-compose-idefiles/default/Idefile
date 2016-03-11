@@ -1,1 +1,2 @@
 IDE_DRIVER="docker-compose"
+IDE_WORK="${PWD}/work"

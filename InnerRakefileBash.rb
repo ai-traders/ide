@@ -33,8 +33,7 @@ namespace 'itest' do
     end
   end
 
-  task :test_gitide_dryrun do
-    Rake.sh("docker pull docker-registry.ai-traders.com/gitide:0.2.0")
+  task :test_docker_dryrun do
     Dir.chdir('./test/gitide-usage') do
       # with command
       Rake.sh('IDE_LOG_LEVEL=debug ../../ide --dryrun echo sth')
@@ -42,13 +41,30 @@ namespace 'itest' do
       Rake.sh('IDE_LOG_LEVEL=debug ../../ide --dryrun')
     end
   end
-  task :test_gitide do
-    Rake.sh("docker pull docker-registry.ai-traders.com/gitide:0.2.0")
+  task :test_docker do
     if File.directory?('./test/gitide-usage/work/bash')
       FileUtils.rm_r('./test/gitide-usage/work/bash')
     end
     Dir.chdir('./test/gitide-usage') do
       Rake.sh('IDE_LOG_LEVEL=debug ../../ide '\
+        '"git clone git@git.ai-traders.com:edu/bash.git && ls -la bash && pwd"')
+    end
+  end
+
+  task :test_docker_compose_dryrun do
+    Dir.chdir('./test/docker-compose-idefiles/default') do
+      # with command
+      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --dryrun echo sth')
+      # no command
+      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --dryrun')
+    end
+  end
+  task :test_docker_compose do
+    if File.directory?('./test/docker-compose-idefiles/default/work/bash')
+      FileUtils.rm_r('./test/docker-compose-idefiles/default/work/bash')
+    end
+    Dir.chdir('./test/docker-compose-idefiles/default') do
+      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide '\
         '"git clone git@git.ai-traders.com:edu/bash.git && ls -la bash && pwd"')
     end
   end
@@ -68,8 +84,10 @@ namespace 'go' do
   end
   namespace 'itest' do
     task :test_image do
-      Rake::Task['itest:test_gitide_dryrun'].invoke
-      Rake::Task['itest:test_gitide'].invoke
+      Rake::Task['itest:test_docker_dryrun'].invoke
+      Rake::Task['itest:test_docker'].invoke
+      Rake::Task['itest:test_docker_compose_dryrun'].invoke
+      Rake::Task['itest:test_docker_compose'].invoke
     end
     task :test_install do
       Rake::Task['itest:test_install'].invoke

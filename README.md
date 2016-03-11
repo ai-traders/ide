@@ -362,25 +362,3 @@ Git branches apply as in AI-Traders cookbooks or gems: create your feature branc
 1. Apply https://github.com/progrium/bashstyle style guide.
 1. Maybe do not use Rubyide to release IDE? This demands implementing OVersion
  in bash. And not using gitrake gem.
-1.
-```
-[11-03-2016 11:08:21]0 ewa@7950edb12a91:~/code/ide/test/docker-compose-idefiles/default$ ../../../ide
-docker-compose run command will be:
-IDE_WORK="/home/ewa/code/ide/test/docker-compose-idefiles/default" IDE_IDENTITY="/home/ewa" ENV_FILE="/tmp/ide/environment-ide-default-2016-03-11_11-08-23-79859279" docker-compose -f /home/ewa/code/ide/test/docker-compose-idefiles/default/docker-compose.yml -p ide-default-2016-03-11_11-08-23-79859279 run --rm default
-Pulling alpine (alpine:3.2)...
-3.2: Pulling from library/alpine
-b5e89c7c3c7e: Pull complete
-Digest: sha256:4f2d8bbad359e3e6f23c0498e009aaa3e2f31996cbea7269b78f92ee43647811
-Status: Downloaded newer image for alpine:3.2
-Creating idedefault2016031111082379859279_alpine_1
-ide identity set
-usermod: no changes
-ide init finished (interactive shell), using gitide:0.2.0
-ide@f9f1feffc1e4:/ide/work$ exit
-exit
-ERROR: .IOError: [Errno 2] No such file or directory: u'./true'
-ERROR: .IOError: [Errno 2] No such file or directory: u'./true'
-[11-03-2016 11:08:58]0 ewa@7950edb12a91:~/code/ide/test/docker-compose-idefiles/default$ docker ps -a
-CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                      PORTS               NAMES
-c6bbc8d44938        alpine:3.2          "/bin/sh"           32 seconds ago      Exited (0) 30 seconds ago                       idedefault2016031111082379859279_alpine_1
-```
