@@ -294,10 +294,14 @@ function construct_docker_command() {
 # $1 is the file with environment variables to be mounted into docker container
 # $2 is the docker-compose yaml file path
 # $3 is docker-compose project name
+# $4 is IDE_WORK
+# $5 is IDE_IDENTITY
 function construct_docker_compose_command_part1() {
   env_file="$1"
   docker_compose_file="$2"
   project_name="$3"
+  ide_work="$4"
+  ide_identity="$5"
   if [ -z "$env_file" ]; then
     log_error "env_file not specified"
     return 1;
@@ -310,8 +314,16 @@ function construct_docker_compose_command_part1() {
     log_error "project_name not specified"
     return 1;
   fi
+  if [ -z "$ide_work" ]; then
+    log_error "ide_work not specified"
+    return 1;
+  fi
+  if [ -z "$ide_identity" ]; then
+    log_error "ide_identity not specified"
+    return 1;
+  fi
 
-  docker_compose_cmd="ENV_FILE=\"${env_file}\" docker-compose -f ${docker_compose_file} -p ${project_name}"
+  docker_compose_cmd="IDE_WORK=\"${ide_work}\" IDE_IDENTITY=\"${ide_identity}\" ENV_FILE=\"${env_file}\" docker-compose -f ${docker_compose_file} -p ${project_name}"
   echo "$docker_compose_cmd"
 }
 
@@ -320,25 +332,29 @@ function construct_docker_compose_command_part1() {
 # $2 is the docker-compose yaml file path
 # $3 is docker-compose project name
 # $4 is the true/false whether to run interactively
-# $5 is command to be run in docker container
-# $6 are docker compose options
+# $5 is IDE_WORK
+# $6 is IDE_IDENTITY
+# $7 is command to be run in docker container
+# $8 are docker compose options
 function construct_docker_compose_run_command() {
   env_file="$1"
   docker_compose_file="$2"
   project_name="$3"
   run_interactively="$4"
+  ide_work="$5"
+  ide_identity="$6"
   # can be unset
-  command="$5"
+  command="$7"
   # can be unset
-  ide_docker_compose_options="$6"
+  ide_docker_compose_options="$8"
 
   # initial part of the docker compose command
-  docker_compose_cmd=$(construct_docker_compose_command_part1 "${env_file}" "${docker_compose_file}" "${project_name}")
+  docker_compose_cmd=$(construct_docker_compose_command_part1 "${env_file}" "${docker_compose_file}" "${project_name}" "${ide_work}" "${ide_identity}")
   if [[ "$?" != "0" ]]; then
     log_error "$docker_compose_cmd"
     return 1
   fi
-  
+
   # first let construct_docker_compose_command_part1 fail, then fail here
   if [ -z "$run_interactively" ]; then
     log_error "run_interactively not specified"
@@ -369,12 +385,16 @@ function construct_docker_compose_run_command() {
 # $1 is the file with environment variables to be mounted into docker container
 # $2 is docker-compose project name
 # $3 is the docker-compose yaml file path
+# $4 is IDE_WORK
+# $5 is IDE_IDENTITY
 function construct_docker_compose_stop_command() {
   env_file="$1"
   docker_compose_file="$2"
   project_name="$3"
+  ide_work="$4"
+  ide_identity="$5"
 
-  docker_compose_cmd=$(construct_docker_compose_command_part1 "${env_file}" "${docker_compose_file}" "${project_name}")
+  docker_compose_cmd=$(construct_docker_compose_command_part1 "${env_file}" "${docker_compose_file}" "${project_name}" "${ide_work}" "${ide_identity}")
   if [[ "$?" != "0" ]]; then
     log_error "$docker_compose_cmd"
     return 1
@@ -387,12 +407,16 @@ function construct_docker_compose_stop_command() {
 # $1 is the file with environment variables to be mounted into docker container
 # $2 is docker-compose project name
 # $3 is the docker-compose yaml file path
+# $4 is IDE_WORK
+# $5 is IDE_IDENTITY
 function construct_docker_compose_rm_command() {
   env_file="$1"
   docker_compose_file="$2"
   project_name="$3"
+  ide_work="$4"
+  ide_identity="$5"
 
-  docker_compose_cmd=$(construct_docker_compose_command_part1 "${env_file}" "${docker_compose_file}" "${project_name}")
+  docker_compose_cmd=$(construct_docker_compose_command_part1 "${env_file}" "${docker_compose_file}" "${project_name}" "${ide_work}" "${ide_identity}")
   if [[ "$?" != "0" ]]; then
     log_error "$docker_compose_cmd"
     return 1

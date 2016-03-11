@@ -364,28 +364,23 @@ Git branches apply as in AI-Traders cookbooks or gems: create your feature branc
  in bash. And not using gitrake gem.
 1.
 ```
-[10-03-2016 20:51:01]0 ewa@140c364f91fb:~/code/ide/test/docker-compose-idefiles/default$ ../../../ide
+[11-03-2016 11:08:21]0 ewa@7950edb12a91:~/code/ide/test/docker-compose-idefiles/default$ ../../../ide
 docker-compose run command will be:
-ENV_FILE="/tmp/ide/environment-ide-default-2016-03-10_20-51-07-35558870" docker-compose -f /home/ewa/code/ide/test/docker-compose-idefiles/default/docker-compose.yml -p ide-default-2016-03-10_20-51-07-35558870 run --rm default
-WARNING: The IDE_IDENTITY variable is not set. Defaulting to a blank string.
-WARNING: The IDE_WORK variable is not set. Defaulting to a blank string.
-Creating idedefault2016031020510735558870_alpine_1
-Pulling default (docker-registry.ai-traders.com/gitide:0.2.0)...
-Pulling repository docker-registry.ai-traders.com/gitide
-9205d2727d66: Download complete
-cb6fb082434e: Download complete
-d4b2ba78e3b4: Download complete
-a576998a0799: Download complete
-e4274e39c344: Download complete
-06b954f42f09: Download complete
-ec42bf203f4f: Download complete
-2b46db243641: Download complete
-a680888044a4: Download complete
-Status: Downloaded newer image for docker-registry.ai-traders.com/gitide:0.2.0
-docker-registry.ai-traders.com/gitide: this image was pulled from a legacy registry.  Important: This registry version will not be supported in future versions of docker.
-ERROR: . includes invalid characters for a local volume name, only [a-zA-Z0-9][a-zA-Z0-9_.-] are allowed
+IDE_WORK="/home/ewa/code/ide/test/docker-compose-idefiles/default" IDE_IDENTITY="/home/ewa" ENV_FILE="/tmp/ide/environment-ide-default-2016-03-11_11-08-23-79859279" docker-compose -f /home/ewa/code/ide/test/docker-compose-idefiles/default/docker-compose.yml -p ide-default-2016-03-11_11-08-23-79859279 run --rm default
+Pulling alpine (alpine:3.2)...
+3.2: Pulling from library/alpine
+b5e89c7c3c7e: Pull complete
+Digest: sha256:4f2d8bbad359e3e6f23c0498e009aaa3e2f31996cbea7269b78f92ee43647811
+Status: Downloaded newer image for alpine:3.2
+Creating idedefault2016031111082379859279_alpine_1
+ide identity set
+usermod: no changes
+ide init finished (interactive shell), using gitide:0.2.0
+ide@f9f1feffc1e4:/ide/work$ exit
+exit
 ERROR: .IOError: [Errno 2] No such file or directory: u'./true'
 ERROR: .IOError: [Errno 2] No such file or directory: u'./true'
-error: fail! exit status: 1
-[10-03-2016 20:51:21]1 ewa@140c364f91fb:~/code/ide/test/docker-compose-idefiles/default$
+[11-03-2016 11:08:58]0 ewa@7950edb12a91:~/code/ide/test/docker-compose-idefiles/default$ docker ps -a
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                      PORTS               NAMES
+c6bbc8d44938        alpine:3.2          "/bin/sh"           32 seconds ago      Exited (0) 30 seconds ago                       idedefault2016031111082379859279_alpine_1
 ```
