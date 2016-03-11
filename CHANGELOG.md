@@ -1,3 +1,8 @@
+# 0.4.3 (11 Mar 2016)
+
+* fix failing tests, which were false positive on CI due to:
+ #8932 fix: ide does not preserve exit status when not-interactive
+
 # 0.4.2 (11 Mar 2016)
 
 * more readme on docker-compose driver
