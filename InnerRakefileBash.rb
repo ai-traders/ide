@@ -16,7 +16,8 @@ end
 # 2. run: apt-get install shellcheck
 namespace 'style' do
   task :shellcheck do
-    Rake.sh('shellcheck ide*')
+    Rake.sh('shellcheck ide')
+    Rake.sh('shellcheck ide_functions')
   end
 end
 
@@ -44,9 +45,9 @@ namespace 'itest' do
     puts '----------------------------------------------------------'.cyan
     Dir.chdir('./test/docker/gitide-usage') do
       # with command
-      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --dryrun echo sth')
+      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --dryrun --force_not_interactive echo sth')
       # no command
-      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --dryrun')
+      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --dryrun --force_not_interactive')
     end
   end
   task :test_docker do
@@ -55,7 +56,7 @@ namespace 'itest' do
       FileUtils.rm_r('./test/docker/gitide-usage/work/bash')
     end
     Dir.chdir('./test/docker/gitide-usage') do
-      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide '\
+      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --force_not_interactive '\
         '"git clone git@git.ai-traders.com:edu/bash.git && ls -la bash && pwd"')
     end
   end
@@ -83,9 +84,9 @@ namespace 'itest' do
     puts '----------------------------------------------------------'.cyan
     Dir.chdir('./test/docker-compose/default') do
       # with command
-      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --dryrun echo sth')
+      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --dryrun --force_not_interactive echo sth')
       # no command
-      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --dryrun')
+      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --dryrun --force_not_interactive')
     end
   end
   task :test_docker_compose do
@@ -94,7 +95,7 @@ namespace 'itest' do
       FileUtils.rm_r('./test/docker-compose/default/work/bash')
     end
     Dir.chdir('./test/docker-compose/default') do
-      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide '\
+      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --force_not_interactive '\
         '"git clone git@git.ai-traders.com:edu/bash.git && ls -la bash && pwd"')
     end
   end

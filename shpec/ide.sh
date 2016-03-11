@@ -126,47 +126,47 @@ describe "commandline options"
   describe "docker-compose driver"
     it "exits 0, if some command set"
       # do not use \"\" it will not be counted as empty string
-      message="$(cd test/docker-compose/default && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun /bin/bash -c \"aaa\")"
+      message="$(cd test/docker-compose/default && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --force_not_interactive /bin/bash -c \"aaa\")"
       assert equal "$?" "0"
       assert do_match "$message" "ENV_FILE=\""
       assert do_match "$message" "docker-compose -f ${PWD}/test/docker-compose/default/docker-compose.yml -p"
-      assert do_match "$message" "run --rm default \"/bin/bash -c \"aaa\"\""
+      assert do_match "$message" "run --rm -T default \"/bin/bash -c \"aaa\"\""
     end
     it "exits 0, if no command set"
       # do not use \"\" it will not be counted as empty string
-      message="$(cd test/docker-compose/default && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun)"
+      message="$(cd test/docker-compose/default && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --force_not_interactive)"
       assert equal "$?" "0"
       assert do_match "$message" "ENV_FILE=\""
       assert do_match "$message" "docker-compose -f ${PWD}/test/docker-compose/default/docker-compose.yml -p"
-      assert do_not_match "$message" "run --rm default \"\""
+      assert do_not_match "$message" "run --rm -T default \"\""
     end
     it "exits 0, if custom docker-compose file set"
       # do not use \"\" it will not be counted as empty string
-      message="$(cd test/docker-compose/custom_dc_file && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun /bin/bash -c \"aaa\")"
+      message="$(cd test/docker-compose/custom_dc_file && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --force_not_interactive /bin/bash -c \"aaa\")"
       assert equal "$?" "0"
       assert do_match "$message" "ENV_FILE=\""
       assert do_match "$message" "docker-compose -f ${PWD}/test/docker-compose/custom_dc_file/bla.yml -p"
-      assert do_match "$message" "run --rm default \"/bin/bash -c \"aaa\"\""
+      assert do_match "$message" "run --rm -T default \"/bin/bash -c \"aaa\"\""
     end
     it "exits 0, if custom docker-compose options set and command set"
       # do not use \"\" it will not be counted as empty string
-      message="$(cd test/docker-compose/custom_dc_options && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun /bin/bash -c \"aaa\")"
+      message="$(cd test/docker-compose/custom_dc_options && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --force_not_interactive /bin/bash -c \"aaa\")"
       assert equal "$?" "0"
       assert do_match "$message" "ENV_FILE=\""
       assert do_match "$message" "docker-compose -f ${PWD}/test/docker-compose/custom_dc_options/docker-compose.yml -p"
-      assert do_match "$message" "run --rm --bla default \"/bin/bash -c \"aaa\"\""
+      assert do_match "$message" "run --rm -T --bla default \"/bin/bash -c \"aaa\"\""
     end
     it "exits 0, if custom docker-compose options set and command not set"
       # do not use \"\" it will not be counted as empty string
-      message="$(cd test/docker-compose/custom_dc_options && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun)"
+      message="$(cd test/docker-compose/custom_dc_options && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --force_not_interactive)"
       assert equal "$?" "0"
       assert do_match "$message" "ENV_FILE=\""
       assert do_match "$message" "docker-compose -f ${PWD}/test/docker-compose/custom_dc_options/docker-compose.yml -p"
-      assert do_match "$message" "run --rm --bla default"
+      assert do_match "$message" "run --rm -T --bla default"
     end
     it "exits 1, if docker-compose file does not exist"
       # do not use \"\" it will not be counted as empty string
-      message="$(cd test/docker-compose/no_dc_file && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun /bin/bash -c \"aaa\")"
+      message="$(cd test/docker-compose/no_dc_file && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --force_not_interactive /bin/bash -c \"aaa\")"
       assert equal "$?" "1"
       assert do_match "$message" "IDE_DOCKER_COMPOSE_FILE set to"
       assert do_match "$message" "does not exist"
