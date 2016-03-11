@@ -3,6 +3,7 @@
 # http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "${DIR}/ide_functions"
+source "${DIR}/ide_version"
 GREEN='\033[0;32m'
 NC='\033[0m'
 
@@ -17,7 +18,6 @@ helpfunc() {
 
 # default values
 idefile="${PWD}/Idefile"
-version="0.4.0"
 dryrun="false"
 
 while (( $# > 0 ))

@@ -1,3 +1,9 @@
+# 0.4.2 (11 Mar 2016)
+
+* development:
+   * use ideide 0.1.0 with docker-compose installed
+   * #8935 bump version file automatically
+
 # 0.4.1 (11 Mar 2016)
 
 * #8932 fix: ide does not preserve exit status when not-interactive
