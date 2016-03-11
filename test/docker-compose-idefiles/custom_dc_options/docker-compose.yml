@@ -1,0 +1,16 @@
+alpine:
+  image: "alpine:3.2"
+  entrypoint: ["/bin/sh", "-c"]
+  # Uncomment this if you want to test with long running command
+  # I chose short running command because it is faster to stop this container.
+  # command: ["while true; do sleep 1d; done;"]
+  command: ["true"]
+default:
+  image: "docker-registry.ai-traders.com/gitide:0.2.0"
+  links:
+  - alpine
+  volumes:
+  - ${IDE_IDENTITY}:/ide/identity:ro
+  - ${IDE_WORK}:/ide/work
+  env_file:
+  - ${ENV_FILE}

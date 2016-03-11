@@ -185,12 +185,12 @@ elif [[ "$IDE_DRIVER" == "docker-compose" ]]; then
   verify_docker_compose_file "$IDE_DOCKER_COMPOSE_FILE"
 
   # construct docker-compose command
-  docker_compose_command=$(construct_docker_compose_run_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$run_interactively" "$IDE_WORK" "$IDE_IDENTITY"  "$command" "$ide_docker_compose_options")
+  docker_compose_command=$(construct_docker_compose_run_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$run_interactively" "$IDE_WORK" "$IDE_IDENTITY"  "$command" "$IDE_DOCKER_COMPOSE_OPTIONS")
   docker_compose_stop_command=$(construct_docker_compose_stop_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$IDE_WORK" "$IDE_IDENTITY")
   docker_compose_rm_command=$(construct_docker_compose_rm_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$IDE_WORK" "$IDE_IDENTITY")
   echo -e "docker-compose run command will be:\n${GREEN}${docker_compose_command}${NC}"
-  log_debug "docker-compose stop command will be:\n${GREEN}${docker_compose_stop_command}${NC}"
-  log_debug "docker-compose rm command will be:\n${GREEN}${docker_compose_rm_command}${NC}"
+  log_debug "docker-compose stop command will be:\n${docker_compose_stop_command}"
+  log_debug "docker-compose rm command will be:\n${docker_compose_rm_command}"
 
   on_control_c()
   {

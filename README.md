@@ -74,27 +74,35 @@ The whole configuration is put in `Idefile`. It is an environment variable style
  project.
 
 Supported variables:
-* `IDE_DRIVER`, supported values: docker, docker-compose (won’t be implemented now),
- vagrant (won’t be implemented now), defaults to docker – will run docker run command
-* `IDE_DOCKER_IMAGE`, the only required setting, docker image (or in the future
- maybe openstack image) to use
-* `IDE_DOCKER_OPTIONS="--privileged"` will append the string into docker run command. This is a fallback, because I can’t predict all the ide usage but I think such a fallback will be needed.
+* `IDE_DRIVER`, supported values: docker, docker-compose. Default: docker – will
+ run docker run command
 * `IDE_IDENTITY`, what on localhost should be mounted into container as
- `/ide/identity`, defaults to `HOME`
+`/ide/identity`, defaults to `HOME`
 * `IDE_WORK`, what on localhost should be mounted into container as
- `/ide/work`, this is your working copy, your project repository;
- defaults to current directory. Thanks to this, a container can see your
- working copy so that is has code to work on, and you can see any container's
- work result (code changes).
-* if DISPLAY environment variable is set (to anything at all), then you can use ide
- with graphical applications.
+`/ide/work`, this is your working copy, your project repository;
+defaults to current directory. Thanks to this, a container can see your
+working copy so that is has code to work on, and you can see any container's
+work result (code changes).
+* variables only for **docker driver**:
+  * `IDE_DOCKER_IMAGE`, the only required setting, docker image (or in the future
+   maybe openstack image) to use
+  * `IDE_DOCKER_OPTIONS` will append the string into docker run command. This is
+  a fallback, because I can’t predict all the ide usage but I think such
+  a fallback will be needed. Use it e.g. to set "--privileged" or publish ports.
+  * if DISPLAY environment variable is set (to anything at all), then you can use ide
+  with graphical applications.
+* variables only for **docker-compose driver**:
+  * `IDE_DOCKER_COMPOSE_FILE`, the file used by docker-compose. Default: `docker-compose.yml`.
+  * `IDE_DOCKER_COMPOSE_OPTIONS` will append the string into docker-compose run
+   command. This is a fallback, because I can’t predict all the ide usage but I
+   think such a fallback will be needed. Use it e.g. to set "--service-ports".
 
 ## Installation
 ```bash
-sudo bash -c "`curl -L http://gitlab.ai-traders.com/lab/ide/raw/master/install.sh`"
+sudo bash -c "`curl -L http://gitlab.ai-traders.com/ide/ide/raw/master/install.sh`"
 ```
 
-Or just do what [install.sh](./install.sh) says.
+Or just do what [install.sh](./install.sh) says or use [ide cookbook](http://gitlab.ai-traders.com/ide/cookbook-ide).
 
 ## How to create ide Docker image?
 *This is a quite long documentation. You can skip it and go ahead to examples:
