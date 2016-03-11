@@ -1,4 +1,4 @@
-# 0.4.0 (10 Mar 2016)
+# 0.4.0 (11 Mar 2016) (released by mistake as 0.3.1)
 
 * #8598 support docker-compose driver
 * remove all groups logic (it was never fully implemented)
