@@ -29,11 +29,11 @@ describe "commandline options"
       assert do_match "$message" "aa does not exist"
     end
     it "exits 0, if --idefile not set and Idefile exists in curent directory"
-      message="$(cd test/gitide-usage && ${IDE_PATH} --dryrun some_command)"
+      message="$(cd test/docker/gitide-usage && ${IDE_PATH} --dryrun some_command)"
       assert equal "$?" "0"
     end
     it "exits 0, if --idefile set and the file exists"
-      message="$(${IDE_PATH} --idefile test/complexide-usage/Idefile --dryrun some_command)"
+      message="$(${IDE_PATH} --idefile test/docker/complexide-usage/Idefile --dryrun some_command)"
       assert equal "$?" "0"
     end
   end
@@ -47,7 +47,7 @@ describe "commandline options"
   #     it "runs non-interactively if invoked non-interactively"
   #       # do not use \"\" it will not be counted as empty string
   #       # TODO: how to test it? note that I already put test in "/bin/bash -c"
-  #       message="$(/bin/bash -c "cd test/gitide-usage && ${IDE_PATH} --dryrun")"
+  #       message="$(/bin/bash -c "cd test/docker/gitide-usage && ${IDE_PATH} --dryrun")"
   #       assert equal "$?" "0"
   #       assert do_match "$message" "docker run --rm -v"
   #       assert do_match "$message" "gitide:0.2.0"
@@ -58,7 +58,7 @@ describe "commandline options"
   #     # this fails in ideide, where terminal is non-interactive
   #     # it "runs interactively if invoked interactively"
   #     #   # do not use \"\" it will not be counted as empty string
-  #     #   message="$(cd test/gitide-usage && ${IDE_PATH} --dryrun)"
+  #     #   message="$(cd test/docker/gitide-usage && ${IDE_PATH} --dryrun)"
   #     #   assert equal "$?" "0"
   #     #   assert do_match "$message" "docker run --rm -v"
   #     #   assert do_match "$message" " -ti gitide:0.2.0"
@@ -68,7 +68,7 @@ describe "commandline options"
   #   end
   #   describe "command set"
   #     it "runs non-interactively if invoked non-interactively"
-  #       message="$(cd test/gitide-usage && ${IDE_PATH} --dryrun some_command)"
+  #       message="$(cd test/docker/gitide-usage && ${IDE_PATH} --dryrun some_command)"
   #       assert equal "$?" "0"
   #       assert do_match "$message" "docker run --rm -v"
   #       assert do_match "$message" "gitide:0.2.0 \"some_command \""
@@ -76,7 +76,7 @@ describe "commandline options"
   #       assert do_not_match "$message" " -ti"
   #     end
   #     it "runs interactively if invoked interactively"
-  #       message="$(cd test/gitide-usage && ${IDE_PATH} --dryrun some_command)"
+  #       message="$(cd test/docker/gitide-usage && ${IDE_PATH} --dryrun some_command)"
   #       assert equal "$?" "0"
   #       assert do_match "$message" "docker run --rm -v"
   #       # this probably fails in ideide, where terminal is non-interactive
@@ -87,38 +87,38 @@ describe "commandline options"
   describe "docker driver"
     it "exits 0, if some command set"
       # do not use \"\" it will not be counted as empty string
-      message="$(cd test/gitide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun /bin/bash -c \"aaa\")"
+      message="$(cd test/docker/gitide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun /bin/bash -c \"aaa\")"
       assert equal "$?" "0"
-      assert do_match "$message" "docker run --rm -v ${PWD}/test/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+      assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
       assert do_match "$message" "gitide:0.2.0 \"/bin/bash -c \"aaa\"\""
     end
     it "exits 0, if no command set"
       # do not use \"\" it will not be counted as empty string
-      message="$(cd test/gitide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun)"
+      message="$(cd test/docker/gitide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun)"
       assert equal "$?" "0"
-      assert do_match "$message" "docker run --rm -v ${PWD}/test/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+      assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
       assert do_match "$message" "gitide:0.2.0"
       # we don't want quotes if $command not set
       assert do_not_match "$message" "gitide:0.2.0 \"\""
     end
     it "exits 0, if complex IDE_WORK and IDE_IDENTITY set"
       # do not use \"\" it will not be counted as empty string
-      message="$(IDE_LOG_LEVEL=debug ABC=1 DEF=2 GHI=3 ${IDE_PATH} --idefile test/complexide-usage/Idefile --dryrun some_command)"
+      message="$(IDE_LOG_LEVEL=debug ABC=1 DEF=2 GHI=3 ${IDE_PATH} --idefile test/docker/complexide-usage/Idefile --dryrun some_command)"
       assert equal "$?" "0"
-      assert do_match "$message" "docker run --rm -v ${PWD}/test/empty_work_dir:/ide/work -v ${PWD}/test/empty_home_dir:/ide/identity:ro --env-file="
+      assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/empty_work_dir:/ide/work -v ${PWD}/test/docker/empty_home_dir:/ide/identity:ro --env-file="
       # "-ti" is not shown in ideide, but it should be already tested
       assert do_match "$message" " --privileged"
       assert do_match "$message" "complexide:0.1.0 \"some_command \""
     end
     it "exits 1, if IDE_DRIVER set to bla"
       # do not use \"\" it will not be counted as empty string
-      message="$(${IDE_PATH} --idefile test/invalid-driver-ide-usage/Idefile --dryrun some_command)"
+      message="$(${IDE_PATH} --idefile test/docker/invalid-driver-ide-usage/Idefile --dryrun some_command)"
       assert equal "$?" "1"
       assert do_match "$message" "IDE_DRIVER set to bla, supported are: docker, docker-compose"
     end
     it "exits 1, if IDE_DOCKER_IMAGE not set"
       # do not use \"\" it will not be counted as empty string
-      message="$(${IDE_PATH} --idefile test/image-not-set-ide-usage/Idefile --dryrun some_command)"
+      message="$(${IDE_PATH} --idefile test/docker/image-not-set-ide-usage/Idefile --dryrun some_command)"
       assert equal "$?" "1"
       assert do_match "$message" "IDE_DOCKER_IMAGE not set"
     end
@@ -126,47 +126,47 @@ describe "commandline options"
   describe "docker-compose driver"
     it "exits 0, if some command set"
       # do not use \"\" it will not be counted as empty string
-      message="$(cd test/docker-compose-idefiles/default && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun /bin/bash -c \"aaa\")"
+      message="$(cd test/docker-compose/default && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun /bin/bash -c \"aaa\")"
       assert equal "$?" "0"
       assert do_match "$message" "ENV_FILE=\""
-      assert do_match "$message" "docker-compose -f ${PWD}/test/docker-compose-idefiles/default/docker-compose.yml -p"
+      assert do_match "$message" "docker-compose -f ${PWD}/test/docker-compose/default/docker-compose.yml -p"
       assert do_match "$message" "run --rm default \"/bin/bash -c \"aaa\"\""
     end
     it "exits 0, if no command set"
       # do not use \"\" it will not be counted as empty string
-      message="$(cd test/docker-compose-idefiles/default && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun)"
+      message="$(cd test/docker-compose/default && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun)"
       assert equal "$?" "0"
       assert do_match "$message" "ENV_FILE=\""
-      assert do_match "$message" "docker-compose -f ${PWD}/test/docker-compose-idefiles/default/docker-compose.yml -p"
+      assert do_match "$message" "docker-compose -f ${PWD}/test/docker-compose/default/docker-compose.yml -p"
       assert do_not_match "$message" "run --rm default \"\""
     end
     it "exits 0, if custom docker-compose file set"
       # do not use \"\" it will not be counted as empty string
-      message="$(cd test/docker-compose-idefiles/custom_dc_file && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun /bin/bash -c \"aaa\")"
+      message="$(cd test/docker-compose/custom_dc_file && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun /bin/bash -c \"aaa\")"
       assert equal "$?" "0"
       assert do_match "$message" "ENV_FILE=\""
-      assert do_match "$message" "docker-compose -f ${PWD}/test/docker-compose-idefiles/custom_dc_file/bla.yml -p"
+      assert do_match "$message" "docker-compose -f ${PWD}/test/docker-compose/custom_dc_file/bla.yml -p"
       assert do_match "$message" "run --rm default \"/bin/bash -c \"aaa\"\""
     end
     it "exits 0, if custom docker-compose options set and command set"
       # do not use \"\" it will not be counted as empty string
-      message="$(cd test/docker-compose-idefiles/custom_dc_options && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun /bin/bash -c \"aaa\")"
+      message="$(cd test/docker-compose/custom_dc_options && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun /bin/bash -c \"aaa\")"
       assert equal "$?" "0"
       assert do_match "$message" "ENV_FILE=\""
-      assert do_match "$message" "docker-compose -f ${PWD}/test/docker-compose-idefiles/custom_dc_options/docker-compose.yml -p"
+      assert do_match "$message" "docker-compose -f ${PWD}/test/docker-compose/custom_dc_options/docker-compose.yml -p"
       assert do_match "$message" "run --rm --bla default \"/bin/bash -c \"aaa\"\""
     end
     it "exits 0, if custom docker-compose options set and command not set"
       # do not use \"\" it will not be counted as empty string
-      message="$(cd test/docker-compose-idefiles/custom_dc_options && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun)"
+      message="$(cd test/docker-compose/custom_dc_options && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun)"
       assert equal "$?" "0"
       assert do_match "$message" "ENV_FILE=\""
-      assert do_match "$message" "docker-compose -f ${PWD}/test/docker-compose-idefiles/custom_dc_options/docker-compose.yml -p"
+      assert do_match "$message" "docker-compose -f ${PWD}/test/docker-compose/custom_dc_options/docker-compose.yml -p"
       assert do_match "$message" "run --rm --bla default"
     end
     it "exits 1, if docker-compose file does not exist"
       # do not use \"\" it will not be counted as empty string
-      message="$(cd test/docker-compose-idefiles/no_dc_file && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun /bin/bash -c \"aaa\")"
+      message="$(cd test/docker-compose/no_dc_file && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun /bin/bash -c \"aaa\")"
       assert equal "$?" "1"
       assert do_match "$message" "IDE_DOCKER_COMPOSE_FILE set to"
       assert do_match "$message" "does not exist"

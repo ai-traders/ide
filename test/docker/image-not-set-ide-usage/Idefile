@@ -1,0 +1,2 @@
+IDE_WORK="${PWD}/test/docker/empty_work_dir"
+IDE_IDENTITY="${PWD}/test/docker/empty_home_dir"

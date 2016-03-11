@@ -3,5 +3,5 @@
 IDE_DRIVER="docker"
 IDE_DOCKER_IMAGE="complexide:0.1.0"
 IDE_DOCKER_OPTIONS="--privileged"
-IDE_WORK="${PWD}/test/empty_work_dir"
-IDE_IDENTITY="${PWD}/test/empty_home_dir"
+IDE_WORK="${PWD}/test/docker/empty_work_dir"
+IDE_IDENTITY="${PWD}/test/docker/empty_home_dir"

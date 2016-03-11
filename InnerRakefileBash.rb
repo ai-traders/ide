@@ -34,25 +34,25 @@ namespace 'itest' do
   end
 
   task :test_docker_dryrun do
-    Dir.chdir('./test/gitide-usage') do
+    Dir.chdir('./test/docker/gitide-usage') do
       # with command
-      Rake.sh('IDE_LOG_LEVEL=debug ../../ide --dryrun echo sth')
+      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --dryrun echo sth')
       # no command
-      Rake.sh('IDE_LOG_LEVEL=debug ../../ide --dryrun')
+      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --dryrun')
     end
   end
   task :test_docker do
-    if File.directory?('./test/gitide-usage/work/bash')
-      FileUtils.rm_r('./test/gitide-usage/work/bash')
+    if File.directory?('./test/docker/gitide-usage/work/bash')
+      FileUtils.rm_r('./test/docker/gitide-usage/work/bash')
     end
-    Dir.chdir('./test/gitide-usage') do
-      Rake.sh('IDE_LOG_LEVEL=debug ../../ide '\
+    Dir.chdir('./test/docker/gitide-usage') do
+      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide '\
         '"git clone git@git.ai-traders.com:edu/bash.git && ls -la bash && pwd"')
     end
   end
 
   task :test_docker_compose_dryrun do
-    Dir.chdir('./test/docker-compose-idefiles/default') do
+    Dir.chdir('./test/docker-compose/default') do
       # with command
       Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --dryrun echo sth')
       # no command
@@ -60,10 +60,10 @@ namespace 'itest' do
     end
   end
   task :test_docker_compose do
-    if File.directory?('./test/docker-compose-idefiles/default/work/bash')
-      FileUtils.rm_r('./test/docker-compose-idefiles/default/work/bash')
+    if File.directory?('./test/docker-compose/default/work/bash')
+      FileUtils.rm_r('./test/docker-compose/default/work/bash')
     end
-    Dir.chdir('./test/docker-compose-idefiles/default') do
+    Dir.chdir('./test/docker-compose/default') do
       Rake.sh('IDE_LOG_LEVEL=debug ../../../ide '\
         '"git clone git@git.ai-traders.com:edu/bash.git && ls -la bash && pwd"')
     end
