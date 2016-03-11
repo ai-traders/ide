@@ -138,6 +138,9 @@ if [[ "$IDE_DRIVER" == "docker" ]]; then
   on_control_c()
   {
       log_error "Ctrl+c caught by IDE."
+      # The following cleanup is needed because nothing stops that docker
+      # container when no Ctrl+c is pressed, because that container is run with:
+      # `docker run --rm`.
       if [[ $(docker inspect -f "{{.State.Running}}" "$run_id" ) == "false" ]]; then
         # If Ctrl+c was typed fast enough, docker container is not running, but
         # it is created. If that is the case, remove it.
@@ -156,8 +159,8 @@ if [[ "$IDE_DRIVER" == "docker" ]]; then
     if [[ "$run_interactively" == "true" ]]; then
       eval "${docker_command}"
     else
-      # run in the background so that user has a moment to run ctrl+c
-      # until container did not stop
+      # run in the background so that correct exit status (130) is returned
+      # and on_control_c is invoked faster
       eval "${docker_command}" &
       wait
     fi
@@ -183,14 +186,17 @@ elif [[ "$IDE_DRIVER" == "docker-compose" ]]; then
 
   # construct docker-compose command
   docker_compose_command=$(construct_docker_compose_run_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$run_interactively" "$IDE_WORK" "$IDE_IDENTITY"  "$command" "$ide_docker_compose_options")
-  docker_compose_stop_command=$(construct_docker_compose_stop_command "$env_file" "$run_interactively" "$run_id" "$IDE_WORK" "$IDE_IDENTITY")
-  docker_compose_rm_command=$(construct_docker_compose_rm_command "$env_file" "$run_interactively" "$run_id" "$IDE_WORK" "$IDE_IDENTITY")
+  docker_compose_stop_command=$(construct_docker_compose_stop_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$IDE_WORK" "$IDE_IDENTITY")
+  docker_compose_rm_command=$(construct_docker_compose_rm_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$IDE_WORK" "$IDE_IDENTITY")
   echo -e "docker-compose run command will be:\n${GREEN}${docker_compose_command}${NC}"
+  log_debug "docker-compose stop command will be:\n${GREEN}${docker_compose_stop_command}${NC}"
+  log_debug "docker-compose rm command will be:\n${GREEN}${docker_compose_rm_command}${NC}"
 
   on_control_c()
   {
       log_error "Ctrl+c caught by IDE."
-      log_error "TODO"
+      # No need for additional cleaning, because it is done below and happens
+      # even if not Ctrl+c is pressed.
   }
   trap 'on_control_c' INT
 
@@ -199,13 +205,16 @@ elif [[ "$IDE_DRIVER" == "docker-compose" ]]; then
     if [[ "$run_interactively" == "true" ]]; then
       eval "${docker_compose_command}"
     else
-      # run in the background so that user has a moment to run ctrl+c
-      # until container did not stop
+      # run in the background so that correct exit status (130) is returned
+      # and on_control_c is invoked faster
       eval "${docker_compose_command}" &
       wait
     fi
     exit_status="$?"
+    # even if all the containers are stopped, this won't fail
+    log_debug "Stopping"
     eval "${docker_compose_stop_command}"
+    log_debug "Removing"
     eval "${docker_compose_rm_command}"
     log_debug "ide exit status: $exit_status"
     if [[ "$exit_status" != "0" ]]; then
