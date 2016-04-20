@@ -1,9 +1,65 @@
 # ide - isolated development environment
 
-Build/test/release your software in an isolated environment. Currently only docker
- images are supported to provide such an environment.
+Build/test/release your software in an **isolated, reproducible, well-defined** environment.
+
+This project is more about **conventions and best practices** than actual code.
+
+## TL;DR
+
+Any application should be built/tested by running
+
+```
+git clone <project-url>
+ide <build-command>
+```
+
+**regadless of installed software** on the host where this was called.
+
+`ide` is the *magical* command wrapping `docker` that will
+
+ * fetch development environment image(s)
+ * create environment where development tasks can be executed
+ * mount volumes from host to container(s)
+
+## Use cases
+
+This project will prove to be useful in following cases:
+
+1. You have applications/projects that have complex and/or frequently changing
+development dependencies.
+2. You work on multitude of projects and it is impossible to have all dependencies
+installed on your laptop/workstation.
+3. To ensure developers have the same development tools that CI agents.
+4. To have reproducible builds.
+5. Reduce time needed by developers to setup their development environment to 0.
+
+### Common problems solved
+
+If you apply to IDE conventions, you'll find these, commonly occuring problems
+in all organizations solved:
+
+1. I need to setup my workstation to develop *application X*, how do I do that?
+2. I just developed new feature in *application X* on my laptop, all tests passed,
+but when submitted to CI system, some tests fail.
+3. CI agents are always out of date. They have missing, old or conflicting dependencies installed.
+Someone repeatedly wastes time on provisioning tools to CI agents.
+
+## Requirements and responsibilites
+
+Above benefits sound appealing, but they come at a cost. If you want to
+develop applications IDE-style you'll be committing to:
+
+1. Run **all** your builds in `docker`. By developers and by CI agents.
+2. Version your docker images with all development tools.
+3. In each project there must be `Idefile` which unambiguously points
+a **correct** development environment - The one that is **sufficient for exactly
+this particular commit**.
 
 ## Features (specification)
+
+Currently only docker
+ images are supported to provide such an environment.
+
 1. Run `ide <command>` which runs a docker container and invokes a `command` inside.
 1. Run `ide` which runs a docker container interactively with default (set in
   Dockerfile) command invoked inside.
@@ -74,7 +130,7 @@ The whole configuration is put in `Idefile`. It is an environment variable style
  project.
 
 Supported variables:
-* `IDE_DRIVER`, supported values: docker, docker-compose. Default: docker – will
+* `IDE_DRIVER`, supported values: `docker`, `docker-compose`. Default: docker – will
  run docker run command
 * `IDE_IDENTITY`, what on localhost should be mounted into container as
 `/ide/identity`, defaults to `HOME`
