@@ -6,7 +6,7 @@ This project is more about **conventions and best practices** than actual code.
 
 ## TL;DR
 
-Any application should be built/tested by running
+Any application should be built/tested by running:
 
 ```
 git clone <project-url>
@@ -16,14 +16,13 @@ ide <build-command>
 **regadless of installed software** on the host where this was called.
 
 `ide` is the *magical* command wrapping `docker` that will
-
- * fetch development environment image(s)
- * create environment where development tasks can be executed
- * mount volumes from host to container(s)
+   * fetch development environment image(s)
+   * create environment where development tasks can be executed
+   * mount volumes from host to container(s)
 
 ## Use cases
 
-This project will prove to be useful in following cases:
+This project will prove to be useful in the following cases:
 
 1. You have applications/projects that have complex and/or frequently changing
 development dependencies.
@@ -46,13 +45,13 @@ Someone repeatedly wastes time on provisioning tools to CI agents.
 
 ## Requirements and responsibilites
 
-Above benefits sound appealing, but they come at a cost. If you want to
+The above benefits sound appealing, but they come at a cost. If you want to
 develop applications IDE-style you'll be committing to:
 
 1. Run **all** your builds in `docker`. By developers and by CI agents.
 2. Version your docker images with all development tools.
-3. In each project there must be `Idefile` which unambiguously points
-a **correct** development environment - The one that is **sufficient for exactly
+3. In each project there must be an **Idefile** which unambiguously points
+a **correct** development environment - the one that is **sufficient for exactly
 this particular commit**.
 
 ## Features (specification)
@@ -106,16 +105,16 @@ ide rake style:rubocop
 1. IDE pulls rubyide:0.1.0.
 1. IDE decides which environment variables must be preserved into docker container
  and which must be escaped with a prefix `IDE_`. They are saved to a file e.g.
- `/tmp/ide/environment-2016-02-08_17-56-19`.
+ `/tmp/ide/environment-2016-02-08_17-56-19-78638303`.
 1. IDE creates a container from rubyide:0.1.0 image with the following command:
-```
-docker run --rm -v ${IDE_WORK}:/ide/work -v ${IDE_IDENTITY}:/ide/identity \
-  --env-file /tmp/ide/environment-2016-02-08_17-56-19 ${IDE_DOCKER_IMAGE} \
-  "rake style:rubocop"
-```
+  ```
+  docker run --rm -v ${IDE_WORK}:/ide/work -v ${IDE_IDENTITY}:/ide/identity \
+    --env-file /tmp/ide/environment-2016-02-08_17-56-19-78638303 ${IDE_DOCKER_IMAGE} \
+    "rake style:rubocop"
+  ```
   If your terminal was running interactively, then `-ti` is added to `docker run`
   command.
-1. IDE runs rake style:rubocop in the container in the /ide/work directory.
+1. IDE runs `rake style:rubocop` in the container in the `/ide/work` directory.
 
 For debug output set `IDE_LOG_LEVEL=debug`.
 
@@ -125,7 +124,7 @@ Current implementation limitations:
 * works only on Linux.
 
 ### Configuration
-The whole configuration is put in `Idefile`. It is an environment variable style
+The whole configuration is put in an Idefile. It is an environment variable style
  file (e.g `IDE_DRIVER=docker`). It should be put in a root directory of your
  project.
 
@@ -136,9 +135,9 @@ Supported variables:
 `/ide/identity`, defaults to `HOME`
 * `IDE_WORK`, what on localhost should be mounted into container as
 `/ide/work`, this is your working copy, your project repository;
-defaults to current directory. Thanks to this, a container can see your
-working copy so that is has code to work on, and you can see any container's
-work result (code changes).
+defaults to current directory. Thanks to this, your project's code is visible
+inside the container (so its has code to work on) and you can see any container's
+ work result (code changes).
 * variables only for **docker driver**:
   * `IDE_DOCKER_IMAGE`, the only required setting, docker image (or in the future
    maybe openstack image) to use
@@ -153,6 +152,14 @@ work result (code changes).
    command. This is a fallback, because I can’t predict all the ide usage but I
    think such a fallback will be needed. Use it e.g. to set `--service-ports`.
 
+#### Docker driver example configuration
+Idefile:
+```
+IDE_DOCKER_IMAGE="docker-registry.ai-traders.com/ideide:0.1.0"
+IDE_DOCKER_OPTIONS="--privileged"
+```
+
+#### Docker-compose driver example configuration
 Example Idefile for docker-compose driver:
 ```bash
 IDE_DRIVER="docker-compose"
@@ -470,11 +477,11 @@ $ rake itest:test_gitide
 The `Rakefile.rb` contains guidelines how to install testing software. If you wish,
  you can invoke them without rake.
 
-Git branches apply as in AI-Traders cookbooks or gems: create your feature branch
- from master and if you are ready to have it ci tested, merge your feature branch
- onto ci branch. Then work on ci branch until all tests on ci are passed.
+**Should you contribute a PR, just create your feature branch from master.**
+
+Git branching that leads to new release: create your feature branch(es) from master
+ and if you are ready to have it ci-tested, merge your feature branch(es)
+ onto ci branch. Then, work on ci branch until all tests on ci are passed.
 
 ### TODOs
 1. Apply https://github.com/progrium/bashstyle style guide.
-1. Maybe do not use Rubyide to release IDE? This demands implementing OVersion
- in bash. And not using gitrake gem.
