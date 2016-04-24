@@ -221,7 +221,9 @@ Or just do what [install.sh](./install.sh) says or use [ide cookbook](http://git
 
 ## How to create ide Docker image?
 *This is a quite long documentation. You can skip it and go ahead to examples:
- [gitide](http://gitlab.ai-traders.com/ide/docker-gitide) (no cookbook) or [chefide](http://gitlab.ai-traders.com/chef/docker-chefide) (with cookbook)*
+ [gitide](https://github.com/ai-traders/docker-gitide) (no cookbook) or
+ [chefide](http://gitlab.ai-traders.com/chef/docker-chefide) (with cookbook),
+ some images or test tools are not open source (yet)*
 
 Frequently evolving IDE images are very ok. You should not just start using new
  tools without building and testing new dev image first.
