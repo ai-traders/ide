@@ -487,3 +487,7 @@ Git branching that leads to new release: create your feature branch(es) from mas
 
 ### TODOs
 1. Apply https://github.com/progrium/bashstyle style guide.
+
+## License
+
+This project is licensed under the [GNU Lesser General Public License v3.0](http://choosealicense.com/licenses/lgpl-3.0/) license.
