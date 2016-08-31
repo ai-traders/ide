@@ -1,0 +1,10 @@
+FROM alpine:3.4
+
+# Test-Kitchen needs bash to login into the container.
+# That will install packages running first apk update and then rm -rf /var/cache/apk/*
+RUN apk add --no-cache bash git
+RUN git clone https://github.com/sstephenson/bats.git && bats/install.sh /usr/local
+
+# make ide scripts available in Docker build context, so that we can
+# install them later (using install.sh)
+COPY src /tmp/ide_image_scripts_src

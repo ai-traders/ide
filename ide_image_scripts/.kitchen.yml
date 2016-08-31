@@ -1,0 +1,22 @@
+---
+provisioner:
+  name: dummy
+
+platforms:
+  - name: docker
+    transport:
+      name: docker_cli
+    driver:
+      name: docker_cli
+    driver_config:
+      # make it a long running container:
+      command: /bin/sh
+      build_context: true
+
+suites:
+  - name: default
+    driver_config:
+      container_name: kt-ide-scripts-default
+      volume:
+        - <%= File.dirname(__FILE__) %>/test/integration/dummy_work:/ide/work
+        - <%= File.dirname(__FILE__) %>/test/integration/default/bats:/tmp/bats

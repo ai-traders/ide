@@ -1,3 +1,4 @@
 test/gitide-usage/work/**
 test/docker-compose/default/work/**
 tmp_env
+**/*/.kitchen

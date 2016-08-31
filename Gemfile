@@ -1,5 +1,4 @@
-# source 'https://rubygems.org'
-source 'http://rubygems-cache.ai-traders.com'
+source 'https://rubygems.org'
 
 source 'http://gems.ai-traders.com/' do
   gem 'git'
