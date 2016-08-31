@@ -20,3 +20,11 @@ suites:
       volume:
         - <%= File.dirname(__FILE__) %>/test/integration/dummy_work:/ide/work
         - <%= File.dirname(__FILE__) %>/test/integration/default/bats:/tmp/bats
+  - name: ssh
+    driver_config:
+      container_name: kt-ide-scripts-ssh
+      volume:
+        - <%= File.dirname(__FILE__) %>/test/integration/dummy_work:/ide/work
+        - <%= File.dirname(__FILE__) %>/test/integration/ssh/bats:/tmp/bats
+        - <%= File.dirname(__FILE__) %>/test/integration/ssh/30-copy-ssh-configs.sh:/etc/ide.d/30-copy-ssh-configs.sh
+        - <%= File.dirname(__FILE__) %>/test/integration/ssh/dummy_identity:/ide/identity
