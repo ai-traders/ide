@@ -98,6 +98,31 @@
       ]
     },
     {
+      "name" : "ide_image_scripts_test",
+      "jobs" : [
+        {
+          "name" : "test",
+          "resources" : ["docker", "small"],
+          "tasks" : [
+            {
+              "type": "plugin",
+              "run_if": "passed",
+              "configuration": [
+                {
+                  "key": "script",
+                  "value": "ide --idefile ChefIdefile \"cd ide_image_scripts && chef exec bundle install && chef exec bundle exec rake test_ide_scripts\""
+                }
+              ],
+              "plugin_configuration": {
+                "id": "script-executor",
+                "version": "1"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name" : "itest",
       "jobs" : [
         {
