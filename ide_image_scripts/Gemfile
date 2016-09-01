@@ -1,5 +1,6 @@
 source 'https://rubygems.org'
 
 gem 'test-kitchen'
-gem 'kitchen-docker_cli'
+gem 'kitchen-docker_cli', git: 'https://github.com/xmik/kitchen-docker_cli.git',
+  branch: 'build-context-dockerfile'
 gem 'rake'

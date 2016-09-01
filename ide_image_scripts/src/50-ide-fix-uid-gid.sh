@@ -8,8 +8,8 @@
 
 # This is the directory we expect to be mounted as docker volume.
 # From that directory we know uid and gid.
-ide_home="/home/ide"
 ide_work="/ide/work"
+ide_home="/home/ide"
 owner_username="ide"
 owner_groupname="ide"
 
@@ -50,8 +50,10 @@ if ! $ret; then
     exit 1;
 fi
 
-newuid=$(ls --numeric-uid-gid -d "$ide_work" | awk '{ print $3 }')
-newgid=$(ls --numeric-uid-gid -d "$ide_work" | awk '{ print $4 }')
+# use -n option which is the same as --numeric-uid-gid on Debian/Ubuntu,
+# but on Alpine, there is no --numeric-uid-gid option
+newuid=$(ls -n -d "$ide_work" | awk '{ print $3 }')
+newgid=$(ls -n -d "$ide_work" | awk '{ print $4 }')
 
 usermod -u "$newuid" "$owner_username"
 groupmod -g "$newgid" "$owner_groupname"

@@ -3,7 +3,7 @@ provisioner:
   name: dummy
 
 platforms:
-  - name: docker
+  - name: ubuntu
     transport:
       name: docker_cli
     driver:
@@ -12,17 +12,28 @@ platforms:
       # make it a long running container:
       command: /bin/sh
       build_context: true
+      image: ubuntu:14.04.2
+      dockerfile: DockerfileUbuntu
+  - name: alpine
+    transport:
+      name: docker_cli
+    driver:
+      name: docker_cli
+    driver_config:
+      # make it a long running container:
+      command: /bin/sh
+      build_context: true
+      image: alpine:3.4
+      dockerfile: DockerfileAlpine
 
 suites:
   - name: default
     driver_config:
-      container_name: kt-ide-scripts-default
       volume:
         - <%= File.dirname(__FILE__) %>/test/integration/dummy_work:/ide/work
         - <%= File.dirname(__FILE__) %>/test/integration/default/bats:/tmp/bats
   - name: ssh
     driver_config:
-      container_name: kt-ide-scripts-ssh
       volume:
         - <%= File.dirname(__FILE__) %>/test/integration/dummy_work:/ide/work
         - <%= File.dirname(__FILE__) %>/test/integration/ssh/bats:/tmp/bats
