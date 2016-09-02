@@ -1,3 +1,11 @@
+# 0.5.0 (2 Sep 2016)
+
+* #9728 add scripts to help make IDE docker image
+* use ideide:1.0.1 docker image to test IDE (instead of 3 different, 2 of them
+  private docker images)
+* replace 2 InnerRakefiles and Rakefile with 2 Rakefiles
+* update gems dependencies
+
 # 0.4.4 (11 Mar 2016)
 
 * do not `git push` to ci branch when bumping version or else CI

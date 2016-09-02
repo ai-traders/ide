@@ -22,11 +22,3 @@ task :test_ide_scripts do
     instance.destroy()
   end
 end
-
-# In order to run each test suite manually and separatelly, example for 1 suite:
-# ide --idefile ChefIdefile # we need ruby + docker
-# cd ide_image_scripts
-# chef exec bundle install
-# chef exec bundle exec kitchen create default
-# chef exec bundle exec kitchen exec default -c "bats /tmp/bats/"
-# chef exec bundle exec kitchen destroy default

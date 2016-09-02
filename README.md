@@ -43,7 +43,7 @@ but when submitted to CI system, some tests fail.
 3. CI agents are always out of date. They have missing, old or conflicting dependencies installed.
 Someone repeatedly wastes time on provisioning tools to CI agents.
 
-## Requirements and responsibilites
+## Requirements and responsibilities
 
 The above benefits sound appealing, but they come at a cost. If you want to
 develop applications IDE-style you'll be committing to:
@@ -93,7 +93,7 @@ Without setting a `COMMAND`, a docker container will be run with default
 
 Example: keep an `./Idefile`, e.g. like this:
 ```
-IDE_DOCKER_IMAGE="rubyide:0.1.0"
+IDE_DOCKER_IMAGE="ideide:1.0.0"
 ```
 and then run:
 ```bash
@@ -101,12 +101,12 @@ ide rake style:rubocop
 ```
 
 ### What happens
-1. IDE determines that docker image rubyide:0.1.0 is needed
-1. IDE pulls rubyide:0.1.0.
+1. IDE determines that docker image ideide:1.0.0 is needed
+1. IDE pulls ideide:1.0.0.
 1. IDE decides which environment variables must be preserved into docker container
  and which must be escaped with a prefix `IDE_`. They are saved to a file e.g.
  `/tmp/ide/environment-2016-02-08_17-56-19-78638303`.
-1. IDE creates a container from rubyide:0.1.0 image with the following command:
+1. IDE creates a container from ideide:1.0.0 image with the following command:
   ```
   docker run --rm -v ${IDE_WORK}:/ide/work -v ${IDE_IDENTITY}:/ide/identity \
     --env-file /tmp/ide/environment-2016-02-08_17-56-19-78638303 ${IDE_DOCKER_IMAGE} \
@@ -155,7 +155,7 @@ inside the container (so its has code to work on) and you can see any container'
 #### Docker driver example configuration
 Idefile:
 ```
-IDE_DOCKER_IMAGE="docker-registry.ai-traders.com/ideide:0.1.0"
+IDE_DOCKER_IMAGE="docker-registry.ai-traders.com/ideide:1.0.0"
 IDE_DOCKER_OPTIONS="--privileged"
 ```
 
@@ -221,9 +221,12 @@ Or just do what [install.sh](./install.sh) says or use [ide cookbook](http://git
 
 ## How to create ide Docker image?
 *This is a quite long documentation. You can skip it and go ahead to examples:
- [gitide](https://github.com/ai-traders/docker-gitide) (no cookbook) or
- [chefide](http://gitlab.ai-traders.com/chef/docker-chefide) (with cookbook),
+ [gitide](https://github.com/ai-traders/docker-gitide) or
+ [ideide](https://github.com/ai-traders/docker-ideide),
  some images or test tools are not open source (yet)*
+
+There is an `ide_image_scripts/install.sh` script which helps create ide Docker
+ image. See: `ide_image_scripts/Readme.md`.
 
 Frequently evolving IDE images are very ok. You should not just start using new
  tools without building and testing new dev image first.
@@ -348,7 +351,7 @@ Thanks to ENTRYPOINT taking care of all configuration, secrets, ownership, curre
  directory, the CMD can be as simple as possible, as if you ran it on fully
  provisioned instance. Example: `rake style:rubocop` or some mono command.
 
-Such a docker image can be ran:
+Such a docker image can be run:
  * **not-interactively**: `docker run --rm -v ${PWD}/test/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.2.0 "git clone git@git.ai-traders.com:edu/bash.git && ls -la bash"`
  * **interactively**: `docker run -ti --rm -v ${PWD}/test/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.2.0`
  * **interactively**: `docker run -ti --rm -v ${PWD}/test/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.2.0 "env && /bin/bash"`
@@ -471,10 +474,11 @@ ide image and mounting it this way would shadow all the provisioned files.
 ## Development
 There is a [Rakefile.rb](./Rakefile.rb) and rake tasks to be used:
 ```
-$ rake style
-$ rake unit
-$ rake itest:test_gitide_dryrun
-$ rake itest:test_gitide
+$ ide rake style
+$ ide rake unit
+$ ide rake itest:test_image
+$ ide rake itest:test_install
+$ ide "cd ide_image_scripts && bundle install && bundle exec rake test_ide_scripts"
 ```
 The `Rakefile.rb` contains guidelines how to install testing software. If you wish,
  you can invoke them without rake.
