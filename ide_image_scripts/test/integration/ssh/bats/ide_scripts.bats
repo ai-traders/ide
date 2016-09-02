@@ -77,8 +77,10 @@ load '/bats-assert/load.bash'
 @test "/usr/bin/entrypoint.sh returns 0" {
   run /usr/bin/entrypoint.sh whoami 2>&1
   assert_equal "$status" 0
-  assert_line --index 1 --partial "ide init finished"
-  assert_line --index 2 "ide"
+  # do not care which line returns those strings, sometimes there is
+  # additional line: "usermod: no changes"
+  assert_line --partial "ide init finished"
+  assert_line "ide"
 }
 # secret provided thanks to the custom configuration file
 @test "/home/ide/.ssh/id_rsa exists and is a file" {
