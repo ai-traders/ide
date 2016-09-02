@@ -1,5 +1,5 @@
 alpine:
-  image: "alpine:3.2"
+  image: "alpine:3.4"
   entrypoint: ["/bin/sh", "-c"]
   command: ["while true; do sleep 1d; done;"]
   # Uncomment this if you want to test with short running command.
@@ -9,7 +9,7 @@ alpine:
   # remove all the containers).
   # command: ["true"]
 default:
-  image: "docker-registry.ai-traders.com/gitide:0.2.0"
+  image: "dummyide:0.0.1"
   links:
   - alpine
   volumes:

@@ -52,9 +52,19 @@ namespace 'itest' do
     end
   end
 
+  # this is needed to run all the below tasks
+  task :build_dummyide do
+    FileUtils.rm_rf('test/docker-dummyide/src')
+    FileUtils.cp_r("#{File.dirname(__FILE__)}/ide_image_scripts/src",
+      'test/docker-dummyide/src')
+    Dir.chdir('test/docker-dummyide') do
+      Rake.sh('docker build -t dummyide:0.0.1 .')
+    end
+  end
+
   task :test_docker_dryrun do
     puts '----------------------------------------------------------'.cyan
-    Dir.chdir('./test/docker/gitide-usage') do
+    Dir.chdir('./test/docker/dummyide-usage') do
       # with command
       Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --dryrun --force_not_interactive echo sth')
       # no command
@@ -63,12 +73,9 @@ namespace 'itest' do
   end
   task :test_docker do
     puts '----------------------------------------------------------'.cyan
-    if File.directory?('./test/docker/gitide-usage/work/bash')
-      FileUtils.rm_r('./test/docker/gitide-usage/work/bash')
-    end
-    Dir.chdir('./test/docker/gitide-usage') do
+    Dir.chdir('./test/docker/dummyide-usage') do
       Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --force_not_interactive '\
-        '"git clone git@git.ai-traders.com:edu/bash.git && ls -la bash && pwd"')
+        '"bash --version && pwd"')
     end
   end
   desc 'Test that IDE preserves not 0 exit status'
@@ -76,7 +83,7 @@ namespace 'itest' do
     puts '----------------------------------------------------------'.cyan
     rescued = false
     begin
-    Dir.chdir('./test/docker/gitide-usage') do
+    Dir.chdir('./test/docker/dummyide-usage') do
       # exit with some weird exit status
       Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --force_not_interactive '\
         '"echo abc && exit 164"')
@@ -107,7 +114,7 @@ namespace 'itest' do
     end
     Dir.chdir('./test/docker-compose/default') do
       Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --force_not_interactive '\
-        '"git clone git@git.ai-traders.com:edu/bash.git && ls -la bash && pwd"')
+        '"bash --version && pwd"')
     end
   end
   desc 'Test that IDE preserves not 0 exit status'
@@ -145,13 +152,19 @@ namespace 'go' do
   end
   namespace 'itest' do
     task :test_image do
+      Rake::Task['itest:build_dummyide'].invoke
       Rake::Task['itest:test_docker_dryrun'].invoke
       Rake::Task['itest:test_docker'].invoke
+      Rake::Task['itest:test_docker_fail'].invoke
       Rake::Task['itest:test_docker_compose_dryrun'].invoke
       Rake::Task['itest:test_docker_compose'].invoke
+      Rake::Task['itest:test_docker_compose_fail'].invoke
     end
     task :test_install do
       Rake::Task['itest:test_install'].invoke
+    end
+    task :test_local_install do
+      Rake::Task['itest:test_local_install'].invoke
     end
   end
 end

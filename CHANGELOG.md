@@ -6,6 +6,8 @@
 * replace 2 InnerRakefiles and Rakefile with 2 Rakefiles
 * update gems dependencies
 * #9740 add local_install.sh
+* #9749 do not depend on external and private docker images: gitide, build dummyide
+ instead, for testing purposes only
 
 # 0.4.4 (11 Mar 2016)
 

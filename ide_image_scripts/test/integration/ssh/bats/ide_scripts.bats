@@ -9,7 +9,7 @@ load '/bats-assert/load.bash'
   assert_equal "$status" 0
 }
 
-# all the ide scripts are set -- only default scripts in this tests suite
+# all the ide scripts are set -- NOT only default scripts in this tests suite
 @test "/usr/bin/entrypoint.sh exists and is a file" {
   run test -f /usr/bin/entrypoint.sh
   assert_equal "$status" 0

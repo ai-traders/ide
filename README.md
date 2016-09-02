@@ -167,14 +167,14 @@ IDE_DRIVER="docker-compose"
 Example docker-compose.yml version 1:
 ```yml
 alpine:
-  image: "alpine:3.2"
+  image: "alpine:3.4"
   entrypoint: ["/bin/sh", "-c"]
   # Uncomment this if you want to test with long running command
   # I chose short running command because it is faster to stop this container.
   # command: ["while true; do sleep 1d; done;"]
   command: ["true"]
 default:
-  image: "docker-registry.ai-traders.com/gitide:0.2.0"
+  image: "dummyide:0.0.1"
   links:
   - alpine
   volumes:
@@ -193,14 +193,14 @@ Example docker-compose.yml version 2:
 version: '2'
 services:
   alpine:
-    image: "alpine:3.2"
+    image: "alpine:3.4"
     entrypoint: ["/bin/sh", "-c"]
     # Uncomment this if you want to test with long running command
     # I chose short running command because it is faster to stop this container.
     # command: ["while true; do sleep 1d; done;"]
     command: ["true"]
   default:
-    image: "docker-registry.ai-traders.com/gitide:0.2.0"
+    image: "dummyide:0.0.1"
     depends_on:
     - alpine
     volumes:
@@ -362,9 +362,9 @@ Thanks to ENTRYPOINT taking care of all configuration, secrets, ownership, curre
  provisioned instance. Example: `rake style:rubocop` or some mono command.
 
 Such a docker image can be run:
- * **not-interactively**: `docker run --rm -v ${PWD}/test/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.2.0 "git clone git@git.ai-traders.com:edu/bash.git && ls -la bash"`
- * **interactively**: `docker run -ti --rm -v ${PWD}/test/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.2.0`
- * **interactively**: `docker run -ti --rm -v ${PWD}/test/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro gitide:0.2.0 "env && /bin/bash"`
+ * **not-interactively**: `docker run --rm -v ${PWD}/test/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro dummyide:0.0.1 "bash --version"`
+ * **interactively**: `docker run -ti --rm -v ${PWD}/test/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro dummyide:0.0.1`
+ * **interactively**: `docker run -ti --rm -v ${PWD}/test/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro dummyide:0.0.1 "env && /bin/bash"`
 
 ### Docker in Docker
 If your ide docker image should have docker daemon:
