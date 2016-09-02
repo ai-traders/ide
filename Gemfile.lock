@@ -1,9 +1,9 @@
 GEM
-  remote: http://rubygems-cache.ai-traders.com/
+  remote: https://rubygems.org/
   remote: http://gems.ai-traders.com/
   specs:
     addressable (2.4.0)
-    ait-configurator (0.1.2)
+    ait-configurator (0.1.3)
       psych (~> 2.0.5)
     ast (2.2.0)
     astrolabe (1.3.1)
@@ -11,41 +11,41 @@ GEM
     blockenspiel (0.5.0)
     boson (1.3.0)
     diff-lcs (1.2.5)
-    diplomat (0.13.1)
+    diplomat (1.0.0)
       faraday (~> 0.9)
-      json (~> 1.8)
+      json
     excon (0.45.4)
     faraday (0.9.2)
       multipart-post (>= 1.2, < 3)
     gem-release (0.7.3)
-    gemrake (0.3.0)
+    gemrake (0.3.5)
       gem-release (= 0.7.3)
-      gitrake (>= 0.2.2)
+      gitrake (>= 0.3.0)
       oversion (>= 0.3.0)
       rake (>= 10.4.2)
-      repocritic (>= 1.0.0)
+      repocritic (>= 1.0.2)
       rspec (>= 3.3.0)
       rubocop (>= 0.31.0)
       stickler (>= 2.4.2)
     gherkin (2.12.2)
       multi_json (~> 1.3)
     git (100.2.9.1)
-    gitrake (0.2.5)
+    gitrake (0.3.0)
       git (= 100.2.9.1)
       oversion (>= 0.3.0)
       rake (>= 10.4.2)
       repocritic (>= 1.0.0)
       versionomy (= 0.5.0)
-    json (1.8.3)
+    json (2.0.2)
     little-plugger (1.1.4)
     logging (1.8.2)
       little-plugger (>= 1.1.3)
       multi_json (>= 1.8.4)
-    multi_json (1.11.2)
+    multi_json (1.12.1)
     multipart-post (2.0.0)
-    oversion (0.3.0)
-      ait-configurator (~> 0.1.2)
-      diplomat (= 0.13.1)
+    oversion (0.3.2)
+      ait-configurator (>= 0.1.2)
+      diplomat (>= 0.13.1)
     parser (2.3.0.1)
       ast (~> 2.2)
     powerpack (0.1.1)
@@ -55,7 +55,7 @@ GEM
       rack
     rainbow (2.0.0)
     rake (10.5.0)
-    repocritic (1.0.0)
+    repocritic (1.0.2)
       boson (= 1.3.0)
       gherkin (~> 2.11)
       oversion (>= 0.3.0)
@@ -107,4 +107,4 @@ DEPENDENCIES
   repocritic!
 
 BUNDLED WITH
-   1.10.5
+   1.12.5
