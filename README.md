@@ -232,7 +232,8 @@ If you want to install from a specified tag, e.g. `0.5.0`, add: `-b 0.5.0` optio
 ## How to create ide Docker image?
 *This is a quite long documentation. You can skip it and go ahead to examples:
  [gitide](https://github.com/ai-traders/docker-gitide) or
- [ideide](https://github.com/ai-traders/docker-ideide),
+ [ideide](https://github.com/ai-traders/docker-ideide)
+ [dummyide](test/docker-dummyide),
  some images or test tools are not open source (yet)*
 
 There is an `ide_image_scripts/install.sh` script which helps create ide Docker
@@ -274,7 +275,7 @@ If your docker image already has `/ide/work` or `/ide/identity`, they will
 #### Configuration and secrets
 * Map any settings and secrets files from IDE_IDENTITY into `/home/ide/`. Do it
  by **copying** and changing ownership and setting permissions to `ide` user.
- Do it in **`/usr/bin/ide-setup-identity.sh` script**.
+ Do it e.g. in **`/etc/ide.d/scripts/20-ide-setup-identity.sh` script**.
 * If you want, you can map any files from `${IDE_IDENTITY}/.bashrc.d/` and from
  `${IDE_IDENTITY}/profile.d/`, because your
  entrypoint can ensure to run in login shell. If your host's shell is interactive,
@@ -299,7 +300,7 @@ If your docker image already has `/ide/work` or `/ide/identity`, they will
  Thanks to [Tom's docker-uid-gid-fix](https://github.com/tomzo/docker-uid-gid-fix)
  project, we are armed with PoC how to achieve this. We change the uid and gid of
  `ide` user with the destined uid and gid.
- Do it in `/usr/bin/ide-fix-uid-gid.sh` script.
+ This is done by `/etc/ide.d/scripts/50-ide-fix-uid-gid.sh` script.
 * When docker image already contains files owned by `ide` user,
   (e.g. `/ide/home`), then after changing uid and gid we have to search for all
   those files and update their ownership.
@@ -307,54 +308,33 @@ If your docker image already has `/ide/work` or `/ide/identity`, they will
 
 #### ENTRYPOINT
 The entrypoint should:
-* invoke `ide-setup-identity.sh` and `ide-fix-uid-gid.sh` scripts.
+* source any scripts from `/etc/ide.d/variables/*`.
+* invoke any scripts from `/etc/ide.d/scripts/*`.
 * enable end user to run the docker image interactively or not.
 * change the current directory into `/ide/work` (this may be done in
  `/home/ide/.profile`).
+* it could say which docker image name and tag it runs in.
 
 ##### Examples
-You can choose `su` command to change user from root to ide. Disadvantage: the only possible command to invoke interactively is `/bin/bash`
- (https://aitraders.tpondemand.com/entity/8189 ). Example entrypoint.sh with `su`:
+You can choose `su` command to change user from root to ide. Disadvantage: the
+ only possible command to invoke interactively is `/bin/bash`
+ (https://aitraders.tpondemand.com/entity/8189 ). Example `su` command:
 ```bash
-#!/bin/bash
-set -e
-/usr/bin/ide-setup-identity.sh
-/usr/bin/ide-fix-uid-gid.sh
-
-if [ -t 0 ] ; then
-    echo "ide init finished (interactive shell)"
-    set +e
-    # No "su -c" option
-    su - ide
-else
-    echo "ide init finished (not interactive shell)"
-    su - ide -c "$@"
-fi
+su - ide -c "$@"
 ```
 
-  Prefer `sudo` instead, but do remember that **`sudo` must be installed in
-  the docker image**. Example entrypoint.sh:
+Prefer `sudo` instead, but do remember that **`sudo` must be installed in
+the docker image**. Example `sudo` command:
 ```bash
-#!/bin/bash
-set -e
-/usr/bin/ide-setup-identity.sh
-/usr/bin/ide-fix-uid-gid.sh
-
-if [ -t 0 ] ; then
-    # interactive shell
-    echo "ide init finished (interactive shell)"
-    set +e
-else
-    # not interactive shell
-    echo "ide init finished (not interactive shell)"
-    set -e
-fi
-
 sudo -E -H -u ide /bin/bash -lc "$@"
 ```
 
-It would be nice if entrypoint said, which docker image name and tag it uses
- (gitide does that).
+Working example is in [entrypoint.sh](ide_image_scripts/src/entrypoint.sh)
+
+If you want to run your ide docker image without using its default entrypoint, run e.g.:
+```
+docker run --rm -ti --entrypoint=/bin/bash dummyide:0.0.1 -c "/bin/bash"
+```
 
 #### CMD
 Thanks to ENTRYPOINT taking care of all configuration, secrets, ownership, current
@@ -381,6 +361,8 @@ E: Sub-process /usr/bin/dpkg returned an error code (2)
 Examples are: chefide and ideide.
 
 ### IDE Docker image release cycle
+
+*This is strongly work in progress and below information is obsolete*
 
 The release cycle is very similar to the [usual docker image release cycle](http://gitlab.ai-traders.com/lab/docs/blob/master/ReleaseCycle/DockerImage.md),
  but there are more tests.
@@ -486,7 +468,7 @@ There is a [Rakefile.rb](./Rakefile.rb) and rake tasks to be used:
 ```
 $ ide rake style
 $ ide rake unit
-$ ide rake itest:test_image
+$ ide rake go:itest:test_image
 $ ide rake itest:test_install
 $ ide rake itest:test_local_install
 $ ide "cd ide_image_scripts && bundle install && bundle exec rake test_ide_scripts"
