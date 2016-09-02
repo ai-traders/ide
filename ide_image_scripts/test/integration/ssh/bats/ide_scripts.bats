@@ -55,7 +55,23 @@ load '/bats-assert/load.bash'
   assert_equal "$status" 0
   assert_equal "$output" "755"
 }
-# custom configuration file
+
+# All the ide scripts can be executed without error and many times.
+# Do not run /etc/ide.d/scripts/* on their own here,
+# because it needs variables which are sourced by /usr/bin/entrypoint.sh.
+@test "/usr/bin/entrypoint.sh returns 0" {
+  run /usr/bin/entrypoint.sh whoami 2>&1
+  assert_equal "$status" 0
+  # do not test which line returns those strings, sometimes there is
+  # additional line: "usermod: no changes"
+  assert_line --partial "ide init finished"
+  assert_line "ide"
+}
+
+# This must run after entrypoint.sh, because at first 30-copy-ssh-configs.sh
+# may be owned by some uid:gid which does not exist in current env (ideide)
+# but exists on host (on go-agent) and that uid:gid is not 1000:1000.
+# Custom configuration file
 @test "/etc/ide.d/scripts/30-copy-ssh-configs.sh exists and is a file" {
   run test -f /etc/ide.d/scripts/30-copy-ssh-configs.sh
   assert_equal "$status" 0
@@ -71,17 +87,6 @@ load '/bats-assert/load.bash'
   assert_equal "$output" "775"
 }
 
-# All the ide scripts can be executed without error and many times.
-# Do not run /etc/ide.d/scripts/* on their own here,
-# because it needs variables which are sourced by /usr/bin/entrypoint.sh.
-@test "/usr/bin/entrypoint.sh returns 0" {
-  run /usr/bin/entrypoint.sh whoami 2>&1
-  assert_equal "$status" 0
-  # do not test which line returns those strings, sometimes there is
-  # additional line: "usermod: no changes"
-  assert_line --partial "ide init finished"
-  assert_line "ide"
-}
 # secret provided thanks to the custom configuration file
 @test "/home/ide/.ssh/id_rsa exists and is a file" {
   run test -f /home/ide/.ssh/id_rsa

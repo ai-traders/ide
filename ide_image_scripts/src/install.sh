@@ -14,9 +14,9 @@ script_path=$(readlink -f "$BASH_SOURCE")
 script_dir=$(dirname "${script_path}")
 
 cp "${script_dir}/entrypoint.sh" /usr/bin/entrypoint.sh
-mkdir /etc/ide.d
-mkdir /etc/ide.d/scripts
-mkdir /etc/ide.d/variables
+mkdir -p /etc/ide.d
+mkdir -p /etc/ide.d/scripts
+mkdir -p /etc/ide.d/variables
 # 50 is because user may want to do things before and after home and work
 # directories ownership was fixed. Also user may wish to delete/replace this script.
 cp "${script_dir}/50-ide-fix-uid-gid.sh" /etc/ide.d/scripts/50-ide-fix-uid-gid.sh
