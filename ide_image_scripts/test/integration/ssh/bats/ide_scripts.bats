@@ -68,7 +68,7 @@ load '/bats-assert/load.bash'
 @test "/etc/ide.d/scripts/30-copy-ssh-configs.sh is executable" {
   run stat -c %a /etc/ide.d/scripts/30-copy-ssh-configs.sh
   assert_equal "$status" 0
-  assert_equal "$output" "755"
+  assert_equal "$output" "775"
 }
 
 # All the ide scripts can be executed without error and many times.
@@ -77,7 +77,7 @@ load '/bats-assert/load.bash'
 @test "/usr/bin/entrypoint.sh returns 0" {
   run /usr/bin/entrypoint.sh whoami 2>&1
   assert_equal "$status" 0
-  # do not care which line returns those strings, sometimes there is
+  # do not test which line returns those strings, sometimes there is
   # additional line: "usermod: no changes"
   assert_line --partial "ide init finished"
   assert_line "ide"
