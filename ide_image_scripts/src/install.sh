@@ -20,7 +20,7 @@ mkdir /etc/ide.d/variables
 # 50 is because user may want to do things before and after home and work
 # directories ownership was fixed. Also user may wish to delete/replace this script.
 cp "${script_dir}/50-ide-fix-uid-gid.sh" /etc/ide.d/scripts/50-ide-fix-uid-gid.sh
-cp "${script_dir}/variables.sh" /etc/ide.d/variables/01-variables.sh
+cp "${script_dir}/variables.sh" /etc/ide.d/variables/50-variables.sh
 
 # Add ide user and group
 groupadd --gid 1000 ide
