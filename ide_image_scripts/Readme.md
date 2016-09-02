@@ -12,12 +12,17 @@ The `src/install.sh` script is meant to be invoked inside a docker container
 
 It works on Debian/Ubuntu/Alpine Linux.
 
+Real example: https://github.com/ai-traders/docker-ideide
+
 ### Installation
 ```
-git clone --depth 1 -b 0.5.0 --single-branch  https://github.com/ai-traders/ide.git
+git clone --depth 1 --single-branch  https://github.com/ai-traders/ide.git
 ide/ide_image_scripts/src/install.sh
 rm -r ./ide
 ```
+If you want to install from a specified tag, e.g. `0.5.0`, add: `-b 0.5.0` option
+ to `git clone` command.
+
 On Alpine Linux ignore the: `Creating mailbox file: No such file or directory`
  message.
 
