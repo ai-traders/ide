@@ -41,6 +41,17 @@ namespace 'itest' do
     end
   end
 
+  desc 'Test local_install.sh; do not run on workstation'
+  task :test_local_install do
+    Rake.sh('sudo ./local_install.sh')
+    ide_installed = `ide --version 2>&1`
+    if ide_installed.include?('/usr/bin/ide version')
+      puts 'success, ide is installed'
+    else
+      fail
+    end
+  end
+
   task :test_docker_dryrun do
     puts '----------------------------------------------------------'.cyan
     Dir.chdir('./test/docker/gitide-usage') do

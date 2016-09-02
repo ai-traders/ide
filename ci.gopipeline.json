@@ -146,6 +146,26 @@
           ]
         },
         {
+          "name" : "test_local_install",
+          "resources" : ["docker", "small"],
+          "tasks" : [
+            {
+              "type": "plugin",
+              "run_if": "passed",
+              "configuration": [
+                {
+                  "key": "script",
+                  "value": "ide rake go:itest:test_local_install"
+                }
+              ],
+              "plugin_configuration": {
+                "id": "script-executor",
+                "version": "1"
+              }
+            }
+          ]
+        },
+        {
           "name" : "test_image",
           "resources" : ["build_docker"],
           "tasks" : [

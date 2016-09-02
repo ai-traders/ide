@@ -17,7 +17,7 @@ Real example: https://github.com/ai-traders/docker-ideide
 ### Installation
 ```
 git clone --depth 1 --single-branch  https://github.com/ai-traders/ide.git
-ide/ide_image_scripts/src/install.sh
+./ide/ide_image_scripts/src/install.sh
 rm -r ./ide
 ```
 If you want to install from a specified tag, e.g. `0.5.0`, add: `-b 0.5.0` option

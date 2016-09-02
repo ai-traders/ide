@@ -214,10 +214,20 @@ The same requirements apply as for docker-compose.yml version 1, but here you ca
 
 ## Installation
 ```bash
-sudo bash -c "`curl -L http://gitlab.ai-traders.com/ide/ide/raw/master/install.sh`"
+sudo bash -c "`curl -L https://raw.githubusercontent.com/ai-traders/ide/master/install.sh`"
 ```
 
 Or just do what [install.sh](./install.sh) says or use [ide cookbook](http://gitlab.ai-traders.com/ide/cookbook-ide).
+Or:
+
+```bash
+git clone --depth 1 --single-branch https://github.com/ai-traders/ide.git
+./ide/local_install.sh
+rm -r ./ide
+```
+
+If you want to install from a specified tag, e.g. `0.5.0`, add: `-b 0.5.0` option
+ to `git clone` command.
 
 ## How to create ide Docker image?
 *This is a quite long documentation. You can skip it and go ahead to examples:
@@ -478,6 +488,7 @@ $ ide rake style
 $ ide rake unit
 $ ide rake itest:test_image
 $ ide rake itest:test_install
+$ ide rake itest:test_local_install
 $ ide "cd ide_image_scripts && bundle install && bundle exec rake test_ide_scripts"
 ```
 The `Rakefile.rb` contains guidelines how to install testing software. If you wish,

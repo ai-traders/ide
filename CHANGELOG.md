@@ -5,6 +5,7 @@
   private docker images)
 * replace 2 InnerRakefiles and Rakefile with 2 Rakefiles
 * update gems dependencies
+* #9740 add local_install.sh
 
 # 0.4.4 (11 Mar 2016)
 

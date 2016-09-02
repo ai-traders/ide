@@ -1,6 +1,8 @@
 #!/bin/bash -ex
 
-# if ide is going to be split into more files, see how this is done:
+# Installs IDE.
+
+# If ide is going to be split into more files, see how this is done:
 # https://github.com/rylnd/shpec/blob/master/install.sh
 
 TMPDIR=${TMPDIR:-/tmp}
