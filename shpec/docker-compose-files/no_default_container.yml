@@ -5,7 +5,7 @@ rsync:
   volumes:
   - /ide/work/rsync_target:/docker
 antydefault:
-  image: "docker-registry.ai-traders.com/gitide:0.2.0"
+  image: "dummyide:0.0.1"
   links:
   - rsync
   volumes:

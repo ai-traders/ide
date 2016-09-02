@@ -29,7 +29,7 @@ describe "commandline options"
       assert do_match "$message" "aa does not exist"
     end
     it "exits 0, if --idefile not set and Idefile exists in curent directory"
-      message="$(cd test/docker/gitide-usage && ${IDE_PATH} --dryrun some_command)"
+      message="$(cd test/docker/dummyide-usage && ${IDE_PATH} --dryrun some_command)"
       assert equal "$?" "0"
     end
     it "exits 0, if --idefile set and the file exists"
@@ -47,59 +47,59 @@ describe "commandline options"
   #     it "runs non-interactively if invoked non-interactively"
   #       # do not use \"\" it will not be counted as empty string
   #       # TODO: how to test it? note that I already put test in "/bin/bash -c"
-  #       message="$(/bin/bash -c "cd test/docker/gitide-usage && ${IDE_PATH} --dryrun")"
+  #       message="$(/bin/bash -c "cd test/docker/dummyide-usage && ${IDE_PATH} --dryrun")"
   #       assert equal "$?" "0"
   #       assert do_match "$message" "docker run --rm -v"
-  #       assert do_match "$message" "gitide:0.2.0"
+  #       assert do_match "$message" "dummyide:0.0.1"
   #       # we don't want quotes if $command not set
-  #       assert do_not_match "$message" "gitide:0.2.0 \"\""  #
+  #       assert do_not_match "$message" "dummyide:0.0.1 \"\""  #
   #       assert do_not_match "$message" " -ti"
   #     end
   #     # this fails in ideide, where terminal is non-interactive
   #     # it "runs interactively if invoked interactively"
   #     #   # do not use \"\" it will not be counted as empty string
-  #     #   message="$(cd test/docker/gitide-usage && ${IDE_PATH} --dryrun)"
+  #     #   message="$(cd test/docker/dummyide-usage && ${IDE_PATH} --dryrun)"
   #     #   assert equal "$?" "0"
   #     #   assert do_match "$message" "docker run --rm -v"
-  #     #   assert do_match "$message" " -ti gitide:0.2.0"
+  #     #   assert do_match "$message" " -ti dummyide:0.0.1"
   #     #   # we don't want quotes if $command not set
-  #     #   assert do_not_match "$message" "gitide:0.2.0 \"\""
+  #     #   assert do_not_match "$message" "dummyide:0.0.1 \"\""
   #     # end
   #   end
   #   describe "command set"
   #     it "runs non-interactively if invoked non-interactively"
-  #       message="$(cd test/docker/gitide-usage && ${IDE_PATH} --dryrun some_command)"
+  #       message="$(cd test/docker/dummyide-usage && ${IDE_PATH} --dryrun some_command)"
   #       assert equal "$?" "0"
   #       assert do_match "$message" "docker run --rm -v"
-  #       assert do_match "$message" "gitide:0.2.0 \"some_command \""
+  #       assert do_match "$message" "dummyide:0.0.1 \"some_command \""
   #       # this fails on workstation, where terminal is interactive
   #       assert do_not_match "$message" " -ti"
   #     end
   #     it "runs interactively if invoked interactively"
-  #       message="$(cd test/docker/gitide-usage && ${IDE_PATH} --dryrun some_command)"
+  #       message="$(cd test/docker/dummyide-usage && ${IDE_PATH} --dryrun some_command)"
   #       assert equal "$?" "0"
   #       assert do_match "$message" "docker run --rm -v"
   #       # this probably fails in ideide, where terminal is non-interactive
-  #       assert do_match "$message" " -ti gitide:0.2.0 \"some_command \""
+  #       assert do_match "$message" " -ti dummyide:0.0.1 \"some_command \""
   #     end
   #   end
   # end
   describe "docker driver"
     it "exits 0, if some command set"
       # do not use \"\" it will not be counted as empty string
-      message="$(cd test/docker/gitide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun /bin/bash -c \"aaa\")"
+      message="$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun /bin/bash -c \"aaa\")"
       assert equal "$?" "0"
-      assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
-      assert do_match "$message" "gitide:0.2.0 \"/bin/bash -c \"aaa\"\""
+      assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+      assert do_match "$message" "dummyide:0.0.1 \"/bin/bash -c \"aaa\"\""
     end
     it "exits 0, if no command set"
       # do not use \"\" it will not be counted as empty string
-      message="$(cd test/docker/gitide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun)"
+      message="$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun)"
       assert equal "$?" "0"
-      assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/gitide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
-      assert do_match "$message" "gitide:0.2.0"
+      assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+      assert do_match "$message" "dummyide:0.0.1"
       # we don't want quotes if $command not set
-      assert do_not_match "$message" "gitide:0.2.0 \"\""
+      assert do_not_match "$message" "dummyide:0.0.1 \"\""
     end
     it "exits 0, if complex IDE_WORK and IDE_IDENTITY set"
       # do not use \"\" it will not be counted as empty string
