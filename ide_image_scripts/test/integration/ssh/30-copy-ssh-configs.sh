@@ -5,11 +5,7 @@
 # into ide_home. Fails if any required secret or configuration file is missing.
 ###########################################################################
 
-# This is the directory we expect to be mounted as docker volume.
-# From that directory we mapt configuration and secrets files.
-ide_identity="/ide/identity"
-ide_home="/home/ide"
-ide_work="/ide/work"
+source /etc/ide.d/variables.sh
 
 # 1st directory we need, copy it with all the secrets, particulary id_rsa
 if [ ! -d "${ide_identity}/.ssh" ]; then

@@ -6,8 +6,10 @@
 
 set -e
 
+source /etc/ide.d/variables.sh
+
 # run any additional scripts to setup custom configuration files or secrets
-# or source any files like /etc/docker_metadata.txt or wait for linux daemons
+# or source any files or wait for linux daemons
 for SCRIPT in /etc/ide.d/* ; do
 	if [ -f $SCRIPT -a -x $SCRIPT ] ; then
 		$SCRIPT

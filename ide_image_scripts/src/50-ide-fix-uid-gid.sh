@@ -6,12 +6,7 @@
 # https://github.com/tomzo/docker-uid-gid-fix/blob/master/fix-uid-gid.sh
 ###########################################################################
 
-# This is the directory we expect to be mounted as docker volume.
-# From that directory we know uid and gid.
-ide_work="/ide/work"
-ide_home="/home/ide"
-owner_username="ide"
-owner_groupname="ide"
+source /etc/ide.d/variables.sh
 
 if [ -z "$ide_work" ]; then
   echo "ide_work not specified"
