@@ -5,8 +5,6 @@
 # into ide_home. Fails if any required secret or configuration file is missing.
 ###########################################################################
 
-source /etc/ide.d/variables.sh
-
 # 1st directory we need, copy it with all the secrets, particulary id_rsa
 if [ ! -d "${ide_identity}/.ssh" ]; then
   echo "${ide_identity}/.ssh does not exist"

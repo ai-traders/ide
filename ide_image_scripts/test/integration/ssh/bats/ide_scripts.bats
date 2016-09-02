@@ -33,45 +33,47 @@ load '/bats-assert/load.bash'
   assert_equal "$status" 0
   assert_equal "$output" "root"
 }
-@test "/etc/ide.d/50-ide-fix-uid-gid.sh exists and is a file" {
-  run test -f /etc/ide.d/50-ide-fix-uid-gid.sh
+@test "/etc/ide.d/scripts exists and is a directory" {
+  run test -d /etc/ide.d/scripts
   assert_equal "$status" 0
 }
-@test "/etc/ide.d/50-ide-fix-uid-gid.sh is owned by root" {
-  run stat -c %U /etc/ide.d/50-ide-fix-uid-gid.sh
+@test "/etc/ide.d/variables exists and is a directory" {
+  run test -d /etc/ide.d/variables
+  assert_equal "$status" 0
+}
+@test "/etc/ide.d/scripts/50-ide-fix-uid-gid.sh exists and is a file" {
+  run test -f /etc/ide.d/scripts/50-ide-fix-uid-gid.sh
+  assert_equal "$status" 0
+}
+@test "/etc/ide.d/scripts/50-ide-fix-uid-gid.sh is owned by root" {
+  run stat -c %U /etc/ide.d/scripts/50-ide-fix-uid-gid.sh
   assert_equal "$status" 0
   assert_equal "$output" "root"
 }
-@test "/etc/ide.d/50-ide-fix-uid-gid.sh is executable" {
-  run stat -c %a /etc/ide.d/50-ide-fix-uid-gid.sh
+@test "/etc/ide.d/scripts/50-ide-fix-uid-gid.sh is executable" {
+  run stat -c %a /etc/ide.d/scripts/50-ide-fix-uid-gid.sh
   assert_equal "$status" 0
   assert_equal "$output" "755"
 }
 # custom configuration file
-@test "/etc/ide.d/30-copy-ssh-configs.sh exists and is a file" {
-  run test -f /etc/ide.d/30-copy-ssh-configs.sh
+@test "/etc/ide.d/scripts/30-copy-ssh-configs.sh exists and is a file" {
+  run test -f /etc/ide.d/scripts/30-copy-ssh-configs.sh
   assert_equal "$status" 0
 }
-@test "/etc/ide.d/30-copy-ssh-configs.sh is owned by ide" {
-  run stat -c %U /etc/ide.d/30-copy-ssh-configs.sh
+@test "/etc/ide.d/scripts/30-copy-ssh-configs.sh is owned by ide" {
+  run stat -c %U /etc/ide.d/scripts/30-copy-ssh-configs.sh
   assert_equal "$status" 0
   assert_equal "$output" "ide"
 }
-@test "/etc/ide.d/30-copy-ssh-configs.sh is executable" {
-  run stat -c %a /etc/ide.d/30-copy-ssh-configs.sh
+@test "/etc/ide.d/scripts/30-copy-ssh-configs.sh is executable" {
+  run stat -c %a /etc/ide.d/scripts/30-copy-ssh-configs.sh
   assert_equal "$status" 0
   assert_equal "$output" "755"
 }
 
-# all the ide scripts can be executed without error and many times
-@test "/etc/ide.d/30-copy-ssh-configs.sh returns 0" {
-  run /etc/ide.d/30-copy-ssh-configs.sh
-  assert_equal "$status" 0
-}
-@test "/etc/ide.d/50-ide-fix-uid-gid.sh returns 0" {
-  run /etc/ide.d/50-ide-fix-uid-gid.sh
-  assert_equal "$status" 0
-}
+# All the ide scripts can be executed without error and many times.
+# Do not run /etc/ide.d/scripts/* on their own here,
+# because it needs variables which are sourced by /usr/bin/entrypoint.sh.
 @test "/usr/bin/entrypoint.sh returns 0" {
   run /usr/bin/entrypoint.sh whoami 2>&1
   assert_equal "$status" 0

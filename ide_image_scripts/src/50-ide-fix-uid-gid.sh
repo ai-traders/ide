@@ -6,8 +6,6 @@
 # https://github.com/tomzo/docker-uid-gid-fix/blob/master/fix-uid-gid.sh
 ###########################################################################
 
-source /etc/ide.d/variables.sh
-
 if [ -z "$ide_work" ]; then
   echo "ide_work not specified"
   exit 1;

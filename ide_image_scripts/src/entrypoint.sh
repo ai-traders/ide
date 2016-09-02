@@ -6,11 +6,15 @@
 
 set -e
 
-source /etc/ide.d/variables.sh
-
+# source any additional scripts with environment variables
+for SCRIPT in /etc/ide.d/variables/* ; do
+	if [ -f $SCRIPT -a -x $SCRIPT ] ; then
+		source $SCRIPT
+	fi
+done
 # run any additional scripts to setup custom configuration files or secrets
 # or source any files or wait for linux daemons
-for SCRIPT in /etc/ide.d/* ; do
+for SCRIPT in /etc/ide.d/scripts/* ; do
 	if [ -f $SCRIPT -a -x $SCRIPT ] ; then
 		$SCRIPT
 	fi
