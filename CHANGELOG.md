@@ -1,6 +1,7 @@
 # 0.6.0 (13 Sep 2016)
 
 * #9865; #9707 ide --pull_only option implemented
+* better itests - replaced some rake tasks with shpec integration tests
 
 # 0.5.0 (2 Sep 2016)
 

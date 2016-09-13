@@ -25,11 +25,24 @@ end
 # sudo sh -c "`curl -L https://raw.github.com/rylnd/shpec/master/install.sh`"
 namespace 'unit' do
   task :shpec do
-    Rake.sh("shpec shpec/*.sh")
+    Rake.sh("shpec test/unit/shpec/*.sh")
   end
 end
 
 namespace 'itest' do
+  # this is needed to run shpec itests
+  task :build_dummyide do
+    FileUtils.rm_rf('test/docker-dummyide/src')
+    FileUtils.cp_r("#{File.dirname(__FILE__)}/ide_image_scripts/src",
+      'test/docker-dummyide/src')
+    Dir.chdir('test/docker-dummyide') do
+      Rake.sh('docker build -t dummyide:0.0.1 .')
+    end
+  end
+  task :shpec do
+    Rake.sh("shpec test/integration/shpec/*.sh")
+  end
+
   desc 'Test install.sh; do not run on workstation'
   task :test_install do
     Rake.sh('sudo ./install.sh')
@@ -51,91 +64,6 @@ namespace 'itest' do
       fail
     end
   end
-
-  # this is needed to run all the below tasks
-  task :build_dummyide do
-    FileUtils.rm_rf('test/docker-dummyide/src')
-    FileUtils.cp_r("#{File.dirname(__FILE__)}/ide_image_scripts/src",
-      'test/docker-dummyide/src')
-    Dir.chdir('test/docker-dummyide') do
-      Rake.sh('docker build -t dummyide:0.0.1 .')
-    end
-  end
-
-  task :test_docker_dryrun do
-    puts '----------------------------------------------------------'.cyan
-    Dir.chdir('./test/docker/dummyide-usage') do
-      # with command
-      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --dryrun --force_not_interactive echo sth')
-      # no command
-      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --dryrun --force_not_interactive')
-    end
-  end
-  task :test_docker do
-    puts '----------------------------------------------------------'.cyan
-    Dir.chdir('./test/docker/dummyide-usage') do
-      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --force_not_interactive '\
-        '"bash --version && pwd"')
-    end
-  end
-  desc 'Test that IDE preserves not 0 exit status'
-  task :test_docker_fail do
-    puts '----------------------------------------------------------'.cyan
-    rescued = false
-    begin
-    Dir.chdir('./test/docker/dummyide-usage') do
-      # exit with some weird exit status
-      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --force_not_interactive '\
-        '"echo abc && exit 164"')
-    end
-    rescue
-      rescued = true
-    end
-    if rescued
-      puts 'Succesfully rescued'
-    else
-      fail 'This should fail, but did not!'
-    end
-  end
-
-  task :test_docker_compose_dryrun do
-    puts '----------------------------------------------------------'.cyan
-    Dir.chdir('./test/docker-compose/default') do
-      # with command
-      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --dryrun --force_not_interactive echo sth')
-      # no command
-      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --dryrun --force_not_interactive')
-    end
-  end
-  task :test_docker_compose do
-    puts '----------------------------------------------------------'.cyan
-    if File.directory?('./test/docker-compose/default/work/bash')
-      FileUtils.rm_r('./test/docker-compose/default/work/bash')
-    end
-    Dir.chdir('./test/docker-compose/default') do
-      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --force_not_interactive '\
-        '"bash --version && pwd"')
-    end
-  end
-  desc 'Test that IDE preserves not 0 exit status'
-  task :test_docker_compose_fail do
-    puts '----------------------------------------------------------'.cyan
-    rescued = false
-    begin
-    Dir.chdir('./test/docker-compose/default') do
-      # exit with some weird exit status
-      Rake.sh('IDE_LOG_LEVEL=debug ../../../ide --force_not_interactive '\
-        '"echo abc && exit 164"')
-    end
-    rescue
-      rescued = true
-    end
-    if rescued
-      puts 'Succesfully rescued'
-    else
-      fail 'This should fail, but did not!'
-    end
-  end
 end
 
 # mapped tasks for Go Server, no desc
@@ -153,12 +81,7 @@ namespace 'go' do
   namespace 'itest' do
     task :test_image do
       Rake::Task['itest:build_dummyide'].invoke
-      Rake::Task['itest:test_docker_dryrun'].invoke
-      Rake::Task['itest:test_docker'].invoke
-      Rake::Task['itest:test_docker_fail'].invoke
-      Rake::Task['itest:test_docker_compose_dryrun'].invoke
-      Rake::Task['itest:test_docker_compose'].invoke
-      Rake::Task['itest:test_docker_compose_fail'].invoke
+      Rake::Task['itest:shpec'].invoke
     end
     task :test_install do
       Rake::Task['itest:test_install'].invoke

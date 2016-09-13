@@ -468,9 +468,9 @@ There is a [Rakefile.rb](./Rakefile.rb) and rake tasks to be used:
 ```
 $ ide rake style
 $ ide rake unit
-$ ide rake go:itest:test_image
-$ ide rake itest:test_install
-$ ide rake itest:test_local_install
+$ ide rake itest:shpec
+$ ide rake itest:test_install # do not run on workstation
+$ ide rake itest:test_local_install # do not run on workstation
 $ ide "cd ide_image_scripts && bundle install && bundle exec rake test_ide_scripts"
 ```
 The `Rakefile.rb` contains guidelines how to install testing software. If you wish,
