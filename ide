@@ -259,7 +259,7 @@ elif [[ "$IDE_DRIVER" == "docker-compose" ]]; then
     echo -e "${GREEN}pulling docker images for: ${IDE_DOCKER_COMPOSE_FILE}${NC}"
     # temporarily set 3 variables and create an empty env file,
     # so that docker-compose does not error
-    empty_env_file="$(dirname ${IDE_DOCKER_COMPOSE_FILE})/dummy"
+    empty_env_file="$(dirname "${IDE_DOCKER_COMPOSE_FILE}")/dummy"
     touch "${empty_env_file}"
     IDE_WORK="dummy" IDE_IDENTITY="dummy" ENV_FILE="dummy" docker-compose -f "${IDE_DOCKER_COMPOSE_FILE}" pull
     rm "${empty_env_file}"

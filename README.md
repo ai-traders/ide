@@ -90,10 +90,23 @@ ide [--idefile IDEFILE] [COMMAND]
 Without setting a `COMMAND`, a docker container will be run with default
  docker image command.
 
-
-Example: keep an `./Idefile`, e.g. like this:
+For more CLI options run:
 ```
-IDE_DOCKER_IMAGE="ideide:1.0.0"
+$ ide --help
+Usage: ide [--idefile IDEFILE] COMMAND
+  --help                           Help. Display this message and quit.
+  --version                        Version. Print version number and quit.
+  --idefile                        Specify IDEFILE, default is: ./Idefile
+  --dryrun                         Do not pull docker image, do not run docker run, verify Idefile.
+  --pull_only                      Pull docker image, do not run docker run, do not verify Idefile.
+  --force_not_interactive --not_i  Do not run docker containers interactively.
+```
+
+### Real example
+Keep an `./Idefile`, e.g. like this:
+```
+IDE_DOCKER_IMAGE="xmik/ideide:1.0.3"
+IDE_DOCKER_OPTIONS="--privileged"
 ```
 and then run:
 ```bash
@@ -101,20 +114,21 @@ ide rake style:rubocop
 ```
 
 ### What happens
-1. IDE determines that docker image ideide:1.0.0 is needed
-1. IDE pulls ideide:1.0.0.
+1. IDE determines that docker image xmik/ideide:1.0.3 is needed
+1. IDE pulls xmik/ideide:1.0.3.
 1. IDE decides which environment variables must be preserved into docker container
  and which must be escaped with a prefix `IDE_`. They are saved to a file e.g.
  `/tmp/ide/environment-2016-02-08_17-56-19-78638303`.
-1. IDE creates a container from ideide:1.0.0 image with the following command:
-  ```
-  docker run --rm -v ${IDE_WORK}:/ide/work -v ${IDE_IDENTITY}:/ide/identity \
-    --env-file /tmp/ide/environment-2016-02-08_17-56-19-78638303 ${IDE_DOCKER_IMAGE} \
-    "rake style:rubocop"
-  ```
-  If your terminal was running interactively, then `-ti` is added to `docker run`
-  command.
+1. IDE creates a container from xmik/ideide:1.0.3 image with the following command:
+    ```
+    docker run --rm -v ${IDE_WORK}:/ide/work -v ${IDE_IDENTITY}:/ide/identity \
+      --env-file /tmp/ide/environment-2016-02-08_17-56-19-78638303 ${IDE_DOCKER_IMAGE} \
+      "rake style:rubocop"
+    ```
+    If your terminal was running interactively, then `-ti` is added to `docker run`
+    command.
 1. IDE runs `rake style:rubocop` in the container in the `/ide/work` directory.
+
 
 For debug output set `IDE_LOG_LEVEL=debug`.
 
@@ -155,7 +169,7 @@ inside the container (so its has code to work on) and you can see any container'
 #### Docker driver example configuration
 Idefile:
 ```
-IDE_DOCKER_IMAGE="docker-registry.ai-traders.com/ideide:1.0.0"
+IDE_DOCKER_IMAGE="xmik/ideide:1.0.3"
 IDE_DOCKER_OPTIONS="--privileged"
 ```
 
@@ -174,7 +188,7 @@ alpine:
   # command: ["while true; do sleep 1d; done;"]
   command: ["true"]
 default:
-  image: "dummyide:0.0.1"
+  image: "xmik/ideide:1.0.3"
   links:
   - alpine
   volumes:
@@ -200,7 +214,7 @@ services:
     # command: ["while true; do sleep 1d; done;"]
     command: ["true"]
   default:
-    image: "dummyide:0.0.1"
+    image: "xmik/ideide:1.0.3"
     depends_on:
     - alpine
     volumes:
@@ -213,21 +227,23 @@ The same requirements apply as for docker-compose.yml version 1, but here you ca
  also use `depends_on` docker-compose configuration.
 
 ## Installation
-```bash
-sudo bash -c "`curl -L https://raw.githubusercontent.com/ai-traders/ide/master/install.sh`"
-```
+The only dependency is Bash and Docker.
 
-Or just do what [install.sh](./install.sh) says or use [ide cookbook](http://gitlab.ai-traders.com/ide/cookbook-ide).
-Or:
-
-```bash
-git clone --depth 1 --single-branch https://github.com/ai-traders/ide.git
-./ide/local_install.sh
-rm -r ./ide
-```
-
-If you want to install from a specified tag, e.g. `0.5.0`, add: `-b 0.5.0` option
- to `git clone` command.
+There are several ways of installing IDE, choose one:
+1. Run:
+    ```bash
+    sudo bash -c "`curl -L https://raw.githubusercontent.com/ai-traders/ide/master/install.sh`"
+    ```
+2. Just do what [install.sh](./install.sh) says.
+3. Use [ide cookbook](http://gitlab.ai-traders.com/ide/cookbook-ide).
+4. Run:
+    ```bash
+    git clone --depth 1 --single-branch https://github.com/ai-traders/ide.git
+    ./ide/local_install.sh
+    rm -r ./ide
+    ```
+    If you want to install from a specified tag, e.g. `0.5.0`, add: `-b 0.5.0` option
+    to `git clone` command.
 
 ## How to create ide Docker image?
 *This is a quite long documentation. You can skip it and go ahead to examples:
