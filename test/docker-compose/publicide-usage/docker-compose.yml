@@ -1,0 +1,15 @@
+alpine:
+  image: "alpine:3.4"
+  entrypoint: ["/bin/sh", "-c"]
+  command: ["while true; do sleep 1d; done;"]
+  # Uncomment this if you want to test with short running command.
+  # When running on CI docker-compose returns error:
+  # "cannot link to a non running container"
+  # I prefer short running command because tests run faster (faster to stop and
+  # remove all the containers).
+  # command: ["true"]
+  volumes:
+  - ${IDE_IDENTITY}:/ide/identity:ro
+  - ${IDE_WORK}:/ide/work
+  env_file:
+  - ${ENV_FILE}

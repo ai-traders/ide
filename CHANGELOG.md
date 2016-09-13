@@ -1,3 +1,7 @@
+# 0.6.0 (13 Sep 2016)
+
+* #9865; #9707 ide --pull_only option implemented
+
 # 0.5.0 (2 Sep 2016)
 
 * #9728 add scripts to help make IDE docker image

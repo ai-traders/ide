@@ -9,10 +9,11 @@ NC='\033[0m'
 
 helpfunc() {
     echo "Usage: $0 [--idefile IDEFILE] COMMAND"
-    echo "  --help     Help. Display this message and quit."
-    echo "  --version  Version. Print version number and quit."
-    echo "  --idefile  Specify IDEFILE, default is: ./Idefile"
-    echo "  --dryrun   Do not pull docker image, do not run docker run."
+    echo "  --help       Help. Display this message and quit."
+    echo "  --version    Version. Print version number and quit."
+    echo "  --idefile    Specify IDEFILE, default is: ./Idefile"
+    echo "  --dryrun     Do not pull docker image, do not run docker run, verify Idefile."
+    echo "  --pull_only  Pull docker image, do not run docker run, do not verify Idefile."
     exit
 }
 
@@ -40,6 +41,9 @@ do
         ;;
     --dryrun)
         dryrun="true"
+        ;;
+    --pull_only)
+        pull_only="true"
         ;;
     --force_not_interactive)
         force_not_interactive="true"
@@ -89,41 +93,47 @@ if [ "$IDE_DRIVER" != "docker" ] && [ "$IDE_DRIVER" != "docker-compose" ]; then
   log_error "IDE_DRIVER set to $IDE_DRIVER, supported are: docker, docker-compose"
   exit 1
 fi
-if [ -z "$IDE_WORK" ]; then
-  IDE_WORK="$PWD"
-  log_debug "IDE_WORK not set, setting to: $IDE_WORK"
-fi
-if [ ! -d "$IDE_WORK" ]; then
-  log_error "IDE_WORK set to $IDE_WORK which does not exist"
-  exit 1
-fi
-if [ -z "$IDE_IDENTITY" ]; then
-  IDE_IDENTITY="$HOME"
-  log_debug "IDE_IDENTITY not set, setting to: $IDE_IDENTITY"
-fi
-if [ ! -d "$IDE_IDENTITY" ]; then
-  log_error "IDE_IDENTITY set to $IDE_IDENTITY which does not exist"
-  exit 1
-fi
-if [ -z "$IDE_VARS_BLACKLIST" ]; then
-  IDE_VARS_BLACKLIST="BASH*,HOME,USERNAME,USER,LOGNAME,PATH,TERM,SHELL,MAIL,SUDO_*,WINDOWID,SSH_*,SESSION_*,GEM_HOME,GEM_PATH,GEM_ROOT,HOSTNAME,HOSTTYPE,IFS,PPID,PWD,OLDPWD"
-  log_debug "IDE_VARS_BLACKLIST not set, setting to: $IDE_VARS_BLACKLIST"
-fi
-if [ -t 0 ] && [[ -z "$force_not_interactive" ]]; then
-  # shell is really interactive and "$force_not_interactive" is not set
-  run_interactively="true"
-else
-  run_interactively="false"
-fi
-log_debug "run_interactively: $run_interactively"
 
-# it serves here as an identificator, will be used as docker container name
-# and as a part of env_file
-run_id=$(get_run_id)
-env_file=$(get_env_vars_file_name "${run_id}")
-env_dir=$(dirname "${env_file}")
-mkdir -p "${env_dir}"
-save_environment_variables "$env_file" "$IDE_VARS_BLACKLIST"
+
+if [[ "$pull_only" != "true" ]]; then
+  # require those variables to be set only if --pull_only is not set
+
+  if [ -z "$IDE_WORK" ]; then
+    IDE_WORK="$PWD"
+    log_debug "IDE_WORK not set, setting to: $IDE_WORK"
+  fi
+  if [ ! -d "$IDE_WORK" ]; then
+    log_error "IDE_WORK set to $IDE_WORK which does not exist"
+    exit 1
+  fi
+  if [ -z "$IDE_IDENTITY" ]; then
+    IDE_IDENTITY="$HOME"
+    log_debug "IDE_IDENTITY not set, setting to: $IDE_IDENTITY"
+  fi
+  if [ ! -d "$IDE_IDENTITY" ]; then
+    log_error "IDE_IDENTITY set to $IDE_IDENTITY which does not exist"
+    exit 1
+  fi
+  if [ -z "$IDE_VARS_BLACKLIST" ]; then
+    IDE_VARS_BLACKLIST="BASH*,HOME,USERNAME,USER,LOGNAME,PATH,TERM,SHELL,MAIL,SUDO_*,WINDOWID,SSH_*,SESSION_*,GEM_HOME,GEM_PATH,GEM_ROOT,HOSTNAME,HOSTTYPE,IFS,PPID,PWD,OLDPWD"
+    log_debug "IDE_VARS_BLACKLIST not set, setting to: $IDE_VARS_BLACKLIST"
+  fi
+  if [ -t 0 ] && [[ -z "$force_not_interactive" ]]; then
+    # shell is really interactive and "$force_not_interactive" is not set
+    run_interactively="true"
+  else
+    run_interactively="false"
+  fi
+  log_debug "run_interactively: $run_interactively"
+
+  # it serves here as an identificator, will be used as docker container name
+  # and as a part of env_file
+  run_id=$(get_run_id)
+  env_file=$(get_env_vars_file_name "${run_id}")
+  env_dir=$(dirname "${env_file}")
+  mkdir -p "${env_dir}"
+  save_environment_variables "$env_file" "$IDE_VARS_BLACKLIST"
+fi
 
 if [[ "$IDE_DRIVER" == "docker" ]]; then
   if [ -z "$IDE_DOCKER_IMAGE" ]; then
@@ -131,46 +141,58 @@ if [[ "$IDE_DRIVER" == "docker" ]]; then
     exit 1;
   fi
 
-  # construct docker command
-  docker_command=$(construct_docker_command "$env_file" "$run_interactively" "$run_id" "$IDE_DOCKER_IMAGE" "$IDE_WORK" "$IDE_IDENTITY" "$command" "$IDE_DOCKER_OPTIONS")
-  echo -e "docker command will be:\n${GREEN}${docker_command}${NC}"
+  if [[ "$pull_only" != "true" ]]; then
+    # construct docker command
+    docker_command=$(construct_docker_command "$env_file" "$run_interactively" "$run_id" "$IDE_DOCKER_IMAGE" "$IDE_WORK" "$IDE_IDENTITY" "$command" "$IDE_DOCKER_OPTIONS")
+    echo -e "docker command will be:\n${GREEN}${docker_command}${NC}"
 
-  on_control_c()
-  {
-      log_error "Ctrl+c caught by IDE."
-      # The following cleanup is needed because nothing stops that docker
-      # container when no Ctrl+c is pressed, because that container is run with:
-      # `docker run --rm`.
-      if [[ $(docker inspect -f "{{.State.Running}}" "$run_id" ) == "false" ]]; then
-        # If Ctrl+c was typed fast enough, docker container is not running, but
-        # it is created. If that is the case, remove it.
-        log_error "I will remove docker container: $run_id (it was created but not started)"
-        docker rm "$run_id"
+    on_control_c()
+    {
+        log_error "Ctrl+c caught by IDE."
+        # The following cleanup is needed because nothing stops that docker
+        # container when no Ctrl+c is pressed, because that container is run with:
+        # `docker run --rm`.
+        if [[ $(docker inspect -f "{{.State.Running}}" "$run_id" ) == "false" ]]; then
+          # If Ctrl+c was typed fast enough, docker container is not running, but
+          # it is created. If that is the case, remove it.
+          log_error "I will remove docker container: $run_id (it was created but not started)"
+          docker rm "$run_id"
+        else
+          log_error "I will stop docker container: $run_id"
+          # this can still take some time (up to 10 seconds)
+          docker stop "$run_id"
+        fi
+    }
+    trap 'on_control_c' INT
+
+    # run docker run
+    if [[ "$dryrun" != "true" ]]; then
+      if [[ "$run_interactively" == "true" ]]; then
+        eval "${docker_command}"
       else
-        log_error "I will stop docker container: $run_id"
-        # this can still take some time (up to 10 seconds)
-        docker stop "$run_id"
+        # run in the background so that correct exit status (130) is returned
+        # and on_control_c is invoked faster
+        eval "${docker_command}" &
+        # if in below line there is no "$!", then the exit_status more below
+        # is incorrect
+        wait "$!"
       fi
-  }
-  trap 'on_control_c' INT
-
-  # run docker run
-  if [[ "$dryrun" != "true" ]]; then
-    if [[ "$run_interactively" == "true" ]]; then
-      eval "${docker_command}"
-    else
-      # run in the background so that correct exit status (130) is returned
-      # and on_control_c is invoked faster
-      eval "${docker_command}" &
-      # if in below line there is no "$!", then the exit_status more below
-      # is incorrect
-      wait "$!"
+      exit_status="$?"
+      log_debug "ide exit status: $exit_status"
+      if [[ "$exit_status" != "0" ]]; then
+        log_error "fail! exit status: $exit_status"
+        exit $exit_status
+      fi
     fi
-    exit_status="$?"
-    log_debug "ide exit status: $exit_status"
-    if [[ "$exit_status" != "0" ]]; then
-      log_error "fail! exit status: $exit_status"
-      exit $exit_status
+  elif [[ "$dryrun" != "true" ]]; then
+    # --pull_only is set and --dryrun is not
+    if [[ $(docker images "${IDE_DOCKER_IMAGE}" --format "{{.ID}}" | wc -l) == "0" ]]; then
+      echo -e "${GREEN}Pulling docker image: ${IDE_DOCKER_IMAGE}${NC}"
+      docker pull "${IDE_DOCKER_IMAGE}"
+    else
+      # if you have a local docker image which is not pushed to any docker
+      # registry, `docker pull` would return error
+      echo -e "${GREEN}Image is up to date for ${IDE_DOCKER_IMAGE}${NC}"
     fi
   fi
 elif [[ "$IDE_DRIVER" == "docker-compose" ]]; then
@@ -184,47 +206,58 @@ elif [[ "$IDE_DRIVER" == "docker-compose" ]]; then
     exit 1;
   fi
 
-  verify_docker_compose_file "$IDE_DOCKER_COMPOSE_FILE"
+  if [[ "$pull_only" != "true" ]]; then
+    verify_docker_compose_file "$IDE_DOCKER_COMPOSE_FILE"
 
-  # construct docker-compose command
-  docker_compose_command=$(construct_docker_compose_run_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$run_interactively" "$IDE_WORK" "$IDE_IDENTITY"  "$command" "$IDE_DOCKER_COMPOSE_OPTIONS")
-  docker_compose_stop_command=$(construct_docker_compose_stop_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$IDE_WORK" "$IDE_IDENTITY")
-  docker_compose_rm_command=$(construct_docker_compose_rm_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$IDE_WORK" "$IDE_IDENTITY")
-  echo -e "docker-compose run command will be:\n${GREEN}${docker_compose_command}${NC}"
-  log_debug "docker-compose stop command will be:\n${docker_compose_stop_command}"
-  log_debug "docker-compose rm command will be:\n${docker_compose_rm_command}"
+    # construct docker-compose command
+    docker_compose_command=$(construct_docker_compose_run_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$run_interactively" "$IDE_WORK" "$IDE_IDENTITY"  "$command" "$IDE_DOCKER_COMPOSE_OPTIONS")
+    docker_compose_stop_command=$(construct_docker_compose_stop_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$IDE_WORK" "$IDE_IDENTITY")
+    docker_compose_rm_command=$(construct_docker_compose_rm_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$IDE_WORK" "$IDE_IDENTITY")
+    echo -e "docker-compose run command will be:\n${GREEN}${docker_compose_command}${NC}"
+    log_debug "docker-compose stop command will be:\n${docker_compose_stop_command}"
+    log_debug "docker-compose rm command will be:\n${docker_compose_rm_command}"
 
-  on_control_c()
-  {
-      log_error "Ctrl+c caught by IDE."
-      # No need for additional cleaning, because it is done below and happens
-      # even if not Ctrl+c is pressed.
-  }
-  trap 'on_control_c' INT
+    on_control_c()
+    {
+        log_error "Ctrl+c caught by IDE."
+        # No need for additional cleaning, because it is done below and happens
+        # even if not Ctrl+c is pressed.
+    }
+    trap 'on_control_c' INT
 
-  # run docker-compose run
-  if [[ "$dryrun" != "true" ]]; then
-    if [[ "$run_interactively" == "true" ]]; then
-      eval "${docker_compose_command}"
-    else
-      # run in the background so that correct exit status (130) is returned
-      # and on_control_c is invoked faster
-      eval "${docker_compose_command}" &
-      # if in below line there is no "$!", then the exit_status more below
-      # is incorrect
-      wait "$!"
+    # run docker-compose run
+    if [[ "$dryrun" != "true" ]]; then
+      if [[ "$run_interactively" == "true" ]]; then
+        eval "${docker_compose_command}"
+      else
+        # run in the background so that correct exit status (130) is returned
+        # and on_control_c is invoked faster
+        eval "${docker_compose_command}" &
+        # if in below line there is no "$!", then the exit_status more below
+        # is incorrect
+        wait "$!"
+      fi
+      exit_status="$?"
+      # even if all the containers are stopped, this won't fail
+      log_debug "Stopping"
+      eval "${docker_compose_stop_command}"
+      log_debug "Removing"
+      eval "${docker_compose_rm_command}"
+      log_debug "ide exit status: $exit_status"
+      if [[ "$exit_status" != "0" ]]; then
+        log_error "fail! exit status: $exit_status"
+        exit $exit_status
+      fi
     fi
-    exit_status="$?"
-    # even if all the containers are stopped, this won't fail
-    log_debug "Stopping"
-    eval "${docker_compose_stop_command}"
-    log_debug "Removing"
-    eval "${docker_compose_rm_command}"
-    log_debug "ide exit status: $exit_status"
-    if [[ "$exit_status" != "0" ]]; then
-      log_error "fail! exit status: $exit_status"
-      exit $exit_status
-    fi
+  elif [[ "$dryrun" != "true" ]]; then
+    # --pull_only is set and --dryrun is not
+    echo -e "${GREEN}pulling docker images for: ${IDE_DOCKER_COMPOSE_FILE}${NC}"
+    # temporarily set 3 variables and create an empty env file,
+    # so that docker-compose does not error
+    empty_env_file="$(dirname ${IDE_DOCKER_COMPOSE_FILE})/dummy"
+    touch "${empty_env_file}"
+    IDE_WORK="dummy" IDE_IDENTITY="dummy" ENV_FILE="dummy" docker-compose -f "${IDE_DOCKER_COMPOSE_FILE}" pull
+    rm "${empty_env_file}"
   fi
 fi
 
