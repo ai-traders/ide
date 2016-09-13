@@ -82,6 +82,7 @@ if [ ! -f "$idefile" ]; then
 fi
 log_debug "Starting ide, version: $version"
 log_debug "idefile: $idefile"
+log_debug "dryrun: $dryrun"
 
 # verify Idefile
 source "$idefile"
