@@ -2,6 +2,7 @@
 
 * #9865; #9707 ide --pull_only option implemented
 * better itests - replaced some rake tasks with shpec integration tests
+* #9865 added alias for --force_not_interactive option: --not_i
 
 # 0.5.0 (2 Sep 2016)
 

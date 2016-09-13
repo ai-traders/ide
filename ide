@@ -9,11 +9,12 @@ NC='\033[0m'
 
 helpfunc() {
     echo "Usage: $0 [--idefile IDEFILE] COMMAND"
-    echo "  --help       Help. Display this message and quit."
-    echo "  --version    Version. Print version number and quit."
-    echo "  --idefile    Specify IDEFILE, default is: ./Idefile"
-    echo "  --dryrun     Do not pull docker image, do not run docker run, verify Idefile."
-    echo "  --pull_only  Pull docker image, do not run docker run, do not verify Idefile."
+    echo "  --help                           Help. Display this message and quit."
+    echo "  --version                        Version. Print version number and quit."
+    echo "  --idefile                        Specify IDEFILE, default is: ./Idefile"
+    echo "  --dryrun                         Do not pull docker image, do not run docker run, verify Idefile."
+    echo "  --pull_only                      Pull docker image, do not run docker run, do not verify Idefile."
+    echo "  --force_not_interactive --not_i  Do not run docker containers interactively."
     exit
 }
 
@@ -44,6 +45,9 @@ do
         ;;
     --pull_only)
         pull_only="true"
+        ;;
+    --not_i)
+        force_not_interactive="true"
         ;;
     --force_not_interactive)
         force_not_interactive="true"
