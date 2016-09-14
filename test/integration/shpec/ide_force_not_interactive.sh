@@ -15,11 +15,11 @@ describe "ide --force_not_interactive"
     end
     describe 'when --dryrun and --force_not_interactive is set; ide cmd is set'
       it "returns 0; does nothing"
-        message="$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --force_not_interactive echo sth)"
+        message="$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --force_not_interactive 'bash --version && pwd')"
         assert equal "$?" "0"
         assert do_match "$message" "dryrun: true"
         assert do_match "$message" "run_interactively: false"
-        assert do_match "$message" "dummyide:0.0.1 \"echo sth\""
+        assert do_match "$message" "dummyide:0.0.1 \"bash --version && pwd\""
         assert do_not_match "$message" " -ti"
       end
     end

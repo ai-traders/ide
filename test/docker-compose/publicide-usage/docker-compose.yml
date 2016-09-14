@@ -1,4 +1,4 @@
-alpine:
+default:
   image: "alpine:3.4"
   entrypoint: ["/bin/sh", "-c"]
   command: ["while true; do sleep 1d; done;"]

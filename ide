@@ -15,6 +15,7 @@ helpfunc() {
     echo "  --dryrun                         Do not pull docker image, do not run docker run, verify Idefile."
     echo "  --pull_only                      Pull docker image, do not run docker run, do not verify Idefile."
     echo "  --force_not_interactive --not_i  Do not run docker containers interactively."
+    echo "  --rm \"false\"                   Remove docker container afterwards. Default: true"
     exit
 }
 
@@ -51,6 +52,10 @@ do
         ;;
     --force_not_interactive)
         force_not_interactive="true"
+        ;;
+    --rm)
+        remove_containers="$1"
+        shift
         ;;
     --*)
         log_error "Invalid option: '$opt'" >&2
@@ -97,6 +102,11 @@ if [ ! -f "$idefile" ]; then
 fi
 log_debug "idefile: $idefile"
 log_debug "dryrun: $dryrun"
+
+if [ -z "$remove_containers" ]; then
+  remove_containers="true"
+fi
+log_debug "remove_containers: $remove_containers"
 
 # verify Idefile
 source "$idefile"
@@ -148,6 +158,14 @@ if [[ "$pull_only" != "true" ]]; then
   env_dir=$(dirname "${env_file}")
   mkdir -p "${env_dir}"
   save_environment_variables "$env_file" "$IDE_VARS_BLACKLIST"
+
+  if [[ "${remove_containers}" != "true" ]]; then
+    # Just not removing docker container would be impractical, we'd have to
+    # parse output of ide in order to get container name. Thus, save the
+    # container name to a file.
+    echo "writing to $(pwd)/iderc"
+    echo "${run_id}" > "./iderc"
+  fi
 fi
 
 if [[ "$IDE_DRIVER" == "docker" ]]; then
@@ -158,7 +176,7 @@ if [[ "$IDE_DRIVER" == "docker" ]]; then
 
   if [[ "$pull_only" != "true" ]]; then
     # construct docker command
-    docker_command=$(construct_docker_command "$env_file" "$run_interactively" "$run_id" "$IDE_DOCKER_IMAGE" "$IDE_WORK" "$IDE_IDENTITY" "$command" "$IDE_DOCKER_OPTIONS")
+    docker_command=$(construct_docker_command "$env_file" "$run_interactively" "$run_id" "$IDE_DOCKER_IMAGE" "$IDE_WORK" "$IDE_IDENTITY" "$remove_containers" "$command" "$IDE_DOCKER_OPTIONS")
     echo -e "docker command will be:\n${GREEN}${docker_command}${NC}"
 
     on_control_c()
@@ -211,6 +229,10 @@ if [[ "$IDE_DRIVER" == "docker" ]]; then
     fi
   fi
 elif [[ "$IDE_DRIVER" == "docker-compose" ]]; then
+  if [[ "${remove_containers}" != "true" ]]; then
+    log_error "Not implemented feature: '--rm false' for driver: $IDE_DRIVER"
+    exit 1
+  fi
   if [ -z "$IDE_DOCKER_COMPOSE_FILE" ]; then
     IDE_DOCKER_COMPOSE_FILE="${PWD}/docker-compose.yml"
     log_debug "IDE_DOCKER_COMPOSE_FILE not set, setting to: $IDE_DOCKER_COMPOSE_FILE"
@@ -225,7 +247,7 @@ elif [[ "$IDE_DRIVER" == "docker-compose" ]]; then
     verify_docker_compose_file "$IDE_DOCKER_COMPOSE_FILE"
 
     # construct docker-compose command
-    docker_compose_command=$(construct_docker_compose_run_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$run_interactively" "$IDE_WORK" "$IDE_IDENTITY"  "$command" "$IDE_DOCKER_COMPOSE_OPTIONS")
+    docker_compose_command=$(construct_docker_compose_run_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$run_interactively" "$IDE_WORK" "$IDE_IDENTITY" "$command" "$IDE_DOCKER_COMPOSE_OPTIONS")
     docker_compose_stop_command=$(construct_docker_compose_stop_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$IDE_WORK" "$IDE_IDENTITY")
     docker_compose_rm_command=$(construct_docker_compose_rm_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$IDE_WORK" "$IDE_IDENTITY")
     echo -e "docker-compose run command will be:\n${GREEN}${docker_compose_command}${NC}"

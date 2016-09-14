@@ -7,6 +7,7 @@
 * added unit tests for running IDE with docker command:
  * without quotes vs with double quotes vs with single quotes
  * one-word vs multi-word
+* #9864 ide with configurable --rm for docker driver
 
 # 0.5.0 (2 Sep 2016)
 
