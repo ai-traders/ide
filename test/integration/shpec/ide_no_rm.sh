@@ -12,7 +12,7 @@ describe "ide --rm false"
         rm -rf "${iderc}"
         message="$(cd ${publicide_path} && ${IDE_PATH} --rm false --dryrun)"
         assert equal "$?" "0"
-        assert do_not_match "$message" " --rm"
+        assert do_not_match "$message" "--rm"
         rm -rf "${iderc}"
       end
     end
@@ -21,7 +21,7 @@ describe "ide --rm false"
         rm -rf "${iderc}"
         message="$(cd ${publicide_path} && IDE_LOG_LEVEL=debug ${IDE_PATH} --rm false whoami)"
         assert equal "$?" "0"
-        assert do_not_match "$message" " --rm"
+        assert do_not_match "$message" "--rm"
 
         # this is how to get the name of the container
         container_name="$(cat ${iderc})"

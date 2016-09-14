@@ -13,6 +13,6 @@ describe "matchers"
       assert do_match "\"-ti\"" "\"-ti\""
     end
     it "\"-ti\" matches \"ti -rm\""
-      assert do_match "-ti -rm" " -ti"
+      assert do_match "-ti -rm" "-ti"
     end
   end

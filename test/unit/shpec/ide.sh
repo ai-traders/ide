@@ -54,7 +54,7 @@ describe "commandline options"
   #       assert do_match "$message" "dummyide:0.0.1"
   #       # we don't want quotes if $command not set
   #       assert do_not_match "$message" "dummyide:0.0.1 \"\""  #
-  #       assert do_not_match "$message" " -ti"
+  #       assert do_not_match "$message" "-ti"
   #     end
   #     # this fails in ideide, where terminal is non-interactive
   #     # it "runs interactively if invoked interactively"
@@ -62,7 +62,7 @@ describe "commandline options"
   #     #   message="$(cd test/docker/dummyide-usage && ${IDE_PATH} --dryrun)"
   #     #   assert equal "$?" "0"
   #     #   assert do_match "$message" "docker run --rm -v"
-  #     #   assert do_match "$message" " -ti dummyide:0.0.1"
+  #     #   assert do_match "$message" "-ti dummyide:0.0.1"
   #     #   # we don't want quotes if $command not set
   #     #   assert do_not_match "$message" "dummyide:0.0.1 \"\""
   #     # end
@@ -74,14 +74,14 @@ describe "commandline options"
   #       assert do_match "$message" "docker run --rm -v"
   #       assert do_match "$message" "dummyide:0.0.1 \"some_command \""
   #       # this fails on workstation, where terminal is interactive
-  #       assert do_not_match "$message" " -ti"
+  #       assert do_not_match "$message" "-ti"
   #     end
   #     it "runs interactively if invoked interactively"
   #       message="$(cd test/docker/dummyide-usage && ${IDE_PATH} --dryrun some_command)"
   #       assert equal "$?" "0"
   #       assert do_match "$message" "docker run --rm -v"
   #       # this probably fails in ideide, where terminal is non-interactive
-  #       assert do_match "$message" " -ti dummyide:0.0.1 \"some_command \""
+  #       assert do_match "$message" "-ti dummyide:0.0.1 \"some_command \""
   #     end
   #   end
   # end
@@ -145,7 +145,7 @@ describe "commandline options"
       assert equal "$?" "0"
       assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/empty_work_dir:/ide/work -v ${PWD}/test/docker/empty_home_dir:/ide/identity:ro --env-file="
       # "-ti" is not shown in ideide, but it should be already tested
-      assert do_match "$message" " --privileged"
+      assert do_match "$message" "--privileged"
       assert do_match "$message" "complexide:0.1.0 \"some_command\""
     end
     it "exits 1, if IDE_DRIVER set to bla"

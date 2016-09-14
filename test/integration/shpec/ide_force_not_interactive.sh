@@ -10,7 +10,7 @@ describe "ide --force_not_interactive"
         assert do_match "$message" "dryrun: true"
         assert do_match "$message" "run_interactively: false"
         assert do_match "$message" "dummyide:0.0.1 \"echo sth\""
-        assert do_not_match "$message" " -ti"
+        assert do_not_match "$message" "-ti"
       end
     end
     describe 'when --dryrun and --force_not_interactive is set; ide cmd is set'
@@ -20,7 +20,7 @@ describe "ide --force_not_interactive"
         assert do_match "$message" "dryrun: true"
         assert do_match "$message" "run_interactively: false"
         assert do_match "$message" "dummyide:0.0.1 \"bash --version && pwd\""
-        assert do_not_match "$message" " -ti"
+        assert do_not_match "$message" "-ti"
       end
     end
     describe 'when --dryrun and --force_not_interactive is set; ide cmd is not set'
@@ -29,7 +29,7 @@ describe "ide --force_not_interactive"
         assert equal "$?" "0"
         assert do_match "$message" "dryrun: true"
         assert do_match "$message" "run_interactively: false"
-        assert do_not_match "$message" " -ti"
+        assert do_not_match "$message" "-ti"
       end
     end
     describe 'when --force_not_interactive is set; ide cmd is set'
@@ -40,7 +40,7 @@ describe "ide --force_not_interactive"
         assert equal "$?" "0"
         assert do_match "$message" "dryrun: false"
         assert do_match "$message" "run_interactively: false"
-        assert do_not_match "$message" " -ti"
+        assert do_not_match "$message" "-ti"
         assert do_match "$message" "dummyide:0.0.1 \"bash --version && pwd\""
         assert do_match "$message" "GNU bash, version 4.3"
         assert do_match "$message" "/ide/work"
@@ -54,7 +54,7 @@ describe "ide --force_not_interactive"
         assert equal "$?" "0"
         assert do_match "$message" "dryrun: true"
         assert do_match "$message" "run_interactively: false"
-        assert do_match "$message" " -T"
+        assert do_match "$message" "-T"
         assert do_match "$message" "default \"echo sth\""
       end
     end
@@ -64,7 +64,7 @@ describe "ide --force_not_interactive"
         assert equal "$?" "0"
         assert do_match "$message" "dryrun: true"
         assert do_match "$message" "run_interactively: false"
-        assert do_match "$message" " -T"
+        assert do_match "$message" "-T"
       end
     end
     describe 'when --force_not_interactive is set; ide cmd is set'
@@ -73,7 +73,7 @@ describe "ide --force_not_interactive"
         assert equal "$?" "0"
         assert do_match "$message" "dryrun: false"
         assert do_match "$message" "run_interactively: false"
-        assert do_match "$message" " -T"
+        assert do_match "$message" "-T"
         assert do_match "$message" "default \"bash --version && pwd\""
         assert do_match "$message" "GNU bash, version 4.3"
         assert do_match "$message" "/ide/work"

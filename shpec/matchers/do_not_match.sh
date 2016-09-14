@@ -6,7 +6,7 @@ do_not_match() {
 
   # Really do quote $actual in order to preserve newlines.
   # Thanks to grep -E we can use extended regex.
-  if  echo -e "$actual" | grep -Eo "$expected" >> /dev/null ;then
+  if  echo -e "$actual" | grep -Eo -- "$expected" >> /dev/null ;then
     : $((_shpec_failures += 1))
          iecho "$_shpec_red$_shpec_assertion"
          iecho "'${actual}' matches '${expected}'$_shpec_norm"
