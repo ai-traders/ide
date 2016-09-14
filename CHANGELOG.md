@@ -3,6 +3,10 @@
 * #9865; #9707 ide --pull_only option implemented
 * better itests - replaced some rake tasks with shpec integration tests
 * #9865 added alias for --force_not_interactive option: --not_i
+* #9890 fixed bug: IDE adds space at the end of docker command
+* added unit tests for running IDE with docker command:
+ * without quotes vs with double quotes vs with single quotes
+ * one-word vs multi-word
 
 # 0.5.0 (2 Sep 2016)
 

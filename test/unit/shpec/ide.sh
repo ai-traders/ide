@@ -3,6 +3,7 @@
 describe "commandline options"
   # make absolute path out of relative
   IDE_PATH=$(readlink -f "./ide")
+  # do not use \"\" it will not be counted as empty string
 
   describe "--version"
     it "outputs the current version number"
@@ -85,15 +86,53 @@ describe "commandline options"
   #   end
   # end
   describe "docker driver"
-    it "exits 0, if some command set"
-      # do not use \"\" it will not be counted as empty string
+    it "exits 0, if one-word command set"
+      message="$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun /bin/bash)"
+      assert equal "$?" "0"
+      assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+      # outside quotes are added
+      assert do_match "$message" "dummyide:0.0.1 \"/bin/bash\""
+    end
+    it "exits 0, if one-word command set with double quotes"
+      message="$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun \"/bin/bash\")"
+      assert equal "$?" "0"
+      assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+      # outside quotes are not added
+      assert do_match "$message" "dummyide:0.0.1 \"/bin/bash\""
+    end
+    it "exits 0, if one-word command set with single quotes"
+      message="$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun '/bin/bash')"
+      assert equal "$?" "0"
+      assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+      # outside quotes are replaced with double quotes
+      assert do_match "$message" "dummyide:0.0.1 \"/bin/bash\""
+    end
+    it "exits 0, if multi-word command set without quotes"
+      # this is not recommended, but test that that behavior is expected
       message="$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun /bin/bash -c \"aaa\")"
       assert equal "$?" "0"
       assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+      # real match is (invalid quotes): dummyide:0.0.1 "/bin/bash -c "aaa""
+      # outside quotes are added
       assert do_match "$message" "dummyide:0.0.1 \"/bin/bash -c \"aaa\"\""
     end
+    it "exits 0, if multi-word command set with double quotes"
+      message="$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun \"/bin/bash -c \\\"aaa\\\"\")"
+      assert equal "$?" "0"
+      assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+      # real match is: dummyide:0.0.1 "/bin/bash -c \"aaa\""
+      # outside quotes are not added
+      assert do_match "$message" "dummyide:0.0.1 \"/bin/bash -c \\\\\"aaa\\\\\"\""
+    end
+    it "exits 0, if multi-word command set with single quotes"
+      message="$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun '/bin/bash -c \"aaa\"')"
+      assert equal "$?" "0"
+      assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+      # real match is: dummyide:0.0.1 "/bin/bash -c \"aaa\""
+      # outside quotes are replaced with double quotes
+      assert do_match "$message" "dummyide:0.0.1 \"/bin/bash -c \\\\\"aaa\\\\\"\""
+    end
     it "exits 0, if no command set"
-      # do not use \"\" it will not be counted as empty string
       message="$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun)"
       assert equal "$?" "0"
       assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
@@ -102,38 +141,78 @@ describe "commandline options"
       assert do_not_match "$message" "dummyide:0.0.1 \"\""
     end
     it "exits 0, if complex IDE_WORK and IDE_IDENTITY set"
-      # do not use \"\" it will not be counted as empty string
       message="$(IDE_LOG_LEVEL=debug ABC=1 DEF=2 GHI=3 ${IDE_PATH} --idefile test/docker/complexide-usage/Idefile --dryrun some_command)"
       assert equal "$?" "0"
       assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/empty_work_dir:/ide/work -v ${PWD}/test/docker/empty_home_dir:/ide/identity:ro --env-file="
       # "-ti" is not shown in ideide, but it should be already tested
       assert do_match "$message" " --privileged"
-      assert do_match "$message" "complexide:0.1.0 \"some_command \""
+      assert do_match "$message" "complexide:0.1.0 \"some_command\""
     end
     it "exits 1, if IDE_DRIVER set to bla"
-      # do not use \"\" it will not be counted as empty string
       message="$(${IDE_PATH} --idefile test/docker/invalid-driver-ide-usage/Idefile --dryrun some_command)"
       assert equal "$?" "1"
       assert do_match "$message" "IDE_DRIVER set to bla, supported are: docker, docker-compose"
     end
     it "exits 1, if IDE_DOCKER_IMAGE not set"
-      # do not use \"\" it will not be counted as empty string
       message="$(${IDE_PATH} --idefile test/docker/image-not-set-ide-usage/Idefile --dryrun some_command)"
       assert equal "$?" "1"
       assert do_match "$message" "IDE_DOCKER_IMAGE not set"
     end
   end
   describe "docker-compose driver"
-    it "exits 0, if some command set"
-      # do not use \"\" it will not be counted as empty string
+    it "exits 0, if one-word command set"
+      message="$(cd test/docker-compose/default && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --force_not_interactive /bin/bash)"
+      assert equal "$?" "0"
+      assert do_match "$message" "ENV_FILE=\""
+      assert do_match "$message" "docker-compose -f ${PWD}/test/docker-compose/default/docker-compose.yml -p"
+      # outside quotes are added
+      assert do_match "$message" "run --rm -T default \"/bin/bash\""
+    end
+    it "exits 0, if one-word command set with double quotes"
+      message="$(cd test/docker-compose/default && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --force_not_interactive \"/bin/bash\")"
+      assert equal "$?" "0"
+      assert do_match "$message" "ENV_FILE=\""
+      assert do_match "$message" "docker-compose -f ${PWD}/test/docker-compose/default/docker-compose.yml -p"
+      # outside quotes are not added
+      assert do_match "$message" "run --rm -T default \"/bin/bash\""
+    end
+    it "exits 0, if one-word command set with single quotes"
+      message="$(cd test/docker-compose/default && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --force_not_interactive '/bin/bash')"
+      assert equal "$?" "0"
+      assert do_match "$message" "ENV_FILE=\""
+      assert do_match "$message" "docker-compose -f ${PWD}/test/docker-compose/default/docker-compose.yml -p"
+      # outside quotes are replaced with double quotes
+      assert do_match "$message" "run --rm -T default \"/bin/bash\""
+    end
+    it "exits 0, if multi-word command set without quotes"
+      # this is not recommended, but test that that behavior is expected
       message="$(cd test/docker-compose/default && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --force_not_interactive /bin/bash -c \"aaa\")"
       assert equal "$?" "0"
       assert do_match "$message" "ENV_FILE=\""
       assert do_match "$message" "docker-compose -f ${PWD}/test/docker-compose/default/docker-compose.yml -p"
+      # real match is (invalid quotes): run --rm -T default "/bin/bash -c "aaa""
+      # outside quotes are added
       assert do_match "$message" "run --rm -T default \"/bin/bash -c \"aaa\"\""
     end
+    it "exits 0, if multi-word command set with double quotes"
+      message="$(cd test/docker-compose/default && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --force_not_interactive \"/bin/bash -c \\\"aaa\\\"\")"
+      assert equal "$?" "0"
+      assert do_match "$message" "ENV_FILE=\""
+      assert do_match "$message" "docker-compose -f ${PWD}/test/docker-compose/default/docker-compose.yml -p"
+      # real match is: run --rm -T default "/bin/bash -c \"aaa\""
+      # outside quotes are not added
+      assert do_match "$message" "run --rm -T default \"/bin/bash -c \\\\\"aaa\\\\\"\""
+    end
+    it "exits 0, if multi-word command set with single quotes"
+      message="$(cd test/docker-compose/default && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --force_not_interactive '/bin/bash -c \"aaa\"')"
+      assert equal "$?" "0"
+      assert do_match "$message" "ENV_FILE=\""
+      assert do_match "$message" "docker-compose -f ${PWD}/test/docker-compose/default/docker-compose.yml -p"
+      # real match is: run --rm -T default "/bin/bash -c \"aaa\""
+      # outside quotes are replaced with double quotes
+      assert do_match "$message" "run --rm -T default \"/bin/bash -c \\\\\"aaa\\\\\"\""
+    end
     it "exits 0, if no command set"
-      # do not use \"\" it will not be counted as empty string
       message="$(cd test/docker-compose/default && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --force_not_interactive)"
       assert equal "$?" "0"
       assert do_match "$message" "ENV_FILE=\""
@@ -141,7 +220,6 @@ describe "commandline options"
       assert do_not_match "$message" "run --rm -T default \"\""
     end
     it "exits 0, if custom docker-compose file set"
-      # do not use \"\" it will not be counted as empty string
       message="$(cd test/docker-compose/custom_dc_file && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --force_not_interactive /bin/bash -c \"aaa\")"
       assert equal "$?" "0"
       assert do_match "$message" "ENV_FILE=\""
@@ -149,7 +227,6 @@ describe "commandline options"
       assert do_match "$message" "run --rm -T default \"/bin/bash -c \"aaa\"\""
     end
     it "exits 0, if custom docker-compose options set and command set"
-      # do not use \"\" it will not be counted as empty string
       message="$(cd test/docker-compose/custom_dc_options && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --force_not_interactive /bin/bash -c \"aaa\")"
       assert equal "$?" "0"
       assert do_match "$message" "ENV_FILE=\""
@@ -157,7 +234,6 @@ describe "commandline options"
       assert do_match "$message" "run --rm -T --bla default \"/bin/bash -c \"aaa\"\""
     end
     it "exits 0, if custom docker-compose options set and command not set"
-      # do not use \"\" it will not be counted as empty string
       message="$(cd test/docker-compose/custom_dc_options && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --force_not_interactive)"
       assert equal "$?" "0"
       assert do_match "$message" "ENV_FILE=\""
@@ -165,7 +241,6 @@ describe "commandline options"
       assert do_match "$message" "run --rm -T --bla default"
     end
     it "exits 1, if docker-compose file does not exist"
-      # do not use \"\" it will not be counted as empty string
       message="$(cd test/docker-compose/no_dc_file && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --force_not_interactive /bin/bash -c \"aaa\")"
       assert equal "$?" "1"
       assert do_match "$message" "IDE_DOCKER_COMPOSE_FILE set to"

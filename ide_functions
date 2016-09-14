@@ -278,8 +278,13 @@ function construct_docker_command() {
   docker_cmd+=" --name ${container_name}"
 
   if [ -n "$command" ]; then
-      # $command set
+    # $command set
+    if [[ "$command" == "\""*"\"" ]]; then
+      # $command is wrapped with double quotes already
+      docker_cmd+=" $image_name $command"
+    else
       docker_cmd+=" $image_name \"$command\""
+    fi
   else
       # $command not set
       # why? Because, if $command is set, then we want to quote it.
@@ -374,8 +379,13 @@ function construct_docker_compose_run_command() {
   docker_compose_cmd+=" default"
 
   if [ -n "$command" ]; then
-      # $command set
+    # $command set
+    if [[ "$command" == "\""*"\"" ]]; then
+      # $command is wrapped with double quotes already
+      docker_compose_cmd+=" $command"
+    else
       docker_compose_cmd+=" \"$command\""
+    fi
   fi
 
   echo "$docker_compose_cmd"

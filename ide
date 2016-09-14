@@ -72,6 +72,17 @@ do
 
 done
 
+log_debug "Starting ide, version: $version"
+if [[ "$command" == *" " ]]; then
+  # If command ends with space, remove it.
+  # This is due to space in: command="$opt $*"
+  # This works correctly for a command with >1 words, e.g. "/bin/sh whoami"
+  # but it leaves the space for 1 word, e.g. "bin/sh" becomes "/bin/sh ".
+  command="${command::-1}"
+  log_debug "command ends with space, trimmed to: ${command}"
+fi
+log_debug "command: $command"
+
 # verify options
 if [ -z "$idefile" ]; then
   log_error "idefile not specified"
@@ -84,7 +95,6 @@ if [ ! -f "$idefile" ]; then
   log_error "idefile: $idefile does not exist (relative to ${PWD})"
   exit 1;
 fi
-log_debug "Starting ide, version: $version"
 log_debug "idefile: $idefile"
 log_debug "dryrun: $dryrun"
 
