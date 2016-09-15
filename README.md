@@ -85,21 +85,32 @@ Thanks to that, we close all configuration problems of a particular
 ## Usage
 Run it from bash terminal:
 ```bash
-ide [--idefile IDEFILE] [COMMAND]
+ide [-c COMMAND] [options]
 ```
-Without setting a `COMMAND`, a docker container will be run with default
- docker image command.
+Without setting a docker or docker-compose command among options, a docker container
+ will be run with default docker image command.
 
 For more CLI options run:
 ```
 $ ide --help
-Usage: ide [--idefile IDEFILE] COMMAND
-  --help                           Help. Display this message and quit.
-  --version                        Version. Print version number and quit.
-  --idefile                        Specify IDEFILE, default is: ./Idefile
-  --dryrun                         Do not pull docker image, do not run docker run, verify Idefile.
-  --pull_only                      Pull docker image, do not run docker run, do not verify Idefile.
-  --force_not_interactive --not_i  Do not run docker containers interactively.
+Usage: ide [-c COMMAND] [options]
+  --command | -c        Set IDE command, supported: run, pull, help, version.
+                        Should be passed as first option. Default: run.
+      -c run            Run docker or docker-compose run command.
+      -c pull           Pull docker images specified in Idefile, do not run docker run, do not verify Idefile.
+      -c help           Help. Display this message and quit.
+      -c version        Version. Print version number and quit.
+
+  Options for run command:
+  --idefile /path/to/Idefile         Specify IDEFILE, default is: ./Idefile
+  --dryrun                           Do not pull docker image, do not run docker run, verify Idefile. Unset by default.
+  --force_not_interactive | --not_i  Do not run docker containers interactively.
+  --not_rm                           Do not docker container afterwards. Unset by default.
+  CMD                                Command to be run in docker container. Unset by default.
+
+  Options for pull command:
+  --idefile /path/to/Idefile         Specify IDEFILE, default is: ./Idefile
+  --dryrun                           Do not pull docker image, do not run docker run, verify Idefile. Unset by default.
 ```
 
 ### Real example
@@ -492,6 +503,11 @@ $ ide "cd ide_image_scripts && bundle install && bundle exec rake test_ide_scrip
 The `Rakefile.rb` contains guidelines how to install testing software. If you wish,
  you can invoke them without rake.
 
+### Unit tests
+Unit tests run either bash functions or invoke ide command with `--dryrun`
+ option. They never create any docker containers or pull/create docker images.
+
+### Contributions
 **Should you contribute a PR, just create your feature branch from master.**
 
 Git branching that leads to new release: create your feature branch(es) from master

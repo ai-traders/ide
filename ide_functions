@@ -8,12 +8,15 @@ log_debug() {
     echo -e "$(date "+%d-%m-%Y %T") ${1}"
   fi
 }
+log_debug_array() {
+  if [ "$IDE_LOG_LEVEL" == "debug" ]; then
+    echo -e "$(date "+%d-%m-%Y %T") ${!1}"
+  fi
+}
 
 log_error() {
   echo -e "\e[31mIDE error: $1\e[0m"
 }
-
-# TODO: parse_opts_for_run_and_pull (_and_commit) to avoid code dup?
 
 # http://stackoverflow.com/a/17841619
 function join_by {
@@ -485,6 +488,33 @@ function verify_docker_compose_file(){
   fi
 }
 
+function verify_idefile_option() {
+  idefile="$1"
+  if [ -z "$idefile" ]; then
+    log_error "idefile path set to zero-length string"
+    exit 1;
+  fi
+  if [ ! -f "$idefile" ]; then
+    # do not get full path here with:
+    # idefile_full_path=$(readlink -f "$idefile")
+    # it will be null
+    log_error "idefile: $idefile does not exist (relative to ${PWD})"
+    exit 1;
+  fi
+  log_debug "idefile: $idefile"
+}
+
+function common_verify_idefile() {
+  if [ -z "$IDE_DRIVER" ]; then
+    IDE_DRIVER="docker"
+    log_debug "IDE_DRIVER not set, setting to: $IDE_DRIVER"
+  fi
+  if [ "$IDE_DRIVER" != "docker" ] && [ "$IDE_DRIVER" != "docker-compose" ]; then
+    log_error "IDE_DRIVER set to $IDE_DRIVER, supported are: docker, docker-compose"
+    exit 1
+  fi
+}
+
 # Arguments:
 # $1 -- all the options for IDE run command
 function runfunc() {
@@ -496,8 +526,9 @@ function runfunc() {
   idefile="${PWD}/Idefile"
   dryrun="false"
 
+  # shellcheck disable=SC2128
   if [ -z "$opts" ]; then
-    log_debug "opts for runfunc not specified and that is ok"
+    log_debug "opts for pullfunc not specified and that is ok"
   else
     # parse options
     counter=0
@@ -542,18 +573,7 @@ function runfunc() {
   fi
 
   # verify options
-  if [ -z "$idefile" ]; then
-    log_error "idefile path set to zero-length string"
-    exit 1;
-  fi
-  if [ ! -f "$idefile" ]; then
-    # do not get full path here with:
-    # idefile_full_path=$(readlink -f "$idefile")
-    # it will be null
-    log_error "idefile: $idefile does not exist (relative to ${PWD})"
-    exit 1;
-  fi
-  log_debug "idefile: $idefile"
+  verify_idefile_option "$idefile"
   log_debug "dryrun: $dryrun"
   if [[ "$command" == *" " ]]; then
     # If command ends with space, remove it.
@@ -571,14 +591,7 @@ function runfunc() {
 
   # verify Idefile
   source "$idefile"
-  if [ -z "$IDE_DRIVER" ]; then
-    IDE_DRIVER="docker"
-    log_debug "IDE_DRIVER not set, setting to: $IDE_DRIVER"
-  fi
-  if [ "$IDE_DRIVER" != "docker" ] && [ "$IDE_DRIVER" != "docker-compose" ]; then
-    log_error "IDE_DRIVER set to $IDE_DRIVER, supported are: docker, docker-compose"
-    exit 1
-  fi
+  common_verify_idefile
 
   if [ -z "$IDE_WORK" ]; then
     IDE_WORK="$PWD"
@@ -744,6 +757,7 @@ function pullfunc() {
   idefile="${PWD}/Idefile"
   dryrun="false"
 
+  # shellcheck disable=SC2128
   if [ -z "$opts" ]; then
     log_debug "opts for pullfunc not specified and that is ok"
   else
@@ -773,30 +787,12 @@ function pullfunc() {
   fi
 
   # verify options
-  if [ -z "$idefile" ]; then
-    log_error "idefile path set to zero-length string"
-    exit 1;
-  fi
-  if [ ! -f "$idefile" ]; then
-    # do not get full path here with:
-    # idefile_full_path=$(readlink -f "$idefile")
-    # it will be null
-    log_error "idefile: $idefile does not exist (relative to ${PWD})"
-    exit 1;
-  fi
-  log_debug "idefile: $idefile"
+  verify_idefile_option "$idefile"
   log_debug "dryrun: $dryrun"
 
   # verify Idefile
   source "$idefile"
-  if [ -z "$IDE_DRIVER" ]; then
-    IDE_DRIVER="docker"
-    log_debug "IDE_DRIVER not set, setting to: $IDE_DRIVER"
-  fi
-  if [ "$IDE_DRIVER" != "docker" ] && [ "$IDE_DRIVER" != "docker-compose" ]; then
-    log_error "IDE_DRIVER set to $IDE_DRIVER, supported are: docker, docker-compose"
-    exit 1
-  fi
+  common_verify_idefile
 
   if [[ "$IDE_DRIVER" == "docker" ]]; then
     if [ -z "$IDE_DOCKER_IMAGE" ]; then

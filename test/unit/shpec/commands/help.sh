@@ -9,15 +9,16 @@ describe "ide command: help"
       assert equal "$exit_status" "0"
     end
     it "informs about ide usage"
-      assert equal "$?" "0"
       assert do_match "$message" "Usage:"
-      assert do_match "$message" "--help"
-      assert do_match "$message" "--version"
+      assert do_match "$message" "run"
+      assert do_match "$message" "pull"
+      assert do_match "$message" "help"
+      assert do_match "$message" "version"
       assert do_match "$message" "--idefile"
       assert do_match "$message" "--dryrun"
-      assert do_match "$message" "--pull_only"
       assert do_match "$message" "--force_not_interactive"
       assert do_match "$message" "--not_i"
+      assert do_match "$message" "--not_rm"
     end
   end
   describe "when run with '-c help'"
@@ -28,13 +29,6 @@ describe "ide command: help"
     end
     it "informs about ide usage"
       assert do_match "$message" "Usage:"
-      assert do_match "$message" "--help"
-      assert do_match "$message" "--version"
-      assert do_match "$message" "--idefile"
-      assert do_match "$message" "--dryrun"
-      assert do_match "$message" "--pull_only"
-      assert do_match "$message" "--force_not_interactive"
-      assert do_match "$message" "--not_i"
     end
   end
   describe "when run with '-c help bla abc 1'"
@@ -45,13 +39,6 @@ describe "ide command: help"
     end
     it "informs about ide usage, ignores the rest of parameters"
       assert do_match "$message" "Usage:"
-      assert do_match "$message" "--help"
-      assert do_match "$message" "--version"
-      assert do_match "$message" "--idefile"
-      assert do_match "$message" "--dryrun"
-      assert do_match "$message" "--pull_only"
-      assert do_match "$message" "--force_not_interactive"
-      assert do_match "$message" "--not_i"
     end
   end
 end

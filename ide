@@ -7,16 +7,26 @@ source "${DIR}/ide_version"
 
 # This function is kept in this file because of usage of: $0
 function helpfunc() {
-    echo "Usage: $0 [--idefile IDEFILE] COMMAND"
-    echo "  --help                           Help. Display this message and quit."
-    echo "  --version                        Version. Print version number and quit."
-    echo "  --idefile                        Specify IDEFILE, default is: ./Idefile"
-    echo "  --dryrun                         Do not pull docker image, do not run docker run, verify Idefile."
-    echo "  --pull_only                      Pull docker image, do not run docker run, do not verify Idefile."
-    echo "  --force_not_interactive --not_i  Do not run docker containers interactively."
-    echo "  --rm \"false\"                   Remove docker container afterwards. Default: true"
+    echo "Usage: $0 [-c COMMAND] [options]"
+    echo "  --command | -c        Set IDE command, supported: run, pull, help, version."
+    echo "                        Should be passed as first option. Default: run."
+    echo "      -c run            Run docker or docker-compose run command."
+    echo "      -c pull           Pull docker images specified in Idefile, do not run docker run, do not verify Idefile."
+    echo "      -c help           Help. Display this message and quit."
+    echo "      -c version        Version. Print version number and quit."
+    echo -e ""
+    echo "  Options for run command:"
+    echo "  --idefile /path/to/Idefile         Specify IDEFILE, default is: ./Idefile"
+    echo "  --dryrun                           Do not pull docker image, do not run docker run, verify Idefile. Unset by default."
+    echo "  --force_not_interactive | --not_i  Do not run docker containers interactively."
+    echo "  --not_rm                           Do not docker container afterwards. Unset by default."
+    echo "  CMD                                Command to be run in docker container. Unset by default."
+    echo -e ""
+    echo "  Options for pull command:"
+    echo "  --idefile /path/to/Idefile         Specify IDEFILE, default is: ./Idefile"
+    echo "  --dryrun                           Do not pull docker image, do not run docker run, verify Idefile. Unset by default."
     exit
-} # TODO: !!!
+}
 
 # default values
 ide_command="run"
@@ -24,6 +34,12 @@ ide_command="run"
 while (( $# > 0 ))
 do
   case $1 in
+  -h | --help)
+    # In order to not let anyone run: "ide --help" and be surprised that
+    # it could run a docker container.
+    helpfunc
+    exit 0
+    ;;
   -c | --command)
     shift 1 # the value of ide command is under the next parameter, so now
     # $2 becomes: $1
@@ -33,7 +49,7 @@ do
   *)
     # assign the rest of parameters into other_options_array1
     # and stop the loop
-    other_options_array=("$@")
+    other_options_array=("$@") # shellcheck disable=SC2034
     break
     ;;
   esac
@@ -41,10 +57,6 @@ done
 
 log_debug "Starting ide, version: $version"
 log_debug "ide_command: $ide_command"
-# echo "other options: ${other_options_array[@]}" # TODO: make log_debug
-# for opt in "${other_options_array[@]}" ; do
-#   echo "one option is: $opt"
-# done
 
 case $ide_command in
 help)
