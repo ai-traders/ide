@@ -7,10 +7,12 @@
 * added unit tests for running IDE with docker command:
  * without quotes vs with double quotes vs with single quotes
  * one-word vs multi-word
-* #9864 ide with configurable --rm for docker driver
+* #9864 ide with configurable --no_rm for docker driver
 * #9888 fix shpec do_match and do_not_match matchers by adding --, so that
   grep string pattern is not misunderstood for grep options and remove
   workarounds (additional spaces in tests).
+* #9889 refactor IDE to differenciate commands and options
+* #9891 order unit and integration tests, put them into directories
 
 # 0.5.0 (2 Sep 2016)
 

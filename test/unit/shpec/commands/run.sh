@@ -1,16 +1,7 @@
-# This acts more like integration tests, but since dry run is used here,
-# I treat it as unit tests.
-describe "commandline options"
+describe "ide command: run"
   # make absolute path out of relative
   IDE_PATH=$(readlink -f "./ide")
-  # do not use \"\" it will not be counted as empty string
 
-  describe "--version"
-    it "outputs the current version number"
-      message="$(${IDE_PATH} --version)"
-      assert do_match "$message" "${IDE_PATH} version"
-    end
-  end
   describe "--idefile"
     it "exits 1, if --idefile not set and Idefile does not exist in curent directory"
       message="$(cd test && ${IDE_PATH} --dryrun some_command)"

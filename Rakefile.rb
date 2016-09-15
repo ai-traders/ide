@@ -25,7 +25,7 @@ end
 # sudo sh -c "`curl -L https://raw.github.com/rylnd/shpec/master/install.sh`"
 namespace 'unit' do
   task :shpec do
-    Rake.sh("shpec test/unit/shpec/*.sh")
+    Rake.sh("shpec test/unit/shpec/**/*.sh")
   end
 end
 
@@ -40,7 +40,7 @@ namespace 'itest' do
     end
   end
   task :shpec do
-    Rake.sh("shpec test/integration/shpec/*.sh")
+    Rake.sh("shpec test/integration/shpec/**/*.sh")
   end
 
   desc 'Test install.sh; do not run on workstation'
