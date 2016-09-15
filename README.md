@@ -105,7 +105,8 @@ Usage: ide [-c COMMAND] [options]
   --idefile /path/to/Idefile         Specify IDEFILE, default is: ./Idefile
   --dryrun                           Do not pull docker image, do not run docker run, verify Idefile. Unset by default.
   --force_not_interactive | --not_i  Do not run docker containers interactively.
-  --not_rm                           Do not docker container afterwards. Unset by default.
+  --not_rm                           Do not remove docker container after run. Unset by default.
+                                     Implemented for docker driver only. Generates ./iderc file with container name.
   CMD                                Command to be run in docker container. Unset by default.
 
   Options for pull command:
