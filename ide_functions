@@ -491,65 +491,59 @@ function runfunc() {
   # receiving array as bash function parameter, thanks to:
   # http://stackoverflow.com/a/4017175
   declare -a opts=("${!1}")
-  if [ -z "$opts" ]; then
-    log_error "opts not specified"
-    return 1;
-  fi
-  echo "in runfunc"
-  for opt in "${opts[@]}" ; do
-    echo "one option is: $opt"
-  done
 
   # default values
   idefile="${PWD}/Idefile"
   dryrun="false"
 
-  counter=0
-  while [[ $counter -lt "${#opts[@]}" ]]; do
-    echo "parsing arg number: $counter"
-    opt="${opts[$counter]}"
-    echo "parsing arg: $opt"
+  if [ -z "$opts" ]; then
+    log_debug "opts for runfunc not specified and that is ok"
+  else
+    # parse options
+    counter=0
+    while [[ $counter -lt "${#opts[@]}" ]]; do
+      opt="${opts[$counter]}"
 
-    case $opt in
-    --idefile)
-        # This format is expected: --idefile /path/to/my_idefile
-        # so "--idefile" is under ${opts[$counter]}, while
-        # "/path/to/my_idefile" is under ${opts[$counter+1]}
-        idefile="${opts[$counter+1]}"
-        counter=$((counter+1))
-        ;;
-    --dryrun)
-        dryrun="true"
-        ;;
-    --not_i | --force_not_interactive)
-        force_not_interactive="true" # TODO: not for pull
-        ;;
-    --no_rm)
-        remove_containers="false" # TODO: not for pull
-        ;;
-    --* | -*)
-        log_error "Invalid option: '$opt'" >&2
-        exit 1
-        ;;
-    *) # TODO: not for pull
-        # we want to assign the rest of array elements as 1 element
-        # http://stackoverflow.com/a/169517
-        cmd_words_array=()
-        # go from current value of counter up to opts array length -1
-        for i in $(seq "${counter}" $((${#opts[@]}-1))) ; do
-          echo "mii: $i"
-          cmd_words_array+=("${opts[$i]}")
-        done
-        command=$(join_by " " "${cmd_words_array[@]}")
-        break;
-        ;;
-    esac
-    counter=$((counter+1))
-  done
+      case $opt in
+      --idefile)
+          # This format is expected: --idefile /path/to/my_idefile
+          # so "--idefile" is under ${opts[$counter]}, while
+          # "/path/to/my_idefile" is under ${opts[$counter+1]}
+          idefile="${opts[$counter+1]}"
+          counter=$((counter+1))
+          ;;
+      --dryrun)
+          dryrun="true"
+          ;;
+      --not_i | --force_not_interactive)
+          force_not_interactive="true"
+          ;;
+      --no_rm)
+          remove_containers="false"
+          ;;
+      --* | -*)
+          log_error "Invalid option: '$opt'" >&2
+          exit 1
+          ;;
+      *)
+          # we want to assign the rest of array elements as 1 element
+          # http://stackoverflow.com/a/169517
+          cmd_words_array=()
+          # go from current value of counter up to opts array length -1
+          for i in $(seq "${counter}" $((${#opts[@]}-1))) ; do
+            cmd_words_array+=("${opts[$i]}")
+          done
+          command=$(join_by " " "${cmd_words_array[@]}")
+          break;
+          ;;
+      esac
+      counter=$((counter+1))
+    done
+  fi
 
   # verify options
   if [ -z "$idefile" ]; then
-    log_error "idefile not specified"
+    log_error "idefile path set to zero-length string"
     exit 1;
   fi
   if [ ! -f "$idefile" ]; then
@@ -745,47 +739,42 @@ function pullfunc() {
   # receiving array as bash function parameter, thanks to:
   # http://stackoverflow.com/a/4017175
   declare -a opts=("${!1}")
-  if [ -z "$opts" ]; then
-    log_error "opts not specified"
-    return 1;
-  fi
-  echo "in runfunc"
-  for opt in "${opts[@]}" ; do
-    echo "one option is: $opt"
-  done
 
   # default values
   idefile="${PWD}/Idefile"
   dryrun="false"
 
-  counter=0
-  while [[ $counter -lt "${#opts[@]}" ]]; do
-    echo "parsing arg number: $counter"
-    opt="${opts[$counter]}"
-    echo "parsing arg: $opt"
+  if [ -z "$opts" ]; then
+    log_debug "opts for pullfunc not specified and that is ok"
+  else
+    # parse options
+    counter=0
+    while [[ $counter -lt "${#opts[@]}" ]]; do
+      opt="${opts[$counter]}"
 
-    case $opt in
-    --idefile)
-        # This format is expected: --idefile /path/to/my_idefile
-        # so "--idefile" is under ${opts[$counter]}, while
-        # "/path/to/my_idefile" is under ${opts[$counter+1]}
-        idefile="${opts[$counter+1]}"
-        counter=$((counter+1))
-        ;;
-    --dryrun)
-        dryrun="true"
-        ;;
-    --* | -* | *)
-        log_error "Invalid option: '$opt'" >&2
-        exit 1
-        ;;
-    esac
-    counter=$((counter+1))
-  done
+      case $opt in
+      --idefile)
+          # This format is expected: --idefile /path/to/my_idefile
+          # so "--idefile" is under ${opts[$counter]}, while
+          # "/path/to/my_idefile" is under ${opts[$counter+1]}
+          idefile="${opts[$counter+1]}"
+          counter=$((counter+1))
+          ;;
+      --dryrun)
+          dryrun="true"
+          ;;
+      --* | -* | *)
+          log_error "Invalid option: '$opt'" >&2
+          exit 1
+          ;;
+      esac
+      counter=$((counter+1))
+    done
+  fi
 
   # verify options
   if [ -z "$idefile" ]; then
-    log_error "idefile not specified"
+    log_error "idefile path set to zero-length string"
     exit 1;
   fi
   if [ ! -f "$idefile" ]; then
@@ -798,6 +787,17 @@ function pullfunc() {
   log_debug "idefile: $idefile"
   log_debug "dryrun: $dryrun"
 
+  # verify Idefile
+  source "$idefile"
+  if [ -z "$IDE_DRIVER" ]; then
+    IDE_DRIVER="docker"
+    log_debug "IDE_DRIVER not set, setting to: $IDE_DRIVER"
+  fi
+  if [ "$IDE_DRIVER" != "docker" ] && [ "$IDE_DRIVER" != "docker-compose" ]; then
+    log_error "IDE_DRIVER set to $IDE_DRIVER, supported are: docker, docker-compose"
+    exit 1
+  fi
+
   if [[ "$IDE_DRIVER" == "docker" ]]; then
     if [ -z "$IDE_DOCKER_IMAGE" ]; then
       log_error "IDE_DOCKER_IMAGE not set"
@@ -805,7 +805,6 @@ function pullfunc() {
     fi
 
     if [[ "$dryrun" != "true" ]]; then
-      # --pull_only is set and --dryrun is not
       if [[ $(docker images "${IDE_DOCKER_IMAGE}" --format "{{.ID}}" | wc -l) == "0" ]]; then
         echo -e "${GREEN}Pulling docker image: ${IDE_DOCKER_IMAGE}${NC}"
         docker pull "${IDE_DOCKER_IMAGE}"
@@ -827,7 +826,6 @@ function pullfunc() {
     fi
 
     if [[ "$dryrun" != "true" ]]; then
-      # --pull_only is set and --dryrun is not
       echo -e "${GREEN}pulling docker images for: ${IDE_DOCKER_COMPOSE_FILE}${NC}"
       # temporarily set 3 variables and create an empty env file,
       # so that docker-compose does not error

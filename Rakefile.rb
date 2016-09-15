@@ -40,7 +40,7 @@ namespace 'itest' do
     end
   end
   task :shpec do
-    Rake.sh("shpec test/integration/shpec/**/*.sh")
+    Rake.sh("shpec test/integration/shpec/*.sh")
   end
 
   desc 'Test install.sh; do not run on workstation'

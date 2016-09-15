@@ -1,6 +1,6 @@
 # 0.6.0 (13 Sep 2016)
 
-* #9865; #9707 ide --pull_only option implemented
+* #9865; #9707 ide pull command implemented
 * better itests - replaced some rake tasks with shpec integration tests
 * #9865 added alias for --force_not_interactive option: --not_i
 * #9890 fixed bug: IDE adds space at the end of docker command
