@@ -8,12 +8,13 @@ source "${DIR}/ide_version"
 # This function is kept in this file because of usage of: $0
 function helpfunc() {
     echo "Usage: $0 [-c COMMAND] [options]"
-    echo "  --command | -c        Set IDE command, supported: run, pull, help, version."
-    echo "                        Should be passed as first option. Default: run."
-    echo "      -c run            Run docker or docker-compose run command."
-    echo "      -c pull           Pull docker images specified in Idefile, do not run docker run, do not verify Idefile."
-    echo "      -c help           Help. Display this message and quit."
-    echo "      -c version        Version. Print version number and quit."
+    echo "  --command  | -c                    Set IDE command, supported: run, pull, help, version."
+    echo "                                     Should be passed as first option. Default: run."
+    echo -e ""
+    echo "  -c run                             Run docker or docker-compose run command."
+    echo "  -c pull                            Pull docker images specified in Idefile, do not run docker run, do not verify Idefile."
+    echo "  -c help    | --help                Help. Display this message and quit."
+    echo "  -c version | --version             Version. Print version number and quit."
     echo -e ""
     echo "  Options for run command:"
     echo "  --idefile /path/to/Idefile         Specify IDEFILE, default is: ./Idefile"
@@ -39,9 +40,13 @@ while (( $# > 0 ))
 do
   case $1 in
   -h | --help)
-    # In order to not let anyone run: "ide --help" and be surprised that
-    # it could run a docker container.
+    # Keep it in order not to surprise end user
     helpfunc
+    exit 0
+    ;;
+  -v | --version)
+    # Keep it in order not to surprise end user
+    echo "$0 version $version"
     exit 0
     ;;
   -c | --command)

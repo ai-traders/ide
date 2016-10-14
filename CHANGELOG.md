@@ -2,6 +2,7 @@
 
 * \#9920 when --no_rm is set, generate iderc.txt with container name and
  iderc file with `IDE_RUN_ID=<container name>`
+* keep `ide --version` option in order not to surprise end user
 
 ### 0.6.0 (13 Sep 2016)
 
