@@ -633,7 +633,9 @@ function runfunc() {
     # Just not removing docker container would be impractical, we'd have to
     # parse output of ide in order to get container name. Thus, save the
     # container name to a file.
-    echo "${run_id}" > "$(pwd)/iderc"
+    echo "${run_id}" > "$(pwd)/iderc.txt"
+    echo "written docker container name to $(pwd)/iderc.txt"
+    echo "IDE_RUN_ID=${run_id}" > "$(pwd)/iderc"
     echo "written docker container name to $(pwd)/iderc"
   fi
 

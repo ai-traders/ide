@@ -17,15 +17,18 @@ function helpfunc() {
     echo -e ""
     echo "  Options for run command:"
     echo "  --idefile /path/to/Idefile         Specify IDEFILE, default is: ./Idefile"
-    echo "  --dryrun                           Do not pull docker image, do not run docker run, verify Idefile. Unset by default."
+    echo "  --dryrun                           Do not pull docker image, do not run docker run, verify Idefile."
+    echo "                                     Unset by default."
     echo "  --force_not_interactive | --not_i  Do not run docker containers interactively."
-    echo "  --not_rm                           Do not remove docker containers after run. Unset by default."
-    echo "                                     Implemented for docker driver only. Generates ./iderc file with container name."
-    echo "  CMD                                Command to be run in docker container. Unset by default."
+    echo "  --no_rm                            Do not remove docker containers after run. Unset by default."
+    echo "                                     Implemented for docker driver only. Generates ./iderc and ./iderc.txt"
+    echo "                                     files with container name."
+    echo "  CMD                                Command to be run in a docker container. Unset by default."
     echo -e ""
     echo "  Options for pull command:"
     echo "  --idefile /path/to/Idefile         Specify IDEFILE, default is: ./Idefile"
-    echo "  --dryrun                           Do not pull docker image, do not run docker run, verify Idefile. Unset by default."
+    echo "  --dryrun                           Do not pull docker image, do not run docker run, verify Idefile."
+    echo "                                     Unset by default."
     exit
 }
 

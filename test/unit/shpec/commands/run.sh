@@ -134,14 +134,19 @@ describe "ide command: run"
     end
     describe '--no_rm option'
       publicide_path="test/docker/publicide-usage"
+      iderc_txt="${publicide_path}/iderc.txt"
       iderc="${publicide_path}/iderc"
 
       describe 'when --no_rm is set'
-        rm -rf "${iderc}"
+        rm -rf "${iderc}" "${iderc_txt}"
         message="$(cd ${publicide_path} && ${IDE_PATH} --no_rm --dryrun)"
         exit_status="$?"
         it "exits with status 0"
           assert equal "$exit_status" "0"
+        end
+        it "creates iderc.txt file"
+          file_exists="$(test -f ${iderc_txt})"
+          assert equal "$?" "0"
         end
         it "creates iderc file"
           file_exists="$(test -f ${iderc})"
@@ -150,7 +155,7 @@ describe "ide command: run"
         it "does not create docker container"
           assert do_not_match "$message" "--rm"
         end
-        rm -rf "${iderc}"
+        rm -rf "${iderc}" "${iderc_txt}"
       end
     end
     describe 'when using different docker run commands'

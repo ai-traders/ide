@@ -1,3 +1,8 @@
+# 0.6.1 (14 Oct 2016)
+
+* #9920 when --no_rm is set, generate iderc.txt with container name and
+ iderc file with `IDE_RUN_ID=<container name>`
+
 # 0.6.0 (13 Sep 2016)
 
 * #9865; #9707 ide pull command implemented
