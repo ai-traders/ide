@@ -7,9 +7,9 @@
 
 TMPDIR=${TMPDIR:-/tmp}
 cd $TMPDIR
-wget --quiet http://gitlab.ai-traders.com/ide/ide/raw/master/ide -O /usr/bin/ide
-wget --quiet http://gitlab.ai-traders.com/ide/ide/raw/master/ide_functions -O /usr/bin/ide_functions
-wget --quiet http://gitlab.ai-traders.com/ide/ide/raw/master/ide_version -O /usr/bin/ide_version
+wget --quiet https://raw.githubusercontent.com/ai-traders/ide/master/ide -O /usr/bin/ide
+wget --quiet https://raw.githubusercontent.com/ai-traders/ide/master/ide_functions -O /usr/bin/ide_functions
+wget --quiet https://raw.githubusercontent.com/ai-traders/ide/master/ide_version -O /usr/bin/ide_version
 chmod 755 /usr/bin/ide
 chmod 755 /usr/bin/ide_functions
 chmod 755 /usr/bin/ide_version

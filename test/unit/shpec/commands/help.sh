@@ -18,7 +18,7 @@ describe "ide command: help"
       assert do_match "$message" "--dryrun"
       assert do_match "$message" "--force_not_interactive"
       assert do_match "$message" "--not_i"
-      assert do_match "$message" "--not_rm"
+      assert do_match "$message" "--no_rm"
     end
   end
   describe "when run with '-c help'"

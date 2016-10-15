@@ -35,8 +35,9 @@ describe "ide command: run"
     describe 'when --no_rm is set'
       publicide_path="test/docker/publicide-usage"
       iderc="${publicide_path}/iderc"
+      iderc_txt="${publicide_path}/iderc.txt"
 
-      rm -rf "${iderc}"
+      rm -rf "${iderc}" "${iderc_txt}"
       message="$(cd ${publicide_path} && IDE_LOG_LEVEL=debug ${IDE_PATH} --no_rm whoami)"
       exit_status="$?"
       it "exits with status 0"
@@ -47,14 +48,14 @@ describe "ide command: run"
       end
       it "creates docker container and does not remove it"
         # this is how to get the name of the container
-        container_name="$(cat ${iderc})"
+        container_name="$(cat ${iderc_txt})"
         assert do_match "$container_name" "ide-publicide-usage"
 
         # container is running? should be not removed and be stopped
         assert do_match $(docker inspect  --format {{.State.Running}} ${container_name}) "false"
       end
       docker rm ${container_name}
-      rm -rf "${iderc}"
+      rm -rf "${iderc}" "${iderc_txt}"
     end
   end
   describe 'when IDE_DRIVER="docker-compose"'
