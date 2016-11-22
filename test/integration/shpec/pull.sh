@@ -54,7 +54,7 @@ describe "ide command: pull"
       end
     end
   end
-  describe 'when IDE_DRIVER="docker-compose"'
+  describe 'when IDE_DRIVER="docker-compose"; version 1 of docker-compose file'
     describe "when run with '--command pull' and docker image does not exist locally"
       # clean up before test, if there is no such image, docker will
       # return error, ignore that
@@ -73,6 +73,37 @@ describe "ide command: pull"
     end
     describe "when run with '--command pull' and docker image exists locally"
       message="$(cd test/docker-compose/publicide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --command pull)"
+      exit_status="$?"
+      it "exits with status 0"
+        assert equal "$exit_status" "0"
+      end
+      it "informs that command to be used is: pull"
+        assert do_match "$message" "ide_command: pull"
+      end
+      it "informs there is no need to pull docker image"
+        assert do_match "$message" "Image is up to date for alpine:3.4"
+      end
+    end
+  end
+  describe 'when IDE_DRIVER="docker-compose"; version 2 of docker-compose file'
+    describe "when run with '--command pull' and docker image does not exist locally"
+      # clean up before test, if there is no such image, docker will
+      # return error, ignore that
+      docker rmi alpine:3.4
+      message="$(cd test/docker-compose/publicide-v2-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --command pull)"
+      exit_status="$?"
+      it "exits with status 0"
+        assert equal "$exit_status" "0"
+      end
+      it "informs that command to be used is: pull"
+        assert do_match "$message" "ide_command: pull"
+      end
+      it "pulls docker image"
+        assert do_match "$message" "Downloaded newer image for alpine:3.4"
+      end
+    end
+    describe "when run with '--command pull' and docker image exists locally"
+      message="$(cd test/docker-compose/publicide-v2-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --command pull)"
       exit_status="$?"
       it "exits with status 0"
         assert equal "$exit_status" "0"

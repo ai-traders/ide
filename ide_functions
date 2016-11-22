@@ -830,9 +830,13 @@ function pullfunc() {
       echo -e "${GREEN}pulling docker images for: ${IDE_DOCKER_COMPOSE_FILE}${NC}"
       # temporarily set 3 variables and create an empty env file,
       # so that docker-compose does not error
-      empty_env_file="$(dirname "${IDE_DOCKER_COMPOSE_FILE}")/dummy"
+      empty_env_file="$(dirname "${IDE_DOCKER_COMPOSE_FILE}")/ide-dummyfile"
       touch "${empty_env_file}"
-      IDE_WORK="dummy" IDE_IDENTITY="dummy" ENV_FILE="dummy" docker-compose -f "${IDE_DOCKER_COMPOSE_FILE}" pull
+      # each of the IDE_WORK, IDE_IDENTITY, ENV_FILE must not be set to a 1
+      # word, because docker-compose v2 files support volumes named with 1 word
+      # and if such a volume does not exist, then there is an error like:
+      # ERROR: Named volume "dummy:/ide/identity:ro" is used in service "default" but no declaration was found in the volumes section.
+      IDE_WORK="${empty_env_file}" IDE_IDENTITY="${empty_env_file}" ENV_FILE="${empty_env_file}" docker-compose -f "${IDE_DOCKER_COMPOSE_FILE}" pull
       rm "${empty_env_file}"
     fi
   fi

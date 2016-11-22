@@ -1,6 +1,8 @@
 ### 0.6.2 (22 Nov 2016)
 
-* \#10078 fix a bug when validating docker-compose version 2 yaml file
+* \#10078 fix a bug when validating docker-compose v2 yaml file
+* \#10078 fix a bug that resulted in error when running `ide -c pull`
+ if using docker-compose v2 yaml file
 
 ### 0.6.1 (14 Oct 2016)
 
