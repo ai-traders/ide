@@ -1,0 +1,14 @@
+version: '2'
+services:
+  default:
+    image: alpine:3.4
+    command: ["while true; do sleep 1d; done;"]
+    volumes:
+      - ${IDE_IDENTITY}:/ide/identity:ro
+      - ${IDE_WORK}:/ide/work
+    env_file:
+      - ${ENV_FILE}
+  another-alpine:
+    image: alpine:3.4
+    env_file:
+      - ${ENV_FILE}
