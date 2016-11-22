@@ -482,7 +482,10 @@ function verify_docker_compose_file(){
     log_error "$docker_compose_file does not contain \":ro\" when mounting IDE_IDENTITY"
     exit 1
   fi
-  if [[ $(echo "$contents" | grep "^default:" -c) == "0" ]]; then
+  # This is the least I can do for now. I could use the command:
+  # `docker-compose -f some.yml config --services`, but it says that the
+  # current directory is not a file and fails.
+  if [[ $(echo "$contents" | grep "default:" -c) == "0" ]]; then
     log_error "$docker_compose_file does not contain \"default\" container"
     exit 1
   fi

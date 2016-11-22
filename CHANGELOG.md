@@ -1,3 +1,7 @@
+### 0.6.2 (22 Nov 2016)
+
+* \#10078 fix a bug when validating docker-compose version 2 yaml file
+
 ### 0.6.1 (14 Oct 2016)
 
 * \#9920 when --no_rm is set, generate iderc.txt with container name and
