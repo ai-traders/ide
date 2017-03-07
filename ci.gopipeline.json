@@ -110,7 +110,7 @@
               "configuration": [
                 {
                   "key": "script",
-                  "value": "ide \"cd ide_image_scripts && bundle install && bundle exec rake test_ide_scripts\""
+                  "value": "ide \"cd ide_image_scripts && bundle install && bundle exec rake kitchen:all\""
                 }
               ],
               "plugin_configuration": {

@@ -2,6 +2,11 @@
 provisioner:
   name: dummy
 
+verifier:
+  name: shell
+  command: /usr/local/bin/bats /tmp/bats
+  remote_exec: true
+
 platforms:
   - name: ubuntu
     transport:
@@ -32,6 +37,7 @@ suites:
       volume:
         - <%= File.dirname(__FILE__) %>/test/integration/dummy_work:/ide/work
         - <%= File.dirname(__FILE__) %>/test/integration/default/bats:/tmp/bats
+        - <%= File.dirname(__FILE__) %>/test/integration/default/30-not-executable-file.sh:/etc/ide.d/scripts/30-not-executable-file.sh
   - name: ssh
     driver_config:
       volume:

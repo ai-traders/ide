@@ -20,9 +20,10 @@ load '/bats-assert/load.bash'
   assert_equal "$output" "root"
 }
 @test "/usr/bin/entrypoint.sh is executable" {
-  run stat -c %a /usr/bin/entrypoint.sh
+  # we don't care about all the permissions, but we care that this file
+  # has execute permission for the user running the test
+  run test -x /usr/bin/entrypoint.sh
   assert_equal "$status" 0
-  assert_equal "$output" "755"
 }
 @test "/etc/ide.d exists and is a directory" {
   run test -d /etc/ide.d
@@ -51,9 +52,12 @@ load '/bats-assert/load.bash'
   assert_equal "$output" "root"
 }
 @test "/etc/ide.d/scripts/50-ide-fix-uid-gid.sh is executable" {
-  run stat -c %a /etc/ide.d/scripts/50-ide-fix-uid-gid.sh
+  run test -x /etc/ide.d/scripts/50-ide-fix-uid-gid.sh
   assert_equal "$status" 0
-  assert_equal "$output" "755"
+}
+@test "/etc/ide.d/scripts/30-not-executable-file.sh is NOT executable" {
+  run test -x /etc/ide.d/scripts/30-not-executable-file.sh
+  assert_equal "$status" 1
 }
 
 # All the ide scripts can be executed without error and many times.
@@ -65,5 +69,13 @@ load '/bats-assert/load.bash'
   # do not test which line returns those strings, sometimes there is
   # additional line: "usermod: no changes"
   assert_line --partial "ide init finished"
+  assert_line --partial "Running a script which user forgot to make executable"
   assert_line "ide"
+}
+@test "entrypoint made /etc/ide.d/scripts/30-not-executable-file.sh executable" {
+  run test -x /etc/ide.d/scripts/30-not-executable-file.sh
+  assert_equal "$status" 0
+
+  # make it not executable again, so that tests can be run many times
+  chmod 644 /etc/ide.d/scripts/30-not-executable-file.sh
 }

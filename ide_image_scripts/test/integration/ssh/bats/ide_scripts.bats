@@ -20,9 +20,10 @@ load '/bats-assert/load.bash'
   assert_equal "$output" "root"
 }
 @test "/usr/bin/entrypoint.sh is executable" {
-  run stat -c %a /usr/bin/entrypoint.sh
+  # we don't care about all the permissions, but we care that this file
+  # has execute permission for the user running the test
+  run test -x /usr/bin/entrypoint.sh
   assert_equal "$status" 0
-  assert_equal "$output" "755"
 }
 @test "/etc/ide.d exists and is a directory" {
   run test -d /etc/ide.d
@@ -51,9 +52,8 @@ load '/bats-assert/load.bash'
   assert_equal "$output" "root"
 }
 @test "/etc/ide.d/scripts/50-ide-fix-uid-gid.sh is executable" {
-  run stat -c %a /etc/ide.d/scripts/50-ide-fix-uid-gid.sh
+  run test -x /etc/ide.d/scripts/50-ide-fix-uid-gid.sh
   assert_equal "$status" 0
-  assert_equal "$output" "755"
 }
 
 # All the ide scripts can be executed without error and many times.
@@ -82,9 +82,8 @@ load '/bats-assert/load.bash'
   assert_equal "$output" "ide"
 }
 @test "/etc/ide.d/scripts/30-copy-ssh-configs.sh is executable" {
-  run stat -c %a /etc/ide.d/scripts/30-copy-ssh-configs.sh
+  run test -x /etc/ide.d/scripts/30-copy-ssh-configs.sh
   assert_equal "$status" 0
-  assert_equal "$output" "775"
 }
 
 # secret provided thanks to the custom configuration file
