@@ -237,17 +237,18 @@ function save_environment_variables() {
 # $8 is command to be run in docker container
 # $9 are docker options
 function construct_docker_command() {
-  env_file="$1"
-  run_interactively="$2"
-  container_name="$3"
-  image_name="$4"
-  ide_work="$5"
-  ide_identity="$6"
-  remove_containers="$7"
+  ide_driver="$1"
+  env_file="$2"
+  run_interactively="$3"
+  container_name="$4"
+  image_name="$5"
+  ide_work="$6"
+  ide_identity="$7"
+  remove_containers="$8"
   # can be unset
-  command="$8"
+  command="$9"
   # can be unset
-  ide_docker_options="$9"
+  ide_docker_options="${10}"
   if [ -z "$env_file" ]; then
     log_error "env_file not specified"
     return 1;
@@ -278,7 +279,14 @@ function construct_docker_command() {
   fi
 
   # initial part of the docker command
-  docker_cmd="docker run"
+  if [[ "${ide_driver}" == "docker" ]]; then
+    docker_cmd="docker run"
+  elif [[ "${ide_driver}" == "nvidia-docker" ]]; then
+    docker_cmd="nvidia-docker run"
+  else
+    log_error "ide_driver was set to ${ide_driver}, which is not supported"
+    return 1;
+  fi
   if [[ "$remove_containers" == "true" ]]; then
     docker_cmd+=" --rm"
   fi
@@ -512,8 +520,8 @@ function common_verify_idefile() {
     IDE_DRIVER="docker"
     log_debug "IDE_DRIVER not set, setting to: $IDE_DRIVER"
   fi
-  if [ "$IDE_DRIVER" != "docker" ] && [ "$IDE_DRIVER" != "docker-compose" ]; then
-    log_error "IDE_DRIVER set to $IDE_DRIVER, supported are: docker, docker-compose"
+  if [ "$IDE_DRIVER" != "docker" ] && [ "$IDE_DRIVER" != "docker-compose" ] && [ "$IDE_DRIVER" != "nvidia-docker" ]; then
+    log_error "IDE_DRIVER set to $IDE_DRIVER, supported are: docker, docker-compose, nvidia-docker"
     exit 1
   fi
 }
@@ -642,13 +650,13 @@ function runfunc() {
     echo "written docker container name to $(pwd)/iderc"
   fi
 
-  if [[ "$IDE_DRIVER" == "docker" ]]; then
+  if [[ "$IDE_DRIVER" == "docker" ]] || [[ "$IDE_DRIVER" == "nvidia-docker" ]]; then
     if [ -z "$IDE_DOCKER_IMAGE" ]; then
       log_error "IDE_DOCKER_IMAGE not set"
       exit 1;
     fi
     # construct docker command
-    docker_command=$(construct_docker_command "$env_file" "$run_interactively" "$run_id" "$IDE_DOCKER_IMAGE" "$IDE_WORK" "$IDE_IDENTITY" "$remove_containers" "$command" "$IDE_DOCKER_OPTIONS")
+    docker_command=$(construct_docker_command "$IDE_DRIVER" "$env_file" "$run_interactively" "$run_id" "$IDE_DOCKER_IMAGE" "$IDE_WORK" "$IDE_IDENTITY" "$remove_containers" "$command" "$IDE_DOCKER_OPTIONS")
     echo -e "docker command will be:\n${GREEN}${docker_command}${NC}"
 
     on_control_c()
@@ -799,7 +807,7 @@ function pullfunc() {
   source "$idefile"
   common_verify_idefile
 
-  if [[ "$IDE_DRIVER" == "docker" ]]; then
+  if [[ "$IDE_DRIVER" == "docker" ]] || [[ "$IDE_DRIVER" == "nvidia-docker" ]]; then
     if [ -z "$IDE_DOCKER_IMAGE" ]; then
       log_error "IDE_DOCKER_IMAGE not set"
       exit 1;

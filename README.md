@@ -155,8 +155,8 @@ The whole configuration is put in an Idefile. It is an environment variable styl
  project.
 
 Supported variables:
-* `IDE_DRIVER`, supported values: `docker`, `docker-compose`. Default: docker – will
- run docker run command
+* `IDE_DRIVER`, supported values: `docker`, `docker-compose`, `nvidia-docker`.
+ Default: `docker` – will run docker run command
 * `IDE_IDENTITY`, what on localhost should be mounted into container as
 `/ide/identity`, defaults to `HOME`
 * `IDE_WORK`, what on localhost should be mounted into container as
@@ -178,14 +178,23 @@ inside the container (so its has code to work on) and you can see any container'
    command. This is a fallback, because I can’t predict all the ide usage but I
    think such a fallback will be needed. Use it e.g. to set `--service-ports`.
 
-#### Docker driver example configuration
+#### `docker` driver example configuration
 Idefile:
 ```
 IDE_DOCKER_IMAGE="xmik/ideide:1.0.3"
 IDE_DOCKER_OPTIONS="--privileged"
 ```
 
-#### Docker-compose driver example configuration
+#### `nvidia-docker` driver example configuration
+Idefile:
+```
+IDE_DRIVER="nvidia-docker"
+IDE_DOCKER_IMAGE="some_nvidia_image:latest"
+```
+This driver differs from `docker` driver in 1 way only: instead of `docker run`
+ command, it uses `nvidia-docker run`. You have to have installed: [nvidia-docker](https://github.com/NVIDIA/nvidia-docker)
+
+#### `docker-compose` driver example configuration
 Example Idefile for docker-compose driver:
 ```bash
 IDE_DRIVER="docker-compose"
@@ -254,7 +263,7 @@ There are several ways of installing IDE, choose one:
     ./ide/local_install.sh
     rm -r ./ide
     ```
-    If you want to install from a specified tag, e.g. `0.5.0`, add: `-b 0.5.0` option
+    If you want to install from a specified tag, e.g. `0.7.0`, add: `-b 0.7.0` option
     to `git clone` command.
 
 ## How to create ide Docker image?
@@ -275,6 +284,7 @@ A convention for all ide docker images names is to end them with `ide`, e.g.:
  * rubyide
  * chefide
  * gitide
+ * someverylongname-ide
 
 ### Readme
 The IDE image readme should note:
@@ -496,7 +506,7 @@ There is a [Rakefile.rb](./Rakefile.rb) and rake tasks to be used:
 ```
 $ ide rake style
 $ ide rake unit
-$ ide rake itest:shpec
+$ ide rake go:itest:test_image
 $ ide rake itest:test_install # do not run on workstation
 $ ide rake itest:test_local_install # do not run on workstation
 $ ide "cd ide_image_scripts && bundle install && bundle exec rake test_ide_scripts"

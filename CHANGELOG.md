@@ -3,6 +3,7 @@
 * \#10674 even if any file in /etc/ide.d/ directory was not executable,
  make it executable in entrypoint.sh. Because user may forget to make a script
  executable.
+* \#10690 add nvidia-docker IDE driver.
 
 ### 0.6.2 (22 Nov 2016)
 
