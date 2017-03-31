@@ -93,7 +93,7 @@ Without setting a docker or docker-compose command among options, a docker conta
 For more CLI options run:
 ```
 $ ide --help
-Usage: ide [-c COMMAND] [options]
+Usage: ide [-c COMMAND] [options] [CMD]
   --command | -c        Set IDE command, supported: run, pull, help, version.
                         Should be passed as first option. Default: run.
       -c run            Run docker or docker-compose run command.

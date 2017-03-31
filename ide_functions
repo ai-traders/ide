@@ -310,10 +310,13 @@ function construct_docker_command() {
 
   if [ -n "$command" ]; then
     # $command set
-    if [[ "$command" == "\""*"\"" ]]; then
-      # $command is wrapped with double quotes already
+    if [[ "$command" == "\""*"\"" ]] || [[ "$command" == *"\""* ]]; then
+      # $command is wrapped with double quotes already OR
+      # $command contains double quotes
       docker_cmd+=" $image_name $command"
     else
+      # no quotes at all or
+      # single quotes (treated as no quotes)
       docker_cmd+=" $image_name \"$command\""
     fi
   else
@@ -411,10 +414,13 @@ function construct_docker_compose_run_command() {
 
   if [ -n "$command" ]; then
     # $command set
-    if [[ "$command" == "\""*"\"" ]]; then
-      # $command is wrapped with double quotes already
+    if [[ "$command" == "\""*"\"" ]] || [[ "$command" == *"\""* ]]; then
+      # $command is wrapped with double quotes already OR
+      # $command contains double quotes
       docker_compose_cmd+=" $command"
     else
+      # no quotes at all or
+      # single quotes (treated as no quotes)
       docker_compose_cmd+=" \"$command\""
     fi
   fi
@@ -563,12 +569,14 @@ function runfunc() {
       --no_rm)
           remove_containers="false"
           ;;
-      --* | -*)
-          log_error "Invalid option: '$opt'" >&2
-          exit 1
-          ;;
-      *)
-          # we want to assign the rest of array elements as 1 element
+      # Do not include that case, because we need to support double dash (--)
+      # and treat everything after it as a docker container command.
+      # --* | -*)
+      #     log_error "Invalid option: '$opt'" >&2
+      #     exit 1
+      #     ;;
+      "-- "* | *)
+          # we want to assign the rest of the array elements as 1 element
           # http://stackoverflow.com/a/169517
           cmd_words_array=()
           # go from current value of counter up to opts array length -1
@@ -586,6 +594,11 @@ function runfunc() {
   # verify options
   verify_idefile_option "$idefile"
   log_debug "dryrun: $dryrun"
+  if [[ "$command" == "-- "* ]]; then
+    # If command starts with double dash and space, remove the first 3 characters.
+    command="${command:3}"
+    log_debug "command starts with double dash, trimmed to: ${command}"
+  fi
   if [[ "$command" == *" " ]]; then
     # If command ends with space, remove it.
     # This is due to space in: command="$opt $*"

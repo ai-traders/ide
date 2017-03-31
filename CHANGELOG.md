@@ -1,3 +1,9 @@
+### 0.7.1 (31 Mar 2017)
+
+* GH:\#1, TP:\#10811 support double dash (--) as end of options marker
+* do not add double quotes if a docker container command already contains
+ double quotes (that would make the command not valid)
+
 ### 0.7.0 (7 Mar 2017)
 
 * \#10674 even if any file in /etc/ide.d/ directory was not executable,
