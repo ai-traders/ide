@@ -3,6 +3,7 @@
 * GH:\#1, TP:\#10811 support double dash (--) as end of options marker
 * do not add double quotes if a docker container command already contains
  double quotes (that would make the command not valid)
+* remove `source` added by mistake in 0.7.0 in ide_image_scripts entrypoint
 
 ### 0.7.0 (7 Mar 2017)
 

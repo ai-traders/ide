@@ -18,7 +18,7 @@ done
 for SCRIPT in /etc/ide.d/scripts/* ; do
 	if [ -f $SCRIPT ] ; then
 		chmod +x $SCRIPT
-		source $SCRIPT
+		$SCRIPT
 	fi
 done
 
