@@ -1,3 +1,10 @@
+### 0.7.2 (2 Apr 2017)
+
+* Quote docker run command arguments if they contain white spaces. This is in
+ order to allow more complicated docker run commands like:
+ `ide --dryrun -- -c "echo aaa"`. Without this change `echo aaa` would not be
+ quoted and the whole command would be invalid.
+
 ### 0.7.1 (31 Mar 2017)
 
 * GH:\#1, TP:\#10811 support double dash (--) as end of options marker

@@ -6,7 +6,7 @@ describe "ide command"
   # Warn: this uses the main Idefile.
 
   describe "when run without --command or --c option"
-    message="$(IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun)"
+    message=$(IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun)
     exit_status="$?"
     it "exits with status 0"
       assert equal "$exit_status" "0"
@@ -17,7 +17,7 @@ describe "ide command"
   end
   describe "when run explicitly with default command"
     describe "when run with '--command run'"
-      message="$(IDE_LOG_LEVEL=debug ${IDE_PATH} --command run --dryrun)"
+      message=$(IDE_LOG_LEVEL=debug ${IDE_PATH} --command run --dryrun)
       exit_status="$?"
       it "exits with status 0"
         assert equal "$exit_status" "0"
@@ -27,7 +27,7 @@ describe "ide command"
       end
     end
     describe "when run with '-c run'"
-      message="$(IDE_LOG_LEVEL=debug ${IDE_PATH} -c run --dryrun)"
+      message=$(IDE_LOG_LEVEL=debug ${IDE_PATH} -c run --dryrun)
       exit_status="$?"
       it "exits with status 0"
         assert equal "$exit_status" "0"
@@ -39,7 +39,7 @@ describe "ide command"
   end
   describe "when run with some valid, not default command"
     describe "when run with '--command pull'"
-      message="$(IDE_LOG_LEVEL=debug ${IDE_PATH} --command pull --dryrun)"
+      message=$(IDE_LOG_LEVEL=debug ${IDE_PATH} --command pull --dryrun)
       exit_status="$?"
       it "exits with status 0"
         assert equal "$exit_status" "0"
@@ -49,7 +49,7 @@ describe "ide command"
       end
     end
     describe "when run with '-c pull'"
-      message="$(IDE_LOG_LEVEL=debug ${IDE_PATH} -c pull --dryrun)"
+      message=$(IDE_LOG_LEVEL=debug ${IDE_PATH} -c pull --dryrun)
       exit_status="$?"
       it "exits with status 0"
         assert equal "$exit_status" "0"
@@ -61,7 +61,7 @@ describe "ide command"
   end
   describe "when run with some invalid command"
     describe "when run with '--command bla'"
-      message="$(IDE_LOG_LEVEL=debug ${IDE_PATH} --command bla --dryrun)"
+      message=$(IDE_LOG_LEVEL=debug ${IDE_PATH} --command bla --dryrun)
       exit_status="$?"
       it "exits with status 1"
         assert equal "$exit_status" "1"
@@ -71,7 +71,7 @@ describe "ide command"
       end
     end
     describe "when run with '-c bla'"
-      message="$(IDE_LOG_LEVEL=debug ${IDE_PATH} -c bla --dryrun)"
+      message=$(IDE_LOG_LEVEL=debug ${IDE_PATH} -c bla --dryrun)
       exit_status="$?"
       it "exits with status 1"
         assert equal "$exit_status" "1"

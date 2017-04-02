@@ -3,7 +3,7 @@ describe "ide command: help"
   IDE_PATH=$(readlink -f "./ide")
 
   describe "when run with '--command help'"
-    message="$(IDE_LOG_LEVEL=debug ${IDE_PATH} --command help)"
+    message=$(IDE_LOG_LEVEL=debug ${IDE_PATH} --command help)
     exit_status="$?"
     it "exits with status 0"
       assert equal "$exit_status" "0"
@@ -22,7 +22,7 @@ describe "ide command: help"
     end
   end
   describe "when run with '-c help'"
-    message="$(IDE_LOG_LEVEL=debug ${IDE_PATH} -c help)"
+    message=$(IDE_LOG_LEVEL=debug ${IDE_PATH} -c help)
     exit_status="$?"
     it "exits with status 0"
       assert equal "$exit_status" "0"
@@ -32,7 +32,7 @@ describe "ide command: help"
     end
   end
   describe "when run with '-c help bla abc 1'"
-    message="$(IDE_LOG_LEVEL=debug ${IDE_PATH} -c help bla abc 1)"
+    message=$(IDE_LOG_LEVEL=debug ${IDE_PATH} -c help bla abc 1)
     exit_status="$?"
     it "exits with status 0"
       assert equal "$exit_status" "0"

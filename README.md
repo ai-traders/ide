@@ -263,7 +263,7 @@ There are several ways of installing IDE, choose one:
     ./ide/local_install.sh
     rm -r ./ide
     ```
-    If you want to install from a specified tag, e.g. `0.7.0`, add: `-b 0.7.0` option
+    If you want to install from a specified tag, e.g. `0.7.2`, add: `-b 0.7.2` option
     to `git clone` command.
 
 ## How to create ide Docker image?

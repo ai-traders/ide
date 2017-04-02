@@ -4,3 +4,4 @@ test/docker-dummyide/src
 test/docker-compose/default/work/**
 tmp_env
 **/*/.kitchen
+**/iderc.txt

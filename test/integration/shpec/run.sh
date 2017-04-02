@@ -10,26 +10,39 @@ describe "ide command: run"
 
   describe 'when IDE_DRIVER="docker"'
     describe 'when --force_not_interactive is set and docker run cmd is set'
-      message="$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --force_not_interactive 'bash --version && pwd')"
-      exit_status="$?"
-      it "exits with status 0"
-        assert equal "$exit_status" "0"
+      describe 'easy, common use-case'
+        message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --force_not_interactive "bash --version && pwd")
+        exit_status="$?"
+        it "exits with status 0"
+          assert equal "$exit_status" "0"
+        end
+        it "informs that dryrun is off"
+          assert do_match "$message" "dryrun: false"
+        end
+        it "informs that running not interactively"
+          assert do_match "$message" "run_interactively: false"
+        end
+        it "shows that docker run command has no -ti"
+          assert do_not_match "$message" "-ti"
+        end
+        it "shows docker run command"
+          assert do_match "$message" "dummyide:0.0.1 \"bash --version && pwd\""
+        end
+        it "shows output from run command"
+          assert do_match "$message" "GNU bash, version 4.3"
+          assert do_match "$message" "/ide/work"
+        end
       end
-      it "informs that dryrun is off"
-        assert do_match "$message" "dryrun: false"
-      end
-      it "informs that running not interactively"
-        assert do_match "$message" "run_interactively: false"
-      end
-      it "shows that docker run command has no -ti"
-        assert do_not_match "$message" "-ti"
-      end
-      it "shows docker run command"
-        assert do_match "$message" "dummyide:0.0.1 \"bash --version && pwd\""
-      end
-      it "shows output from run command"
-        assert do_match "$message" "GNU bash, version 4.3"
-        assert do_match "$message" "/ide/work"
+      describe 'custom use-case: custom entrypoint and command after double dash'
+        # do not run with debug output, it is not needed for this test
+        message=$(cd test/docker/dummyide-usage && IDE_DOCKER_OPTIONS="--entrypoint=/bin/bash" ${IDE_PATH} --force_not_interactive -- -c "echo aaa")
+        exit_status="$?"
+        it "exits with status 0"
+          assert equal "$exit_status" "0"
+        end
+        it "echo was run with visible output"
+          assert do_match "$message" "aaa"
+        end
       end
     end
     describe 'when --no_rm is set'
@@ -38,7 +51,7 @@ describe "ide command: run"
       iderc_txt="${publicide_path}/iderc.txt"
 
       rm -rf "${iderc}" "${iderc_txt}"
-      message="$(cd ${publicide_path} && IDE_LOG_LEVEL=debug ${IDE_PATH} --no_rm whoami)"
+      message=$(cd ${publicide_path} && IDE_LOG_LEVEL=debug ${IDE_PATH} --no_rm whoami)
       exit_status="$?"
       it "exits with status 0"
         assert equal "$exit_status" "0"
@@ -60,7 +73,7 @@ describe "ide command: run"
   end
   describe 'when IDE_DRIVER="docker-compose"'
     describe 'when --force_not_interactive is set and docker-compose run cmd is set'
-      message="$(cd test/docker-compose/default && IDE_LOG_LEVEL=debug ${IDE_PATH} --force_not_interactive 'bash --version && pwd')"
+      message=$(cd test/docker-compose/default && IDE_LOG_LEVEL=debug ${IDE_PATH} --force_not_interactive 'bash --version && pwd')
       exit_status="$?"
       it "exits with status 0"
         assert equal "$exit_status" "0"

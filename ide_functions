@@ -569,19 +569,45 @@ function runfunc() {
       --no_rm)
           remove_containers="false"
           ;;
-      # Do not include that case, because we need to support double dash (--)
-      # and treat everything after it as a docker container command.
-      # --* | -*)
-      #     log_error "Invalid option: '$opt'" >&2
-      #     exit 1
-      #     ;;
-      "-- "* | *)
+      # Do not include the case: --*), because we need to support double dash (--)
+      # and treat everything afterwards as a docker container command.
+      -[a-z]* | --[a-z]*)
+          # examples that match here: --invalid-option -invalid-option -a
+          log_error "Invalid option: '$opt'" >&2
+          exit 1
+          ;;
+      *)
           # we want to assign the rest of the array elements as 1 element
           # http://stackoverflow.com/a/169517
           cmd_words_array=()
           # go from current value of counter up to opts array length -1
           for i in $(seq "${counter}" $((${#opts[@]}-1))) ; do
-            cmd_words_array+=("${opts[$i]}")
+            next_part_of_cmd="${opts[$i]}"
+
+            # It's safe to make the assumption that an argument that contains
+            # white space must have been (and should be) quoted
+            # http://stackoverflow.com/a/1669493/4457564
+            #
+            # Otherwise, this: ide --dryrun -- -c "echo aaa"
+            # would result in docker run command: -c echo aaa.
+            whitespace="[[:space:]]"
+            # shellcheck disable=SC2066
+            for c in "$next_part_of_cmd"; do
+              if [[ $c =~ $whitespace ]]; then
+                if [[ $c == *"\""* ]]; then
+                  # If quotes were used 2 times, we have to escape the
+                  # inner quotes. E.g. end of ide command was:
+                  # -- "/bin/bash -c \"echo aaa\" && echo bbb", so now c is:
+                  # /bin/bash -c "echo aaa" && echo bbb
+                  # and here we transform it into:
+                  # /bin/bash -c \"echo aaa\" && echo bbb
+                  c=${c//\"/\\\"}
+                fi
+                # add outer quotes
+                c=\"$c\"
+              fi
+            done
+            cmd_words_array+=("${c}")
           done
           command=$(join_by " " "${cmd_words_array[@]}")
           break;
