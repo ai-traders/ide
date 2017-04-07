@@ -1,3 +1,9 @@
+### 0.7.3 (2 Apr 2017)
+
+* \#10066 warn if:
+  * running as root
+  * IDE_WORK directory is owned by root
+
 ### 0.7.2 (2 Apr 2017)
 
 * Quote docker run command arguments if they contain white spaces. This is in

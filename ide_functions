@@ -18,6 +18,10 @@ log_error() {
   echo -e "\e[31mIDE error: $1\e[0m"
 }
 
+log_warn() {
+  echo -e "\e[33mIDE warn: $1\e[0m"
+}
+
 # http://stackoverflow.com/a/17841619
 function join_by {
   local IFS="$1"; shift; echo "$*"
@@ -543,6 +547,10 @@ function runfunc() {
   idefile="${PWD}/Idefile"
   dryrun="false"
 
+  if [ "$EUID" -eq 0 ]; then
+    log_warn "Running as root. This is highly inadvisable."
+  fi
+
   # shellcheck disable=SC2128
   if [ -z "$opts" ]; then
     log_debug "opts for pullfunc not specified and that is ok"
@@ -650,6 +658,9 @@ function runfunc() {
   if [ ! -d "$IDE_WORK" ]; then
     log_error "IDE_WORK set to $IDE_WORK which does not exist"
     exit 1
+  fi
+  if [[ $(find . -maxdepth 1 -name '.' -uid 0 | wc -l) == "1" ]]; then
+    log_warn "IDE_WORK directory is owned by root. This is highly inadvisable."
   fi
   if [ -z "$IDE_IDENTITY" ]; then
     IDE_IDENTITY="$HOME"
