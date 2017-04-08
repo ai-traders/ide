@@ -98,7 +98,7 @@ describe "ide command: run"
           assert do_match "$message" "/ide/work"
         end
         it "does not need to remove docker network"
-          assert do_match "${message}" "No need to remove docker network "
+          assert do_match "${message}" "No need to remove docker network"
         end
         it "docker networks count does not change"
           assert do_match "${docker_networks_count_before_test}" "${docker_networks_count_after_test}"
@@ -126,6 +126,26 @@ describe "ide command: run"
         end
         it "removes docker network"
           assert do_match "${message}" "Removed docker network"
+        end
+        it "docker networks count does not change"
+          assert do_match "${docker_networks_count_before_test}" "${docker_networks_count_after_test}"
+        end
+      end
+      describe 'removes unused docker networks created by ide'
+        docker_networks_count_before_test=$(docker network ls -q | wc -l)
+        docker network rm idetest
+        docker network create idetest
+        message=$(cd test/docker-compose/default && IDE_LOG_LEVEL=debug ${IDE_PATH} --force_not_interactive 'bash --version && pwd')
+        docker_networks_count_after_test=$(docker network ls -q | wc -l)
+        exit_status="$?"
+        it "exits with status 0"
+          assert equal "$exit_status" "0"
+        end
+        it "does not need to remove the just created docker network"
+          assert do_match "${message}" "No need to remove docker network"
+        end
+        it "removes the old unused docker networks created by ide"
+          assert do_match "${message}" "Removed docker network: idetest"
         end
         it "docker networks count does not change"
           assert do_match "${docker_networks_count_before_test}" "${docker_networks_count_after_test}"

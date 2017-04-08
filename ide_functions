@@ -803,10 +803,24 @@ function runfunc() {
       # only if using docker-compose file v2. So remove it only if exists.
       if docker network inspect "${expected_docker_network}" >/dev/null 2>&1; then
         docker network rm "${expected_docker_network}" >/dev/null
-        log_debug "Removed docker network ${expected_docker_network}"
+        echo "Removed docker network: ${expected_docker_network}"
       else
-        log_debug "No need to remove docker network (${expected_docker_network} was not created)"
+        log_debug "No need to remove docker network: ${expected_docker_network}. It was not created)"
       fi
+      # remove unused docker networks created in the past by ide
+      for network in $(docker network ls | awk '{print $2}'); do
+        if [[ "${network}" == "ide"* ]]; then
+          # docker network created by ide
+          if docker network inspect "${network}" | grep "Containers\": {}" >/dev/null; then
+            echo "Found unused docker network created by ide: ${network}"
+            docker network rm "${network}" >/dev/null
+            echo "Removed docker network: ${network}"
+          else
+            log_debug "Found docker network created by ide, but it is still in use: ${network}"
+          fi
+        fi
+      done
+
       rm -rf "${env_file}"
       log_debug "ide exit status: $exit_status"
       if [[ "$exit_status" != "0" ]]; then

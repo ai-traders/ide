@@ -1,10 +1,11 @@
-### 0.7.3 (2 Apr 2017)
+### 0.7.3 (8 Apr 2017)
 
 * \#10066 warn if:
   * running as root
   * IDE_WORK directory is owned by root
 * \#10188 Fix bug: Ide is leaving garbage networks. In practice it concerns
  only docker-compose driver and only if using docker-compose file v2.
+* Remove docker networks created in the past by ide if no container uses them
 
 ### 0.7.2 (2 Apr 2017)
 
