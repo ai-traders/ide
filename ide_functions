@@ -5,12 +5,7 @@ NC='\033[0m'
 
 log_debug() {
   if [ "$IDE_LOG_LEVEL" == "debug" ]; then
-    echo -e "$(date "+%d-%m-%Y %T") ${1}"
-  fi
-}
-log_debug_array() {
-  if [ "$IDE_LOG_LEVEL" == "debug" ]; then
-    echo -e "$(date "+%d-%m-%Y %T") ${!1}"
+    echo -e "$(date "+%d-%m-%Y %T") IDE: ${1}"
   fi
 }
 
@@ -773,6 +768,11 @@ function runfunc() {
     log_debug "docker-compose stop command will be:\n${docker_compose_stop_command}"
     log_debug "docker-compose rm command will be:\n${docker_compose_rm_command}"
 
+    # remove dashes and underscores and add "_default" (we always demand
+    # docker container named: "default")
+    expected_docker_network="${run_id//[-_]/}_default"
+    log_debug "expected docker network is:\n${expected_docker_network}"
+
     on_control_c()
     {
         log_error "Ctrl+c caught by IDE."
@@ -799,6 +799,14 @@ function runfunc() {
       eval "${docker_compose_stop_command}"
       log_debug "Removing"
       eval "${docker_compose_rm_command}"
+      # Docker network is created only if using docker-compose driver and
+      # only if using docker-compose file v2. So remove it only if exists.
+      if docker network inspect "${expected_docker_network}" >/dev/null 2>&1; then
+        docker network rm "${expected_docker_network}" >/dev/null
+        log_debug "Removed docker network ${expected_docker_network}"
+      else
+        log_debug "No need to remove docker network (${expected_docker_network} was not created)"
+      fi
       rm -rf "${env_file}"
       log_debug "ide exit status: $exit_status"
       if [[ "$exit_status" != "0" ]]; then
