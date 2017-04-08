@@ -6,6 +6,7 @@
 * \#10188 Fix bug: Ide is leaving garbage networks. In practice it concerns
  only docker-compose driver and only if using docker-compose file v2.
 * Remove docker networks created in the past by ide if no container uses them
+* Use alpine:3.5 instead of alpine:3.4
 
 ### 0.7.2 (2 Apr 2017)
 

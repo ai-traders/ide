@@ -1,2 +1,2 @@
 IDE_DRIVER="docker"
-IDE_DOCKER_IMAGE="alpine:3.4"
+IDE_DOCKER_IMAGE="alpine:3.5"

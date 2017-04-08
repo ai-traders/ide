@@ -202,7 +202,7 @@ IDE_DRIVER="docker-compose"
 Example docker-compose.yml version 1:
 ```yml
 alpine:
-  image: "alpine:3.4"
+  image: "alpine:3.5"
   entrypoint: ["/bin/sh", "-c"]
   # Uncomment this if you want to test with long running command
   # I chose short running command because it is faster to stop this container.
@@ -228,7 +228,7 @@ Example docker-compose.yml version 2:
 version: '2'
 services:
   alpine:
-    image: "alpine:3.4"
+    image: "alpine:3.5"
     entrypoint: ["/bin/sh", "-c"]
     # Uncomment this if you want to test with long running command
     # I chose short running command because it is faster to stop this container.
