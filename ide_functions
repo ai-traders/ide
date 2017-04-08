@@ -5,17 +5,16 @@ NC='\033[0m'
 
 log_debug() {
   if [ "$IDE_LOG_LEVEL" == "debug" ]; then
-    echo -e "$(date "+%d-%m-%Y %T") ${1}"
-  fi
-}
-log_debug_array() {
-  if [ "$IDE_LOG_LEVEL" == "debug" ]; then
-    echo -e "$(date "+%d-%m-%Y %T") ${!1}"
+    echo -e "$(date "+%d-%m-%Y %T") IDE: ${1}"
   fi
 }
 
 log_error() {
   echo -e "\e[31mIDE error: $1\e[0m"
+}
+
+log_warn() {
+  echo -e "\e[33mIDE warn: $1\e[0m"
 }
 
 # http://stackoverflow.com/a/17841619
@@ -543,6 +542,10 @@ function runfunc() {
   idefile="${PWD}/Idefile"
   dryrun="false"
 
+  if [ "$EUID" -eq 0 ]; then
+    log_warn "Running as root. This is highly inadvisable."
+  fi
+
   # shellcheck disable=SC2128
   if [ -z "$opts" ]; then
     log_debug "opts for pullfunc not specified and that is ok"
@@ -650,6 +653,9 @@ function runfunc() {
   if [ ! -d "$IDE_WORK" ]; then
     log_error "IDE_WORK set to $IDE_WORK which does not exist"
     exit 1
+  fi
+  if [[ $(find . -maxdepth 1 -name '.' -uid 0 | wc -l) == "1" ]]; then
+    log_warn "IDE_WORK directory is owned by root. This is highly inadvisable."
   fi
   if [ -z "$IDE_IDENTITY" ]; then
     IDE_IDENTITY="$HOME"
@@ -762,6 +768,11 @@ function runfunc() {
     log_debug "docker-compose stop command will be:\n${docker_compose_stop_command}"
     log_debug "docker-compose rm command will be:\n${docker_compose_rm_command}"
 
+    # remove dashes and underscores and add "_default" (we always demand
+    # docker container named: "default")
+    expected_docker_network="${run_id//[-_]/}_default"
+    log_debug "expected docker network is:\n${expected_docker_network}"
+
     on_control_c()
     {
         log_error "Ctrl+c caught by IDE."
@@ -788,6 +799,28 @@ function runfunc() {
       eval "${docker_compose_stop_command}"
       log_debug "Removing"
       eval "${docker_compose_rm_command}"
+      # Docker network is created only if using docker-compose driver and
+      # only if using docker-compose file v2. So remove it only if exists.
+      if docker network inspect "${expected_docker_network}" >/dev/null 2>&1; then
+        docker network rm "${expected_docker_network}" >/dev/null
+        echo "Removed docker network: ${expected_docker_network}"
+      else
+        log_debug "No need to remove docker network: ${expected_docker_network}. It was not created)"
+      fi
+      # remove unused docker networks created in the past by ide
+      for network in $(docker network ls | awk '{print $2}'); do
+        if [[ "${network}" == "ide"* ]]; then
+          # docker network created by ide
+          if docker network inspect "${network}" | grep "Containers\": {}" >/dev/null; then
+            echo "Found unused docker network created by ide: ${network}"
+            docker network rm "${network}" >/dev/null
+            echo "Removed docker network: ${network}"
+          else
+            log_debug "Found docker network created by ide, but it is still in use: ${network}"
+          fi
+        fi
+      done
+
       rm -rf "${env_file}"
       log_debug "ide exit status: $exit_status"
       if [[ "$exit_status" != "0" ]]; then

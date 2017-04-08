@@ -45,7 +45,7 @@
               "configuration": [
                 {
                   "key": "script",
-                  "value": "ide rake go:style:shellcheck"
+                  "value": "ide rake style:shellcheck"
                 }
               ],
               "plugin_configuration": {
@@ -65,27 +65,7 @@
               "configuration": [
                 {
                   "key": "script",
-                  "value": "ide rake go:unit:shpec"
-                }
-              ],
-              "plugin_configuration": {
-                "id": "script-executor",
-                "version": "1"
-              }
-            }
-          ]
-        },
-        {
-          "name" : "repocritic",
-          "resources" : ["docker","small"],
-          "tasks" : [
-            {
-              "type": "plugin",
-              "run_if": "passed",
-              "configuration": [
-                {
-                  "key": "script",
-                  "value": "ide \"bundle install && bundle exec rake go:style:repocritic -f RakefileRuby.rb\""
+                  "value": "ide rake unit:shpec"
                 }
               ],
               "plugin_configuration": {
@@ -135,7 +115,7 @@
               "configuration": [
                 {
                   "key": "script",
-                  "value": "ide rake go:itest:test_install"
+                  "value": "ide rake itest:test_install"
                 }
               ],
               "plugin_configuration": {
@@ -155,7 +135,7 @@
               "configuration": [
                 {
                   "key": "script",
-                  "value": "ide rake go:itest:test_local_install"
+                  "value": "ide rake itest:test_local_install"
                 }
               ],
               "plugin_configuration": {
@@ -175,7 +155,7 @@
               "configuration": [
                 {
                   "key": "script",
-                  "value": "ide rake go:itest:test_image"
+                  "value": "ide rake itest:test_image"
                 }
               ],
               "plugin_configuration": {
@@ -200,7 +180,7 @@
               "configuration": [
                 {
                   "key": "script",
-                  "value": "ide \"bundle install && bundle exec rake go:release:code -f RakefileRuby.rb\""
+                  "value": "ide \"bundle install && bundle exec rake release:code -f RakefileRuby.rb\""
                 }
               ],
               "plugin_configuration": {

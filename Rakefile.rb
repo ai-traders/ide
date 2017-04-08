@@ -42,6 +42,10 @@ namespace 'itest' do
   task :shpec do
     Rake.sh("shpec test/integration/shpec/*.sh")
   end
+  task :test_image do
+    Rake::Task['itest:build_dummyide'].invoke
+    Rake::Task['itest:shpec'].invoke
+  end
 
   desc 'Test install.sh; do not run on workstation'
   task :test_install do
@@ -62,32 +66,6 @@ namespace 'itest' do
       puts 'success, ide is installed'
     else
       fail
-    end
-  end
-end
-
-# mapped tasks for Go Server, no desc
-namespace 'go' do
-  namespace 'style' do
-    task :shellcheck do
-      Rake::Task['style:shellcheck'].invoke
-    end
-  end
-  namespace 'unit' do
-    task :shpec do
-      Rake::Task['unit:shpec'].invoke
-    end
-  end
-  namespace 'itest' do
-    task :test_image do
-      Rake::Task['itest:build_dummyide'].invoke
-      Rake::Task['itest:shpec'].invoke
-    end
-    task :test_install do
-      Rake::Task['itest:test_install'].invoke
-    end
-    task :test_local_install do
-      Rake::Task['itest:test_local_install'].invoke
     end
   end
 end

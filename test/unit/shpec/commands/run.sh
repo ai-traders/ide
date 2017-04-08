@@ -127,6 +127,31 @@ describe "ide command: run"
       assert do_match "$message" "complexide:0.1.0 \"some_command\""
       end
     end
+    describe 'when using root'
+      describe 'when running as root'
+        message=$(cd test/docker/dummyide-usage && sudo IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun 2>&1)
+        exit_status="$?"
+        it "exits with status 0"
+          assert equal "$exit_status" "0"
+        end
+        it "warns about running as root"
+          assert do_match "$message" "IDE warn: Running as root. This is highly inadvisable."
+        end
+      end
+      describe 'when current directory is owned by root'
+        cp -r test/docker/dummyide-usage test/docker/dummyide-usage-root-owned
+        sudo chown root:root -R test/docker/dummyide-usage-root-owned
+        message=$(cd test/docker/dummyide-usage-root-owned && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun 2>&1)
+        exit_status="$?"
+        it "exits with status 0"
+          assert equal "$exit_status" "0"
+        end
+        it "warns that directory is owned by root"
+          assert do_match "$message" "IDE warn: IDE_WORK directory is owned by root. This is highly inadvisable."
+        end
+        sudo rm -rf test/docker/dummyide-usage-root-owned
+      end
+    end
     describe 'when using different docker run commands'
       describe 'when no command set'
         message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun)

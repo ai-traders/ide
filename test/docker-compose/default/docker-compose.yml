@@ -1,5 +1,5 @@
 alpine:
-  image: "alpine:3.4"
+  image: "alpine:3.5"
   entrypoint: ["/bin/sh", "-c"]
   command: ["while true; do sleep 1d; done;"]
   # Uncomment this if you want to test with short running command.

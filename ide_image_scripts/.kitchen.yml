@@ -28,7 +28,7 @@ platforms:
       # make it a long running container:
       command: /bin/sh
       build_context: true
-      image: alpine:3.4
+      image: alpine:3.5
       dockerfile: DockerfileAlpine
 
 suites:

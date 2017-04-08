@@ -1,4 +1,4 @@
-FROM alpine:3.4
+FROM alpine:3.5
 MAINTAINER Ewa Czechowska <ewa@ai-traders.com>
 
 COPY src/ /tmp/ide_image_scripts/src/
