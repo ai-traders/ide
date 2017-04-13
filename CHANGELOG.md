@@ -1,4 +1,13 @@
 
+* \#10871 implemented option: "--quiet", so that we can save a command output into
+ a bash variable, like: `version=$(ide some-command-to-get-version)`. Any log
+ messages of level info in ide docker image `entrypoint.sh` should then go to stderr.
+
+ In the future we could redirect all the log messages to stderr and switch test framework
+ from: shpec to: bats, because in shpec we have to do `message=$(my-command)`
+ and this will not catch stderr, while: `run` from bats catches the stdout and stderr.
+ Or should we not? Shpec is more explicit, I'll have to add `2>&1` to get the same
+ effect.
 * log_error shows line numbers
 
 ### 0.7.3 (8 Apr 2017)

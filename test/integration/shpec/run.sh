@@ -70,6 +70,16 @@ describe "ide command: run"
       docker rm ${container_name}
       rm -rf "${iderc}" "${iderc_txt}"
     end
+    describe 'command output can be saved to a variable'
+      message=$(cd test/docker/dummyide-usage && ${IDE_PATH} --quiet --force_not_interactive "printenv HOME")
+      exit_status="$?"
+      it "exits with status 0"
+        assert equal "$exit_status" "0"
+      end
+      it "the whole stdout is that 1 value and can be saved to a bash variable"
+        assert equal "$message" "/home/ide"
+      end
+    end
   end
   describe 'when IDE_DRIVER="docker-compose"'
     describe 'when --force_not_interactive is set and docker-compose run cmd is set'
@@ -150,6 +160,16 @@ describe "ide command: run"
         it "docker networks count does not change"
           assert do_match "${docker_networks_count_before_test}" "${docker_networks_count_after_test}"
         end
+      end
+    end
+    describe 'command output can be saved to a variable'
+      message=$(cd test/docker-compose/publicide-v2-usage && ${IDE_PATH} --quiet --force_not_interactive -- /bin/sh -c "printenv HOME")
+      exit_status="$?"
+      it "exits with status 0"
+        assert equal "$exit_status" "0"
+      end
+      it "the whole stdout is that 1 value and can be saved to a bash variable"
+        assert equal "$message" "/root"
       end
     end
   end

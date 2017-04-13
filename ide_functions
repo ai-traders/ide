@@ -1,22 +1,31 @@
 #!/bin/bash
 
-GREEN='\033[0;32m'
-NC='\033[0m'
-
 log_debug() {
-  if [ "$IDE_LOG_LEVEL" == "debug" ]; then
-    echo -e "$(date "+%d-%m-%Y %T") IDE: ${1}"
+  if [[ "${quiet}" != "true" ]]; then
+    if [ "$IDE_LOG_LEVEL" == "debug" ]; then
+      echo -e "$(date "+%d-%m-%Y %T") IDE: ${1}"
+    fi
   fi
 }
 
 log_error() {
-  echo -e "\e[31m$(date "+%d-%m-%Y %T") IDE error: $1\e[0m"
-  echo -e "\e[31m$(date "+%d-%m-%Y %T") IDE error: File: ${BASH_SOURCE[0]}\e[0m"
-  echo -e "\e[31m$(date "+%d-%m-%Y %T") IDE error: Line numbers: ${BASH_LINENO[*]}\e[0m"
+  if [[ "${quiet}" != "true" ]]; then
+    echo -e "\e[31m$(date "+%d-%m-%Y %T") IDE error: $1\e[0m"
+    echo -e "\e[31m$(date "+%d-%m-%Y %T") IDE error: File: ${BASH_SOURCE[0]}\e[0m"
+    echo -e "\e[31m$(date "+%d-%m-%Y %T") IDE error: Line numbers: ${BASH_LINENO[*]}\e[0m"
+  fi
 }
 
 log_warn() {
-  echo -e "\e[33m$(date "+%d-%m-%Y %T") IDE warn: $1\e[0m"
+  if [[ "${quiet}" != "true" ]]; then
+    echo -e "\e[33m$(date "+%d-%m-%Y %T") IDE warn: $1\e[0m"
+  fi
+}
+
+log_info() {
+  if [[ "${quiet}" != "true" ]]; then
+    echo -e "\e[33[0;32m$(date "+%d-%m-%Y %T") IDE info: $1\e[0m"
+  fi
 }
 
 # http://stackoverflow.com/a/17841619
@@ -543,6 +552,7 @@ function runfunc() {
   # default values
   idefile="${PWD}/Idefile"
   dryrun="false"
+  quiet="false"
 
   if [ "$EUID" -eq 0 ]; then
     log_warn "Running as root. This is highly inadvisable."
@@ -567,6 +577,9 @@ function runfunc() {
           ;;
       --dryrun)
           dryrun="true"
+          ;;
+      --quiet)
+          quiet="true"
           ;;
       --not_i | --force_not_interactive)
           force_not_interactive="true"
@@ -625,6 +638,7 @@ function runfunc() {
   # verify options
   verify_idefile_option "$idefile"
   log_debug "dryrun: $dryrun"
+  log_debug "quiet: $quiet"
   if [[ "$command" == "-- "* ]]; then
     # If command starts with double dash and space, remove the first 3 characters.
     command="${command:3}"
@@ -692,9 +706,9 @@ function runfunc() {
     # parse output of ide in order to get container name. Thus, save the
     # container name to a file.
     echo "${run_id}" > "$(pwd)/iderc.txt"
-    echo "written docker container name to $(pwd)/iderc.txt"
+    log_info "written docker container name to $(pwd)/iderc.txt"
     echo "IDE_RUN_ID=${run_id}" > "$(pwd)/iderc"
-    echo "written docker container name to $(pwd)/iderc"
+    log_info "written docker container name to $(pwd)/iderc"
   fi
 
   if [[ "$IDE_DRIVER" == "docker" ]] || [[ "$IDE_DRIVER" == "nvidia-docker" ]]; then
@@ -704,7 +718,7 @@ function runfunc() {
     fi
     # construct docker command
     docker_command=$(construct_docker_command "$IDE_DRIVER" "$env_file" "$run_interactively" "$run_id" "$IDE_DOCKER_IMAGE" "$IDE_WORK" "$IDE_IDENTITY" "$remove_containers" "$command" "$IDE_DOCKER_OPTIONS")
-    echo -e "docker command will be:\n${GREEN}${docker_command}${NC}"
+    log_info "docker command will be:\n${docker_command}"
 
     on_control_c()
     {
@@ -766,7 +780,7 @@ function runfunc() {
     docker_compose_command=$(construct_docker_compose_run_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$run_interactively" "$IDE_WORK" "$IDE_IDENTITY" "$command" "$IDE_DOCKER_COMPOSE_OPTIONS")
     docker_compose_stop_command=$(construct_docker_compose_stop_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$IDE_WORK" "$IDE_IDENTITY")
     docker_compose_rm_command=$(construct_docker_compose_rm_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$IDE_WORK" "$IDE_IDENTITY")
-    echo -e "docker-compose run command will be:\n${GREEN}${docker_compose_command}${NC}"
+    log_info "docker-compose run command will be:\n${docker_compose_command}"
     log_debug "docker-compose stop command will be:\n${docker_compose_stop_command}"
     log_debug "docker-compose rm command will be:\n${docker_compose_rm_command}"
 
@@ -798,14 +812,14 @@ function runfunc() {
       exit_status="$?"
       # even if all the containers are stopped, this won't fail
       log_debug "Stopping"
-      eval "${docker_compose_stop_command}"
+      eval "${docker_compose_stop_command} >&2"
       log_debug "Removing"
-      eval "${docker_compose_rm_command}"
+      eval "${docker_compose_rm_command} >&2"
       # Docker network is created only if using docker-compose driver and
       # only if using docker-compose file v2. So remove it only if exists.
       if docker network inspect "${expected_docker_network}" >/dev/null 2>&1; then
         docker network rm "${expected_docker_network}" >/dev/null
-        echo "Removed docker network: ${expected_docker_network}"
+        log_info "Removed docker network: ${expected_docker_network}"
       else
         log_debug "No need to remove docker network: ${expected_docker_network}. It was not created)"
       fi
@@ -814,9 +828,9 @@ function runfunc() {
         if [[ "${network}" == "ide"* ]]; then
           # docker network created by ide
           if docker network inspect "${network}" | grep "Containers\": {}" >/dev/null; then
-            echo "Found unused docker network created by ide: ${network}"
+            log_info "Found unused docker network created by ide: ${network}"
             docker network rm "${network}" >/dev/null
-            echo "Removed docker network: ${network}"
+            log_info "Removed docker network: ${network}"
           else
             log_debug "Found docker network created by ide, but it is still in use: ${network}"
           fi
@@ -889,12 +903,12 @@ function pullfunc() {
 
     if [[ "$dryrun" != "true" ]]; then
       if [[ $(docker images "${IDE_DOCKER_IMAGE}" --format "{{.ID}}" | wc -l) == "0" ]]; then
-        echo -e "${GREEN}Pulling docker image: ${IDE_DOCKER_IMAGE}${NC}"
+        log_info "Pulling docker image: ${IDE_DOCKER_IMAGE}"
         docker pull "${IDE_DOCKER_IMAGE}"
       else
         # if you have a local docker image which is not pushed to any docker
         # registry, `docker pull` would return error
-        echo -e "${GREEN}Image is up to date for ${IDE_DOCKER_IMAGE}${NC}"
+        log_info "Image is up to date for ${IDE_DOCKER_IMAGE}"
       fi
     fi
   elif [[ "$IDE_DRIVER" == "docker-compose" ]]; then
@@ -909,7 +923,7 @@ function pullfunc() {
     fi
 
     if [[ "$dryrun" != "true" ]]; then
-      echo -e "${GREEN}pulling docker images for: ${IDE_DOCKER_COMPOSE_FILE}${NC}"
+      log_info "pulling docker images for: ${IDE_DOCKER_COMPOSE_FILE}"
       # temporarily set 3 variables and create an empty env file,
       # so that docker-compose does not error
       empty_env_file="$(dirname "${IDE_DOCKER_COMPOSE_FILE}")/ide-dummyfile"
