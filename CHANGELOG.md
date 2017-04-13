@@ -1,3 +1,4 @@
+### 0.8.0 (13 Apr 2017)
 
 * \#10871 implemented option: "--quiet", so that we can save a command output into
  a bash variable, like: `version=$(ide some-command-to-get-version)`. Any log

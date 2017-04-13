@@ -4,6 +4,4 @@ source 'http://gems.ai-traders.com/' do
   gem 'git'
   gem 'gitrake'
   gem 'oversion'
-  gem 'gemrake'
-  gem 'repocritic'
 end

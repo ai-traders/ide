@@ -256,7 +256,7 @@ There are several ways of installing IDE, choose one:
     sudo bash -c "`curl -L https://raw.githubusercontent.com/ai-traders/ide/master/install.sh`"
     ```
 2. Just do what [install.sh](./install.sh) says.
-3. Use [ide cookbook](http://gitlab.ai-traders.com/ide/cookbook-ide).
+3. Use [ide cookbook](http://gogs.ai-traders.com/ide/cookbook-ide).
 4. Run:
     ```bash
     git clone --depth 1 --single-branch https://github.com/ai-traders/ide.git
@@ -402,7 +402,7 @@ Examples are: chefide and ideide.
 
 *This is strongly work in progress and below information is obsolete*
 
-The release cycle is very similar to the [usual docker image release cycle](http://gitlab.ai-traders.com/lab/docs/blob/master/ReleaseCycle/DockerImage.md),
+The release cycle is very similar to the [usual docker image release cycle](http://gogs.ai-traders.com/platform/docs/src/master/ReleaseCycle/DockerImage.md),
  but there are more tests.
 
 ### Tests and build
@@ -428,7 +428,7 @@ namespace 'itest' do
   end
 end
 ```
-You have to provide `config` kitchen suite(s) (see [chefide .kitchen.yml](http://gitlab.ai-traders.com/chef/docker-chefide/blob/master/cookbook-ai_docker_chefdev/.kitchen.yml)). Run those
+You have to provide `config` kitchen suite(s) (see [chefide .kitchen.yml](http://gogs.ai-traders.com/chef/docker-chefide/blob/master/cookbook-ai_docker_chefdev/.kitchen.yml)). Run those
 tests run **before the image is built**, on you docker base image.
 In `.kitchen.yml` file, when **mounting docker volumes, always ensure
  absolute path**, and watch out for the gocd issue which does not set PWD env
@@ -450,7 +450,7 @@ debian packages are installed. You can run them using a rake task like
 or `source imagerc && chef exec bundle exec kitchen verify platform-suite`.
 If your ide docker
 image requires some `IDE_` environment variable, you have to set it in
-`.kitchen.image.yml`, [example](http://gitlab.ai-traders.com/chef/docker-chefide/blob/master/cookbook-ai_docker_chefdev/.kitchen.yml#L18).
+`.kitchen.image.yml`, [example](http://gogs.ai-traders.com/chef/docker-chefide/blob/master/cookbook-ai_docker_chefdev/.kitchen.yml#L18).
 In `.kitchen.image.yml` set **entrypoint which is not the ide entrypoint**!
 When Test-Kitchen cannot start a container, it says only:
 `Error response from daemon: Container <id> is not running`, it does not say why.
@@ -493,7 +493,7 @@ Those tests can use ide or just docker run command. (*Using ide here means that 
 * In Test-Kitchen tests keep 1 spec file named: `a_ide_scripts_spec.rb` so that
  it is run as the first one and it sets ide identity for the rest of the tests.
  (I think `01_ide_scripts_spec.rb` is not run as the first one).
-* see also: http://gitlab.ai-traders.com/lab/gem-dockerimagerake
+* see also: http://gogs.ai-traders.com/docker/gem-dockerimagerake
 
 ## FAQ
 > Why not mount `/home/user` as `/home/ide` but as `/ide/work`?
