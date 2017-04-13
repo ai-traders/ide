@@ -1,3 +1,6 @@
+
+* log_error shows line numbers
+
 ### 0.7.3 (8 Apr 2017)
 
 * \#10066 warn if:

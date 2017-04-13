@@ -10,11 +10,13 @@ log_debug() {
 }
 
 log_error() {
-  echo -e "\e[31mIDE error: $1\e[0m"
+  echo -e "\e[31m$(date "+%d-%m-%Y %T") IDE error: $1\e[0m"
+  echo -e "\e[31m$(date "+%d-%m-%Y %T") IDE error: File: ${BASH_SOURCE[0]}\e[0m"
+  echo -e "\e[31m$(date "+%d-%m-%Y %T") IDE error: Line numbers: ${BASH_LINENO[*]}\e[0m"
 }
 
 log_warn() {
-  echo -e "\e[33mIDE warn: $1\e[0m"
+  echo -e "\e[33m$(date "+%d-%m-%Y %T") IDE warn: $1\e[0m"
 }
 
 # http://stackoverflow.com/a/17841619
