@@ -752,7 +752,10 @@ function runfunc() {
         wait "$!"
       fi
       exit_status="$?"
-      rm -rf "${env_file}"
+    fi
+    rm -rf "${env_file}"
+    log_debug "Removed environment file: ${env_file}"
+    if [[ "$dryrun" != "true" ]]; then
       log_debug "ide exit status: $exit_status"
       if [[ "$exit_status" != "0" ]]; then
         log_error "fail! exit status: $exit_status"
@@ -836,9 +839,11 @@ function runfunc() {
           fi
         fi
       done
-
-      rm -rf "${env_file}"
-      log_debug "ide exit status: $exit_status"
+    fi
+    rm -rf "${env_file}"
+    log_debug "Removed environment file: ${env_file}"
+    if [[ "$dryrun" != "true" ]]; then
+      log_debug "Ide exit status: $exit_status"
       if [[ "$exit_status" != "0" ]]; then
         log_error "fail! exit status: $exit_status"
         exit $exit_status

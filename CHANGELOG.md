@@ -10,6 +10,8 @@
  Or should we not? Shpec is more explicit, I'll have to add `2>&1` to get the same
  effect.
 * log_error shows line numbers
+* remove environment file even if --dryrun set (because it was created
+  even if --dryrun set)
 
 ### 0.7.3 (8 Apr 2017)
 
