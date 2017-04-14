@@ -11,7 +11,9 @@ describe "ide command: run"
   describe 'when IDE_DRIVER="docker"'
     describe 'when --force_not_interactive is set and docker run cmd is set'
       describe 'easy, common use-case'
+        docker_containers_count_before_test=$(docker ps -a | wc -l)
         message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --force_not_interactive "bash --version && pwd")
+        docker_containers_count_after_test=$(docker ps -a | wc -l)
         exit_status="$?"
         it "exits with status 0"
           assert equal "$exit_status" "0"
@@ -31,6 +33,9 @@ describe "ide command: run"
         it "shows output from run command"
           assert do_match "$message" "GNU bash, version 4.3"
           assert do_match "$message" "/ide/work"
+        end
+        it "docker containers count does not change"
+          assert do_match "${docker_containers_count_before_test}" "${docker_containers_count_after_test}"
         end
       end
       describe 'custom use-case: custom entrypoint and command after double dash'
@@ -84,9 +89,11 @@ describe "ide command: run"
   describe 'when IDE_DRIVER="docker-compose"'
     describe 'when --force_not_interactive is set and docker-compose run cmd is set'
       describe 'docker-compose file version 1'
+        docker_containers_count_before_test=$(docker ps -a | wc -l)
         docker_networks_count_before_test=$(docker network ls -q | wc -l)
         message=$(cd test/docker-compose/default && IDE_LOG_LEVEL=debug ${IDE_PATH} --force_not_interactive 'bash --version && pwd')
         docker_networks_count_after_test=$(docker network ls -q | wc -l)
+        docker_containers_count_after_test=$(docker ps -a | wc -l)
         exit_status="$?"
         it "exits with status 0"
           assert equal "$exit_status" "0"
@@ -99,6 +106,9 @@ describe "ide command: run"
         end
         it "shows that docker-compose run command has -T"
           assert do_match "$message" "-T"
+        end
+        it "shows that docker run command contains --rm"
+          assert do_match "$message" "run --rm"
         end
         it "shows docker run command"
           assert do_match "$message" "default \"bash --version && pwd\""
@@ -113,11 +123,16 @@ describe "ide command: run"
         it "docker networks count does not change"
           assert do_match "${docker_networks_count_before_test}" "${docker_networks_count_after_test}"
         end
+        it "docker containers count does not change"
+          assert do_match "${docker_containers_count_before_test}" "${docker_containers_count_after_test}"
+        end
       end
       describe 'docker-compose file version 2'
+        docker_containers_count_before_test=$(docker ps -a | wc -l)
         docker_networks_count_before_test=$(docker network ls -q | wc -l)
         message=$(cd test/docker-compose/publicide-v2-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --force_not_interactive -- /bin/sh -c "echo abc")
         docker_networks_count_after_test=$(docker network ls -q | wc -l)
+        docker_containers_count_after_test=$(docker ps -a | wc -l)
         exit_status="$?"
         it "exits with status 0"
           assert equal "$exit_status" "0"
@@ -139,6 +154,9 @@ describe "ide command: run"
         end
         it "docker networks count does not change"
           assert do_match "${docker_networks_count_before_test}" "${docker_networks_count_after_test}"
+        end
+        it "docker containers count does not change"
+          assert do_match "${docker_containers_count_before_test}" "${docker_containers_count_after_test}"
         end
       end
       describe 'removes unused docker networks created by ide'
