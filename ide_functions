@@ -3,7 +3,7 @@
 log_debug() {
   if [[ "${quiet}" != "true" ]]; then
     if [ "$IDE_LOG_LEVEL" == "debug" ]; then
-      echo -e "$(date "+%d-%m-%Y %T") IDE: ${1}"
+      echo -e "$(date "+%d-%m-%Y %T") IDE debug: ${1}"
     fi
   fi
 }
@@ -24,7 +24,7 @@ log_warn() {
 
 log_info() {
   if [[ "${quiet}" != "true" ]]; then
-    echo -e "\e[33[0;32m$(date "+%d-%m-%Y %T") IDE info: $1\e[0m"
+    echo -e "\e[32m$(date "+%d-%m-%Y %T") IDE info: $1\e[0m"
   fi
 }
 
