@@ -7,16 +7,25 @@ fi
 source ./releaser
 releaser_init
 
+function verify_version_ide {
+  version=$(get_next_version)
+  if [[ "version=\"${version}\"" != $(cat ./ide_version) ]]; then
+    echo "fail! version was not bumped in ide_version file"
+    exit 1
+  fi
+  verify_version_no_version_file
+}
+
 command="$1"
 case "${command}" in
   bump)
       version=$(get_next_version)
-      echo "${version}" > "./ide_version"
+      echo "version=\"${version}\"" > "./ide_version"
       bump_changelog_and_oversion "$2"
       exit $?
       ;;
   verify_version)
-      verify_version_no_version_file
+      verify_version_ide
       exit $?
       ;;
   style)
@@ -69,7 +78,7 @@ case "${command}" in
       fi
       ;;
   release)
-      verify_version_no_version_file
+      verify_version_ide
       git_tag_from_oversion
       exit $?
       ;;

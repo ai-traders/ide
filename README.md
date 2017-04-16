@@ -501,31 +501,38 @@ Those tests can use ide or just docker run command. (*Using ide here means that 
 Because `/home/ide` has already some configuration provided by the docker
 ide image and mounting it this way would shadow all the provisioned files.
 
-## Development
-Run tests this way:
-```
-$ ide
-./tasks style
-./tasks unit
-./tasks itest_build_example-ide
-./tasks itest
+## Development and contributions
+1. Make changes in a feature branch, created from a git tagged commit in master branch.
+1. You run tests:
+    ```
+    $ ide
+    ./tasks style
+    ./tasks unit
+    ./tasks itest_build_example-ide
+    ./tasks itest
 
-./tasks itest_install
-./tasks itest_local_install
-cd ide_image_scripts && ./tasks itest_build_images && ./tasks itest
-```
-The `tasks` file contains guidelines how to install testing software.
+    ./tasks itest_install
+    ./tasks itest_local_install
+    cd ide_image_scripts && ./tasks itest_build_images && ./tasks itest
+    ```
+    The `tasks` file contains guidelines how to install testing software.
+1. If you decide that your code is ready, create a PR. Your job as a contributor
+ is done.
+
+Then:
+1. An IDE author merges PR(s) into master branch.
+1. An IDE author runs locally:
+  * `./tasks bump` to bump the patch version fragment by 1 OR
+  * e.g. `./tasks bump 1.2.3` to bump to a particular version
+  Version is bumped in Changelog, ide_version file and OVersion backend.
+1. Everything is pushed to master onto private git server.
+1. CI server (GoCD) tests and releases IDE.
+1. After successful CI server pipeline, an IDE author pushes master to github.
 
 ### Unit tests
 Unit tests run either bash functions or invoke ide command with `--dryrun`
  option. They never create any docker containers or pull/create docker images.
 
-### Contributions
-**Should you contribute a PR, just create your feature branch from master.**
-
-Git branching that leads to new release: create your feature branch(es) from master
- and if you are ready to have it ci-tested, merge your feature branch(es)
- onto ci branch. Then, work on ci branch until all tests on ci are passed.
 
 ### TODOs
 1. Apply https://github.com/progrium/bashstyle style guide.
