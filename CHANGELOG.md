@@ -1,3 +1,5 @@
+### 0.8.1 (2017-Apr-16)
+
 * do not use ruby for ide development
 * GoCD pipeline in yaml (was in json)
 * renamed dummyide used in tests to example-ide
