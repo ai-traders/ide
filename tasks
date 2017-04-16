@@ -1,0 +1,81 @@
+#!/bin/bash
+
+set -e
+if [[ ! -f ./releaser ]];then
+  wget http://http.archive.ai-traders.com/releaser/0.3.1/releaser
+fi
+source ./releaser
+releaser_init
+
+command="$1"
+case "${command}" in
+  bump)
+      version=$(get_next_version)
+      echo "${version}" > "./ide_version"
+      bump_changelog_and_oversion "$2"
+      exit $?
+      ;;
+  verify_version)
+      verify_version_no_version_file
+      exit $?
+      ;;
+  style)
+      # install shellcheck with (https://github.com/koalaman/shellcheck):
+      # 1. add to your apt source:
+      # deb http://archive.ubuntu.com/ubuntu/ trusty-backports restricted main universe
+      # 2. run: apt-get install shellcheck
+      shellcheck ide
+      shellcheck ide_functions
+      exit $?
+      ;;
+  unit)
+      # install shpec with (https://github.com/rylnd/shpec):
+      # sudo sh -c "`curl -L https://raw.github.com/rylnd/shpec/master/install.sh`"
+      set +e
+      time shpec test/unit/shpec/**/*.sh
+      exit $?
+      ;;
+  itest_build_dummyide)
+      # this is needed to run shpec itests
+      rm -rf test/docker-dummyide/src
+      cp -r ./ide_image_scripts/src test/docker-dummyide/src
+      cd test/docker-dummyide
+      docker build -t dummyide:0.0.1 .
+      exit $?
+      ;;
+  itest)
+      set +e
+      time shpec test/integration/shpec/*.sh
+      exit $?
+      ;;
+  itest_install)
+      sudo ./install.sh
+      ide_installed=$(ide -c version 2>&1)
+      if [[ "${ide_installed}" == "/usr/bin/ide version"* ]]; then
+        echo "success, ide is installed"
+        exit 0
+      else
+        exit 1
+      fi
+      ;;
+  itest_local_install)
+      sudo ./local_install.sh
+      ide_installed=$(ide -c version 2>&1)
+      if [[ "${ide_installed}" == "/usr/bin/ide version"* ]]; then
+        echo "success, ide is installed"
+        exit 0
+      else
+        exit 1
+      fi
+      ;;
+  release)
+      verify_version_no_version_file
+      git_tag_from_oversion
+      exit $?
+      ;;
+  *)
+      echo "Invalid command: '${command}'"
+      exit 1
+      ;;
+esac
+set +e

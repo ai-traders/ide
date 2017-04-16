@@ -1,3 +1,6 @@
+* do not use ruby for ide development
+* GoCD pipeline in yaml (was in json)
+
 ### 0.8.0 (13 Apr 2017)
 
 * \#10871 implemented option: "--quiet", so that we can save a command output into

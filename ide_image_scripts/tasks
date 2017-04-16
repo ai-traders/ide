@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set -e
+
+command="$1"
+case "${command}" in
+  itest_build_images)
+      # this is needed to run itest
+      docker build -f DockerfileAlpine -t ide-image-scripts:alpine .
+      docker build -f DockerfileUbuntu -t ide-image-scripts:ubuntu .
+      exit $?
+      ;;
+  itest)
+      docker_mounts="-v $(pwd)/test/integration/test-files/ide_work:/ide/work -v $(pwd)/test/integration/test-files/ide_identities/full:/ide/identity -v $(pwd)/test/integration/bats:/tmp/bats -v $(pwd)/test/integration/test-files/29-not-executable-file.sh:/etc/ide.d/scripts/29-not-executable-file.sh -v $(pwd)/test/integration/test-files/30-copy-ssh-configs.sh:/etc/ide.d/scripts/30-copy-ssh-configs.sh"
+
+      echo "Testing on Alpine"
+      docker run ${docker_mounts} ide-image-scripts:alpine -c "/usr/local/bin/bats /tmp/bats"
+      # To run it interactively:
+      # docker run -ti ${docker_mounts} ide-image-scripts:alpine -c /bin/bash
+      echo "Testing on Ubuntu"
+      docker run ${docker_mounts} ide-image-scripts:ubuntu -c "/usr/local/bin/bats /tmp/bats"
+      # To run it interactively:
+      # docker run -ti ${docker_mounts} ide-image-scripts:ubuntu -c /bin/bash
+      exit $?
+      ;;
+  *)
+      echo "Invalid command: '${command}'"
+      exit 1
+      ;;
+esac
+set +e

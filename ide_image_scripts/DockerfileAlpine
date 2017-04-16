@@ -1,4 +1,4 @@
-FROM <%= config[:image] %>
+FROM alpine:3.5
 
 # * Test-Kitchen needs bash to login into the container.
 # * "apk add --no-cache" will install packages running first apk update and
@@ -16,3 +16,5 @@ RUN git clone --depth 1 https://github.com/sstephenson/bats.git && \
 # make ide scripts available in Docker build context, so that we can
 # install them later (using install.sh)
 COPY src /tmp/ide_image_scripts_src
+
+ENTRYPOINT ["/bin/bash"]

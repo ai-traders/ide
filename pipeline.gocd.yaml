@@ -1,0 +1,97 @@
+pipelines:
+  ide:
+    group: ide
+    label_template: "${git[:8]}"
+    materials:
+      git:
+        git: "git@git.ai-traders.com:ide/ide.git"
+        branch: master
+        blacklist:
+          - "**/*.md"
+    stages:
+      - style_unit:
+          clean_workspace: true
+          jobs:
+            verify_version:
+              resources:
+                - docker
+                - small
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks verify_version
+            style:
+              resources:
+                - docker
+                - small
+              tasks:
+                - exec:
+                    command: ide
+                    arguments:
+                      - ./tasks style
+            unit:
+              resources:
+                - docker
+                - small
+              tasks:
+                - exec:
+                    command: ide
+                    arguments:
+                      - ./tasks unit
+      - ide_image_scripts_test:
+          clean_workspace: true
+          jobs:
+            itest:
+              resources:
+                - docker
+                - small
+              tasks:
+                - exec:
+                    command: ide
+                    arguments:
+                      - cd ide_image_scripts && ./tasks itest_build_images && ./tasks itest
+      - itest:
+          clean_workspace: true
+          jobs:
+            itest_install:
+              resources:
+                - docker
+                - small
+              tasks:
+                - exec:
+                    command: ide
+                    arguments:
+                      - ./tasks itest_install
+            itest_local_install:
+              resources:
+                - docker
+                - small
+              tasks:
+                - exec:
+                    command: ide
+                    arguments:
+                      - ./tasks itest_local_install
+            shpec:
+              resources:
+                - docker
+                - small
+              tasks:
+                - exec:
+                    command: ide
+                    arguments:
+                      - ./tasks itest_build_dummyide && ./tasks itest
+      - release:
+          clean_workspace: true
+          jobs:
+            code:
+              resources:
+                - docker
+                - small
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks release

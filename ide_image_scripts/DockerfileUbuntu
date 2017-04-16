@@ -1,7 +1,7 @@
-FROM <%= config[:image] %>
+FROM ubuntu:16.04
 
 RUN apt-get update && \
-  apt-get install -y --no-install-recommends git ca-certificates && \
+  apt-get install -y --no-install-recommends sudo git ca-certificates && \
   rm -rf /var/cache/apt/*
 RUN git clone --depth 1 https://github.com/sstephenson/bats.git && \
   git clone --depth 1 https://github.com/ztombol/bats-support.git && \
@@ -11,3 +11,5 @@ RUN git clone --depth 1 https://github.com/sstephenson/bats.git && \
 # make ide scripts available in Docker build context, so that we can
 # install them later (using install.sh)
 COPY src /tmp/ide_image_scripts_src
+
+ENTRYPOINT ["/bin/bash"]

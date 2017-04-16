@@ -502,17 +502,19 @@ Because `/home/ide` has already some configuration provided by the docker
 ide image and mounting it this way would shadow all the provisioned files.
 
 ## Development
-There is a [Rakefile.rb](./Rakefile.rb) and rake tasks to be used:
+Run tests this way:
 ```
-$ ide rake style
-$ ide rake unit
-$ ide rake go:itest:test_image
-$ ide rake itest:test_install # do not run on workstation
-$ ide rake itest:test_local_install # do not run on workstation
-$ ide "cd ide_image_scripts && bundle install && bundle exec rake test_ide_scripts"
+$ ide
+./tasks style
+./tasks unit
+./tasks itest_build_dummyide
+./tasks itest
+
+./tasks itest_install
+./tasks itest_local_install
+cd ide_image_scripts && ./tasks itest_build_images && ./tasks itest
 ```
-The `Rakefile.rb` contains guidelines how to install testing software. If you wish,
- you can invoke them without rake.
+The `tasks` file contains guidelines how to install testing software.
 
 ### Unit tests
 Unit tests run either bash functions or invoke ide command with `--dryrun`
