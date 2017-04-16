@@ -13,7 +13,7 @@ describe "ide command: run"
       describe 'easy, common use-case'
         env_files_count_before_test=$(ls /tmp/ide/ | wc -l)
         docker_containers_count_before_test=$(docker ps -a | wc -l)
-        message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --force_not_interactive "bash --version && pwd")
+        message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --force_not_interactive "bash --version && pwd")
         docker_containers_count_after_test=$(docker ps -a | wc -l)
         env_files_count_after_test=$(ls /tmp/ide/ | wc -l)
         exit_status="$?"
@@ -30,7 +30,7 @@ describe "ide command: run"
           assert do_not_match "$message" "-ti"
         end
         it "shows docker run command"
-          assert do_match "$message" "dummyide:0.0.1 \"bash --version && pwd\""
+          assert do_match "$message" "example-ide:0.0.1 \"bash --version && pwd\""
         end
         it "shows output from run command"
           assert do_match "$message" "GNU bash, version 4.3"
@@ -45,7 +45,7 @@ describe "ide command: run"
       end
       describe 'custom use-case: custom entrypoint and command after double dash'
         # do not run with debug output, it is not needed for this test
-        message=$(cd test/docker/dummyide-usage && IDE_DOCKER_OPTIONS="--entrypoint=/bin/bash" ${IDE_PATH} --force_not_interactive -- -c "echo aaa")
+        message=$(cd test/docker/example-ide-usage && IDE_DOCKER_OPTIONS="--entrypoint=/bin/bash" ${IDE_PATH} --force_not_interactive -- -c "echo aaa")
         exit_status="$?"
         it "exits with status 0"
           assert equal "$exit_status" "0"
@@ -81,7 +81,7 @@ describe "ide command: run"
       rm -rf "${iderc}" "${iderc_txt}"
     end
     describe 'command output can be saved to a variable'
-      message=$(cd test/docker/dummyide-usage && ${IDE_PATH} --quiet --force_not_interactive "printenv HOME")
+      message=$(cd test/docker/example-ide-usage && ${IDE_PATH} --quiet --force_not_interactive "printenv HOME")
       exit_status="$?"
       it "exits with status 0"
         assert equal "$exit_status" "0"

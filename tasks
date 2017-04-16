@@ -35,12 +35,12 @@ case "${command}" in
       time shpec test/unit/shpec/**/*.sh
       exit $?
       ;;
-  itest_build_dummyide)
+  itest_build_exampleide)
       # this is needed to run shpec itests
-      rm -rf test/docker-dummyide/src
-      cp -r ./ide_image_scripts/src test/docker-dummyide/src
-      cd test/docker-dummyide
-      docker build -t dummyide:0.0.1 .
+      rm -rf test/docker-example-ide/src
+      cp -r ./ide_image_scripts/src test/docker-example-ide/src
+      cd test/docker-example-ide
+      docker build -t example-ide:0.0.1 .
       exit $?
       ;;
   itest)

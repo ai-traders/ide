@@ -10,7 +10,7 @@ COPY src/ /tmp/ide_image_scripts/src/
 RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
  apk add --no-cache bash shadow sudo && \
  /tmp/ide_image_scripts/src/install.sh && \
- echo -e "#!/bin/bash\nexport this_image_name=\"dummyide\"\nexport this_image_tag=\"0.0.1\"" >> /etc/ide.d/variables/99.sh &&\
+ echo -e "#!/bin/bash\nexport this_image_name=\"example-ide\"\nexport this_image_tag=\"0.0.1\"" >> /etc/ide.d/variables/99.sh &&\
  chmod 775 /etc/ide.d/variables/99.sh &&\
  echo 'ide ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 

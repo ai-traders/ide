@@ -3,17 +3,17 @@ describe "ide command: run"
   IDE_PATH=$(readlink -f "./ide")
   # Do not ever quote the output of ide command in tests or else it can be
   # not credible. E.g.
-  # message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -- -c "echo aaa")
+  # message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -- -c "echo aaa")
   # could result in command being: -c echo aaa, which will be later put in quotes:
   # "-c echo aaa". So this is a false positive test.
   # while
-  # message="$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -- -c \"echo aaa\")"
+  # message="$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -- -c \"echo aaa\")"
   # could result in command being -c "echo aaa"
   # The latter is the desired one, but the end user would rarely if ever run ide this way.
 
   describe 'common for any IDE_DRIVER'
     describe 'when invalid option set: starts with double dash'
-      message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --invalid-option 2>&1)
+      message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --invalid-option 2>&1)
       exit_status="$?"
       it "exits with status 1"
         assert equal "$exit_status" "1"
@@ -23,7 +23,7 @@ describe "ide command: run"
       end
     end
     describe 'when invalid option set: starts with single dash'
-      message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -invalid-option 2>&1)
+      message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -invalid-option 2>&1)
       exit_status="$?"
       it "exits with status 1"
         assert equal "$exit_status" "1"
@@ -33,7 +33,7 @@ describe "ide command: run"
       end
     end
     describe 'when invalid option set: starts with single dash, single letter'
-      message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -a 2>&1)
+      message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -a 2>&1)
       exit_status="$?"
       it "exits with status 1"
         assert equal "$exit_status" "1"
@@ -44,7 +44,7 @@ describe "ide command: run"
     end
     describe "--dryrun"
       describe 'when --dryrun set'
-        message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun some_command)
+        message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun some_command)
         exit_status="$?"
         it "exits with status 0"
           assert equal "$exit_status" "0"
@@ -87,7 +87,7 @@ describe "ide command: run"
         end
       end
       describe 'when --idefile not set but Idefile exists in curent directory'
-        message=$(cd test/docker/dummyide-usage && ${IDE_PATH} --dryrun some_command)
+        message=$(cd test/docker/example-ide-usage && ${IDE_PATH} --dryrun some_command)
         exit_status="$?"
         it "exits with status 0"
           assert equal "$exit_status" "0"
@@ -129,7 +129,7 @@ describe "ide command: run"
     end
     describe 'when using root'
       describe 'when running as root'
-        message=$(cd test/docker/dummyide-usage && sudo IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun 2>&1)
+        message=$(cd test/docker/example-ide-usage && sudo IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun 2>&1)
         exit_status="$?"
         it "exits with status 0"
           assert equal "$exit_status" "0"
@@ -139,9 +139,9 @@ describe "ide command: run"
         end
       end
       describe 'when current directory is owned by root'
-        cp -r test/docker/dummyide-usage test/docker/dummyide-usage-root-owned
-        sudo chown root:root -R test/docker/dummyide-usage-root-owned
-        message=$(cd test/docker/dummyide-usage-root-owned && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun 2>&1)
+        cp -r test/docker/example-ide-usage test/docker/example-ide-usage-root-owned
+        sudo chown root:root -R test/docker/example-ide-usage-root-owned
+        message=$(cd test/docker/example-ide-usage-root-owned && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun 2>&1)
         exit_status="$?"
         it "exits with status 0"
           assert equal "$exit_status" "0"
@@ -149,231 +149,231 @@ describe "ide command: run"
         it "warns that directory is owned by root"
           assert do_match "$message" "IDE warn: IDE_WORK directory is owned by root. This is highly inadvisable."
         end
-        sudo rm -rf test/docker/dummyide-usage-root-owned
+        sudo rm -rf test/docker/example-ide-usage-root-owned
       end
     end
     describe 'when using different docker run commands'
       describe 'when no command set'
-        message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun)
+        message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun)
         exit_status="$?"
         it "exits with status 0"
           assert equal "$exit_status" "0"
         end
         it "informs about docker run command"
-          assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
-          assert do_match "$message" "dummyide:0.0.1"
+          assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+          assert do_match "$message" "example-ide:0.0.1"
         end
         it "informs that no empty quotes are used"
           # we don't want quotes if $command not set
-          assert do_not_match "$message" "dummyide:0.0.1 \"\""
+          assert do_not_match "$message" "example-ide:0.0.1 \"\""
         end
       end
       describe 'when command without spaces: /bin/bash'
         describe 'when no outer quotes'
-          message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun /bin/bash)
+          message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun /bin/bash)
           exit_status="$?"
           it "exits with status 0"
             assert equal "$exit_status" "0"
           end
           it "informs about docker run command"
-            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
             # outside quotes are added
-            assert do_match "$message" "dummyide:0.0.1 \"/bin/bash\""
+            assert do_match "$message" "example-ide:0.0.1 \"/bin/bash\""
           end
         end
         describe 'when no outer quotes but after double dash'
-          message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -- /bin/bash)
+          message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -- /bin/bash)
           exit_status="$?"
           it "exits with status 0"
             assert equal "$exit_status" "0"
           end
           it "informs about docker run command"
-            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
             # outside quotes are added
-            assert do_match "$message" "dummyide:0.0.1 \"/bin/bash\""
+            assert do_match "$message" "example-ide:0.0.1 \"/bin/bash\""
           end
         end
         describe 'when no outer quotes but after double dash and prefixed with many spaces'
-          message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --    /bin/bash)
+          message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --    /bin/bash)
           exit_status="$?"
           it "exits with status 0"
             assert equal "$exit_status" "0"
           end
           it "informs about docker run command"
-            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
-            assert do_match "$message" "dummyide:0.0.1 \"/bin/bash\""
+            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+            assert do_match "$message" "example-ide:0.0.1 \"/bin/bash\""
           end
         end
         describe 'when single outer quotes'
-          message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun '/bin/bash')
+          message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun '/bin/bash')
           exit_status="$?"
           it "exits with status 0"
             assert equal "$exit_status" "0"
           end
           it "informs about docker run command"
-            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
             # single quotes are treated the same as no quotes
-            assert do_match "$message" "dummyide:0.0.1 \"/bin/bash\""
+            assert do_match "$message" "example-ide:0.0.1 \"/bin/bash\""
           end
         end
         describe 'when single outer quotes and after double dash'
-          message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -- '/bin/bash')
+          message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -- '/bin/bash')
           exit_status="$?"
           it "exits with status 0"
             assert equal "$exit_status" "0"
           end
           it "informs about docker run command"
-            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
             # single quotes are treated the same as no quotes
-            assert do_match "$message" "dummyide:0.0.1 \"/bin/bash\""
+            assert do_match "$message" "example-ide:0.0.1 \"/bin/bash\""
           end
         end
         describe 'when double outer quotes'
-          message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun "/bin/bash")
+          message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun "/bin/bash")
           exit_status="$?"
           it "exits with status 0"
             assert equal "$exit_status" "0"
           end
           it "informs about docker run command"
-            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
-            assert do_match "$message" "dummyide:0.0.1 \"/bin/bash\""
+            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+            assert do_match "$message" "example-ide:0.0.1 \"/bin/bash\""
           end
         end
         describe 'when double outer quotes and after double dash'
-          message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -- "/bin/bash")
+          message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -- "/bin/bash")
           exit_status="$?"
           it "exits with status 0"
             assert equal "$exit_status" "0"
           end
           it "informs about docker run command"
-            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
-            assert do_match "$message" "dummyide:0.0.1 \"/bin/bash\""
+            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+            assert do_match "$message" "example-ide:0.0.1 \"/bin/bash\""
           end
         end
       end
       describe 'when command with spaces and no inner quotation needed: /bin/bash -c "whoami"'
         describe 'when no outer quotes'
-          message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun /bin/bash -c "whoami")
+          message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun /bin/bash -c "whoami")
           exit_status="$?"
           it "exits with status 0"
             assert equal "$exit_status" "0"
           end
           it "informs about docker run command"
-            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
             # it's ok that quotes around whoami are not needed, because whoami
             # is a one word, so this will work fine
-            assert do_match "$message" "dummyide:0.0.1 \"/bin/bash -c whoami\""
+            assert do_match "$message" "example-ide:0.0.1 \"/bin/bash -c whoami\""
           end
         end
         describe 'when no outer quotes but prefixed with double dash'
-          message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -- /bin/bash -c "whoami")
+          message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -- /bin/bash -c "whoami")
           exit_status="$?"
           it "exits with status 0"
             assert equal "$exit_status" "0"
           end
           it "informs about docker run command"
-            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
             # it's ok that quotes around whoami are not needed, because whoami
             # is a one word, so this will work fine
-            assert do_match "$message" "dummyide:0.0.1 \"/bin/bash -c whoami\""
+            assert do_match "$message" "example-ide:0.0.1 \"/bin/bash -c whoami\""
           end
         end
         describe 'when single outer quotes'
-          message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun '/bin/bash -c "whoami"')
+          message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun '/bin/bash -c "whoami"')
           exit_status="$?"
           it "exits with status 0"
             assert equal "$exit_status" "0"
           end
           it "informs about docker run command"
-            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
-            assert do_match "$message" "dummyide:0.0.1 \"/bin/bash -c \\\\\"whoami\\\\\"\""
+            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+            assert do_match "$message" "example-ide:0.0.1 \"/bin/bash -c \\\\\"whoami\\\\\"\""
           end
         end
         describe 'when single outer quotes and prefixed with double dash'
-          message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -- '/bin/bash -c "whoami"')
+          message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -- '/bin/bash -c "whoami"')
           exit_status="$?"
           it "exits with status 0"
             assert equal "$exit_status" "0"
           end
           it "informs about docker run command"
-            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
-            assert do_match "$message" "dummyide:0.0.1 \"/bin/bash -c \\\\\"whoami\\\\\"\""
+            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+            assert do_match "$message" "example-ide:0.0.1 \"/bin/bash -c \\\\\"whoami\\\\\"\""
           end
         end
         describe 'when double outer quotes'
-          message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun "/bin/bash -c \"whoami\"")
+          message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun "/bin/bash -c \"whoami\"")
           exit_status="$?"
           it "exits with status 0"
             assert equal "$exit_status" "0"
           end
           it "informs about docker run command"
-            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
-            assert do_match "$message" "dummyide:0.0.1 \"/bin/bash -c \\\\\"whoami\\\\\"\""
+            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+            assert do_match "$message" "example-ide:0.0.1 \"/bin/bash -c \\\\\"whoami\\\\\"\""
           end
         end
         describe 'when double outer quotes and prefixed with double dash'
-          message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -- "/bin/bash -c \"whoami\"")
+          message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -- "/bin/bash -c \"whoami\"")
           exit_status="$?"
           it "exits with status 0"
             assert equal "$exit_status" "0"
           end
           it "informs about docker run command"
-            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
-            assert do_match "$message" "dummyide:0.0.1 \"/bin/bash -c \\\\\"whoami\\\\\"\""
+            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+            assert do_match "$message" "example-ide:0.0.1 \"/bin/bash -c \\\\\"whoami\\\\\"\""
           end
         end
       end
       describe 'when command with spaces and inner quotation needed: /bin/bash -c "echo aaa" && echo bbb'
         # when no outer quotes - the command after && would not be run in ide
         describe 'when single outer quotes'
-          message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun '/bin/bash -c "echo aaa" && echo bbb')
+          message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun '/bin/bash -c "echo aaa" && echo bbb')
           exit_status="$?"
           it "exits with status 0"
             assert equal "$exit_status" "0"
           end
           it "informs about docker run command"
-            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
-            assert do_match "$message" "dummyide:0.0.1 \"/bin/bash -c \\\\\"echo aaa\\\\\" && echo bbb\""
+            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+            assert do_match "$message" "example-ide:0.0.1 \"/bin/bash -c \\\\\"echo aaa\\\\\" && echo bbb\""
           end
         end
         describe 'when single outer quotes and after double dash'
-          message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -- '/bin/bash -c "echo aaa" && echo bbb')
+          message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -- '/bin/bash -c "echo aaa" && echo bbb')
           exit_status="$?"
           it "exits with status 0"
             assert equal "$exit_status" "0"
           end
           it "informs about docker run command"
-            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
-            assert do_match "$message" "dummyide:0.0.1 \"/bin/bash -c \\\\\"echo aaa\\\\\" && echo bbb\""
+            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+            assert do_match "$message" "example-ide:0.0.1 \"/bin/bash -c \\\\\"echo aaa\\\\\" && echo bbb\""
           end
         end
         describe 'when double outer quotes'
-          message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun "/bin/bash -c \"echo aaa\" && echo bbb")
+          message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun "/bin/bash -c \"echo aaa\" && echo bbb")
           exit_status="$?"
           it "exits with status 0"
             assert equal "$exit_status" "0"
           end
           it "informs about docker run command"
-            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
-            assert do_match "$message" "dummyide:0.0.1 \"/bin/bash -c \\\\\"echo aaa\\\\\" && echo bbb\""
+            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+            assert do_match "$message" "example-ide:0.0.1 \"/bin/bash -c \\\\\"echo aaa\\\\\" && echo bbb\""
           end
         end
         describe 'when double outer quotes and double dash'
-          message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -- "/bin/bash -c \"echo aaa\" && echo bbb")
+          message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -- "/bin/bash -c \"echo aaa\" && echo bbb")
           exit_status="$?"
           it "exits with status 0"
             assert equal "$exit_status" "0"
           end
           it "informs about docker run command"
-            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
-            assert do_match "$message" "dummyide:0.0.1 \"/bin/bash -c \\\\\"echo aaa\\\\\" && echo bbb\""
+            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+            assert do_match "$message" "example-ide:0.0.1 \"/bin/bash -c \\\\\"echo aaa\\\\\" && echo bbb\""
           end
         end
       end
       describe 'when command with spaces and starts with dash'
         describe 'when no outer quotes'
           # this is the reason why we support double dash
-          message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -c "echo aaa" 2>&1)
+          message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -c "echo aaa" 2>&1)
           exit_status="$?"
           it "exits with status 1"
             assert equal "$exit_status" "1"
@@ -383,16 +383,16 @@ describe "ide command: run"
           end
         end
         describe 'when no outer quotes and double dash used'
-          message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -- -c "echo aaa")
+          message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun -- -c "echo aaa")
           exit_status="$?"
           it "exits with status 0"
             assert equal "$exit_status" "0"
           end
           it "informs about docker run command"
-            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
+            assert do_match "$message" "docker run --rm -v ${PWD}/test/docker/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro --env-file="
             # double quotes not added, because the command already contains
             # double quotes
-            assert do_match "$message" "dummyide:0.0.1 -c \"echo aaa\""
+            assert do_match "$message" "example-ide:0.0.1 -c \"echo aaa\""
           end
         end
       end

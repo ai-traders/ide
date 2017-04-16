@@ -17,7 +17,7 @@ describe "ide command: run"
     end
     describe '--force_not_interactive and --not_i'
       describe 'when --force_not_interactive is set'
-        message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --force_not_interactive)
+        message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --force_not_interactive)
         exit_status="$?"
         it "exits with status 0"
           assert equal "$exit_status" "0"
@@ -30,7 +30,7 @@ describe "ide command: run"
         end
       end
       describe 'when --not_i is set'
-        message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --not_i)
+        message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --not_i)
         exit_status="$?"
         it "exits with status 0"
           assert equal "$exit_status" "0"
@@ -43,7 +43,7 @@ describe "ide command: run"
         end
       end
       describe 'when --not_i is set and docker run command is set'
-        message=$(cd test/docker/dummyide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --not_i echo sth)
+        message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --dryrun --not_i echo sth)
         exit_status="$?"
         it "exits with status 0"
           assert equal "$exit_status" "0"
@@ -52,7 +52,7 @@ describe "ide command: run"
           assert do_match "$message" "run_interactively: false"
         end
         it "informs about docker run command user"
-          assert do_match "$message" "dummyide:0.0.1 \"echo sth\""
+          assert do_match "$message" "example-ide:0.0.1 \"echo sth\""
         end
         it "docker run command does not match -ti"
           assert do_not_match "$message" "-ti"

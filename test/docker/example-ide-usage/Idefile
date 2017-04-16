@@ -1,0 +1,4 @@
+IDE_DRIVER="docker"
+IDE_DOCKER_IMAGE="example-ide:0.0.1"
+# so that we use example-ide-usage/work as work
+IDE_WORK="${PWD}/work"

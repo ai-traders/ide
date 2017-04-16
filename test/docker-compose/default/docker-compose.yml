@@ -9,7 +9,7 @@ alpine:
   # remove all the containers).
   # command: ["true"]
 default:
-  image: "dummyide:0.0.1"
+  image: "example-ide:0.0.1"
   links:
   - alpine
   volumes:

@@ -1,6 +1,6 @@
-test/dummyide-usage/work/**
+test/example-ide-usage/work/**
 # copied from other local directory inside this git repository
-test/docker-dummyide/src
+test/docker-example-ide/src
 test/docker-compose/default/work/**
 tmp_env
 **/*/.kitchen

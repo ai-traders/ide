@@ -81,7 +81,7 @@ pipelines:
                 - exec:
                     command: ide
                     arguments:
-                      - ./tasks itest_build_dummyide && ./tasks itest
+                      - ./tasks itest_build_exampleide && ./tasks itest
       - release:
           clean_workspace: true
           jobs:

@@ -270,7 +270,7 @@ There are several ways of installing IDE, choose one:
 *This is a quite long documentation. You can skip it and go ahead to examples:
  [gitide](https://github.com/ai-traders/docker-gitide) or
  [ideide](https://github.com/ai-traders/docker-ideide)
- [dummyide](test/docker-dummyide),
+ [example-ide](test/docker-example-ide),
  some images or test tools are not open source (yet)*
 
 There is an `ide_image_scripts/install.sh` script which helps create ide Docker
@@ -371,7 +371,7 @@ Working example is in [entrypoint.sh](ide_image_scripts/src/entrypoint.sh)
 
 If you want to run your ide docker image without using its default entrypoint, run e.g.:
 ```
-docker run --rm -ti --entrypoint=/bin/bash dummyide:0.0.1 -c "/bin/bash"
+docker run --rm -ti --entrypoint=/bin/bash example-ide:0.0.1 -c "/bin/bash"
 ```
 
 #### CMD
@@ -380,9 +380,9 @@ Thanks to ENTRYPOINT taking care of all configuration, secrets, ownership, curre
  provisioned instance. Example: `rake style:rubocop` or some mono command.
 
 Such a docker image can be run:
- * **not-interactively**: `docker run --rm -v ${PWD}/test/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro dummyide:0.0.1 "bash --version"`
- * **interactively**: `docker run -ti --rm -v ${PWD}/test/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro dummyide:0.0.1`
- * **interactively**: `docker run -ti --rm -v ${PWD}/test/dummyide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro dummyide:0.0.1 "env && /bin/bash"`
+ * **not-interactively**: `docker run --rm -v ${PWD}/test/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro example-ide:0.0.1 "bash --version"`
+ * **interactively**: `docker run -ti --rm -v ${PWD}/test/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro example-ide:0.0.1`
+ * **interactively**: `docker run -ti --rm -v ${PWD}/test/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro example-ide:0.0.1 "env && /bin/bash"`
 
 ### Docker in Docker
 If your ide docker image should have docker daemon:
@@ -507,7 +507,7 @@ Run tests this way:
 $ ide
 ./tasks style
 ./tasks unit
-./tasks itest_build_dummyide
+./tasks itest_build_example-ide
 ./tasks itest
 
 ./tasks itest_install

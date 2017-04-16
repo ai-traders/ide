@@ -1,4 +1,0 @@
-IDE_DRIVER="docker"
-IDE_DOCKER_IMAGE="dummyide:0.0.1"
-# so that we use dummyide-usage/work as work
-IDE_WORK="${PWD}/work"
