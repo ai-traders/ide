@@ -1,165 +1,139 @@
 # ide - isolated development environment
 
 Build/test/release your software in an **isolated, reproducible, well-defined** environment.
-
 This project is more about **conventions and best practices** than actual code.
 
-## TL;DR
+## Installation
+There are several ways of installing `ide`, **choose one**:
+1. Run:
+    ```bash
+    sudo bash -c "`curl -L https://raw.githubusercontent.com/ai-traders/ide/master/install.sh`"
+    ```
+2. Just do what [install.sh](./install.sh) says.
+3. Use private [ide cookbook](http://gogs.ai-traders.com/ide/cookbook-ide).
+4. Run:
+    ```bash
+    git clone --depth 1 --single-branch https://github.com/ai-traders/ide.git
+    ./ide/local_install.sh
+    rm -r ./ide
+    ```
+    If you want to install from a specified tag, e.g. `0.8.0`, add: `-b 0.8.0` option
+    to `git clone` command.
 
-Any application should be built/tested by running:
-
-```
-git clone <project-url>
-ide <build-command>
-```
-
-**regadless of installed software** on the host where this was called.
-
-`ide` is the *magical* command wrapping `docker` that will
-   * fetch development environment image(s)
-   * create environment where development tasks can be executed
-   * mount volumes from host to container(s)
-
-## Use cases
-
-This project will prove to be useful in the following cases:
-
-1. You have applications/projects that have complex and/or frequently changing
-development dependencies.
-2. You work on multitude of projects and it is impossible to have all dependencies
-installed on your laptop/workstation.
-3. To ensure developers have the same development tools that CI agents.
-4. To have reproducible builds.
-5. Reduce time needed by developers to setup their development environment to 0.
-
-### Common problems solved
-
-If you apply to IDE conventions, you'll find these, commonly occuring problems
-in all organizations solved:
-
-1. I need to setup my workstation to develop *application X*, how do I do that?
-2. I just developed new feature in *application X* on my laptop, all tests passed,
-but when submitted to CI system, some tests fail.
-3. CI agents are always out of date. They have missing, old or conflicting dependencies installed.
-Someone repeatedly wastes time on provisioning tools to CI agents.
-
-## Requirements and responsibilities
-
-The above benefits sound appealing, but they come at a cost. If you want to
-develop applications IDE-style you'll be committing to:
-
-1. Run **all** your builds in `docker`. By developers and by CI agents.
-2. Version your docker images with all development tools.
-3. In each project there must be an **Idefile** which unambiguously points
-a **correct** development environment - the one that is **sufficient for exactly
-this particular commit**.
-
-## Features (specification)
-
-Currently only docker
- images are supported to provide such an environment.
-
-1. Run `ide <command>` which runs a docker container and invokes a `command` inside.
-1. Run `ide` which runs a docker container interactively with default (set in
-  Dockerfile) command invoked inside.
-1. Use different docker images for different tasks by the means of various
- Idefiles.
-
-## Why
-1. To move out a project requirements from CI agents and workstation.
- As a result, CI agent does not need mono, ruby, rake, chefdk, etc.
- It never needs to execute those commands locally.
- Instead it will always spin-up docker container
- or vm and run commands there. This means:
- * no need to update CI agent deployment whenever your project environment changes
- * CI agent needs only docker daemon and client, ide installed and secrets
-  provisioned
-2. The docker image used as your project isolated environment can be reused across
- CI agents and workstations.
-
-Thanks to that, we close all configuration problems of a particular
- project type in a single IDE image. You should know what your IDE image is
- capable of, what secrets and configuration it needs. Forgetting configuration
- or secret files was one of the most frequent causes of failed CI jobs for us.
+### Dependencies
+* Bash
+* Docker
 
 ## Usage
-Run it from bash terminal:
-```bash
-ide [-c COMMAND] [options]
+Create a file: `./Idefile`, e.g. like this:
 ```
-Without setting a docker or docker-compose command among options, a docker container
- will be run with default docker image command.
-
-For more CLI options run:
-```
-$ ide --help
-Usage: ide [-c COMMAND] [options] [CMD]
-  --command | -c        Set IDE command, supported: run, pull, help, version.
-                        Should be passed as first option. Default: run.
-      -c run            Run docker or docker-compose run command.
-      -c pull           Pull docker images specified in Idefile, do not run docker run, do not verify Idefile.
-      -c help           Help. Display this message and quit.
-      -c version        Version. Print version number and quit.
-
-  Options for run command:
-  --idefile /path/to/Idefile         Specify IDEFILE, default is: ./Idefile
-  --dryrun                           Do not pull docker image, do not run docker run, verify Idefile. Unset by default.
-  --force_not_interactive | --not_i  Do not run docker containers interactively.
-  --no_rm                            Do not remove docker container after run. Unset by default.
-                                     Implemented for docker driver only. Generates ./iderc file with container name.
-  CMD                                Command to be run in docker container. Unset by default.
-
-  Options for pull command:
-  --idefile /path/to/Idefile         Specify IDEFILE, default is: ./Idefile
-  --dryrun                           Do not pull docker image, do not run docker run, verify Idefile. Unset by default.
-```
-
-### Real example
-Keep an `./Idefile`, e.g. like this:
-```
-IDE_DOCKER_IMAGE="xmik/ideide:1.0.3"
+IDE_DOCKER_IMAGE="xmik/ideide:3.0.1"
 IDE_DOCKER_OPTIONS="--privileged"
 ```
-and then run:
+
+**Idefile** points to a development environment - the one that is **suitable
+ for exactly this particular commit**.
+
+### Run not interactively
+Run:
 ```bash
-ide rake style:rubocop
+$ ide bats --version
+17-04-2017 16:07:55 IDE info: docker command will be:
+docker run --rm -v /home/ewa/code/ide:/ide/work -v /home/ewa:/ide/identity:ro --env-file="/tmp/ide/environment-ide-ide-2017-04-17_16-07-55-85219559" -v /tmp/.X11-unix:/tmp/.X11-unix --privileged -ti --name ide-ide-2017-04-17_16-07-55-85219559 xmik/ideide:3.0.1 "shpec --version"
+Unable to find image 'xmik/ideide:3.0.1' locally
+3.0.1: Pulling from xmik/ideide
+# pulling docker image
+usermod: no changes
+ide init finished (interactive shell)
+using ideide:3.0.1
+Bats 0.4.0
 ```
 
-### What happens
-1. IDE determines that docker image xmik/ideide:1.0.3 is needed
-1. IDE pulls xmik/ideide:1.0.3.
-1. IDE decides which environment variables must be preserved into docker container
- and which must be escaped with a prefix `IDE_`. They are saved to a file e.g.
- `/tmp/ide/environment-2016-02-08_17-56-19-78638303`.
-1. IDE creates a container from xmik/ideide:1.0.3 image with the following command:
-    ```
-    docker run --rm -v ${IDE_WORK}:/ide/work -v ${IDE_IDENTITY}:/ide/identity \
-      --env-file /tmp/ide/environment-2016-02-08_17-56-19-78638303 ${IDE_DOCKER_IMAGE} \
-      "rake style:rubocop"
-    ```
-    If your terminal was running interactively, then `-ti` is added to `docker run`
-    command.
-1. IDE runs `rake style:rubocop` in the container in the `/ide/work` directory.
+What happens:
+1. IDE determines that docker image xmik/ideide:3.0.1 is needed
+1. IDE creates a container from xmik/ideide:3.0.1 image with the following command:
+   ```
+   docker run --rm -v ${IDE_WORK}:/ide/work -v ${IDE_IDENTITY}:/ide/identity:ro \
+     --env-file /tmp/ide/environment-2016-02-08_17-56-19-78638303 ${IDE_DOCKER_IMAGE} \
+     "bats --version"
+   ```
+1. IDE runs `bats --version` in the container in the `/ide/work` directory.
 
+### Run Interactively
+Run:
+```bash
+$ ide
+17-04-2017 16:10:06 IDE info: docker command will be:
+docker run --rm -v /home/ewa/code/ide:/ide/work -v /home/ewa:/ide/identity:ro --env-file="/tmp/ide/environment-ide-ide-2017-04-17_16-10-05-40045882" -v /tmp/.X11-unix:/tmp/.X11-unix --privileged -ti --name ide-ide-2017-04-17_16-10-05-40045882 xmik/ideide:3.0.1
+usermod: no changes
+ide init finished (interactive shell)
+using ideide:3.0.1
+ide@fac6c0976cd1:/ide/work$ echo hello
+hello
+ide@fac6c0976cd1:/ide/work$ whoami
+ide
+ide@fac6c0976cd1:/ide/work$ exit
+exit
+$
+```
 
-For debug output set `IDE_LOG_LEVEL=debug`.
+What happens:
+1. IDE determines that docker image xmik/ideide:3.0.1 is needed
+1. IDE creates a container from xmik/ideide:3.0.1 image with the following command:
+   ```
+   docker run --rm -v ${IDE_WORK}:/ide/work -v ${IDE_IDENTITY}:/ide/identity:ro \
+     --env-file /tmp/ide/environment-2016-02-08_17-56-19-78638303 ${IDE_DOCKER_IMAGE}
+   ```
+1. IDE runs the default command for a docker image, it is `/bin/bash` for `xmik/ideide`.
+
 
 ### Warnings, limitations
 Current implementation limitations:
 * works only on local docker host (docker daemon must be installed locally).
-* works only on Linux.
+* works only on Linux (tested on Ubuntu and Alpine).
+
+### Advanced usage
+For debug output set `IDE_LOG_LEVEL=debug`.
+
+```bash
+$ ide --help
+Usage: /usr/bin/ide [-c COMMAND] [options]
+  --command  | -c                    Set IDE command, supported: run, pull, help, version.
+                                     Should be passed as first option. Default: run.
+
+  -c run                             Run docker or docker-compose run command.
+  -c pull                            Pull docker images specified in Idefile, do not run docker run, do not verify Idefile.
+  -c help    | --help                Help. Display this message and quit.
+  -c version | --version             Version. Print version number and quit.
+
+  Options for run command:
+  --idefile /path/to/Idefile         Specify IDEFILE, default is: ./Idefile
+  --dryrun                           Do not pull docker image, do not run docker run, verify Idefile.
+                                     Unset by default.
+  --force_not_interactive | --not_i  Do not run docker containers interactively.
+  --no_rm                            Do not remove docker containers after run. Unset by default.
+                                     Implemented for docker driver only. Generates ./iderc and ./iderc.txt
+                                     files with container name.
+  CMD                                Command to be run in a docker container. Unset by default.
+
+  Options for pull command:
+  --idefile /path/to/Idefile         Specify IDEFILE, default is: ./Idefile
+  --dryrun                           Do not pull docker image, do not run docker run, verify Idefile.
+                                     Unset by default.
+```
+
 
 ### Configuration
-The whole configuration is put in an Idefile. It is an environment variable style
+Configuration is kept in an Idefile. It is an environment variable style
  file (e.g `IDE_DRIVER=docker`). It should be put in a root directory of your
  project.
 
 Supported variables:
-* `IDE_DRIVER`, supported values: `docker`, `docker-compose`, `nvidia-docker`.
- Default: `docker` – will run docker run command
-* `IDE_IDENTITY`, what on localhost should be mounted into container as
+* `IDE_DRIVER`, supported values: **docker**, **docker-compose**, **nvidia-docker**.
+ Default: **docker**
+* `IDE_IDENTITY`, what on localhost should be read-only mounted into container as
 `/ide/identity`, defaults to `HOME`
-* `IDE_WORK`, what on localhost should be mounted into container as
+* `IDE_WORK`, what on localhost should be read-write mounted into container as
 `/ide/work`, this is your working copy, your project repository;
 defaults to current directory. Thanks to this, your project's code is visible
 inside the container (so its has code to work on) and you can see any container's
@@ -178,14 +152,14 @@ inside the container (so its has code to work on) and you can see any container'
    command. This is a fallback, because I can’t predict all the ide usage but I
    think such a fallback will be needed. Use it e.g. to set `--service-ports`.
 
-#### `docker` driver example configuration
+#### docker driver example configuration
 Idefile:
 ```
-IDE_DOCKER_IMAGE="xmik/ideide:1.0.3"
+IDE_DOCKER_IMAGE="xmik/ideide:3.0.1"
 IDE_DOCKER_OPTIONS="--privileged"
 ```
 
-#### `nvidia-docker` driver example configuration
+#### nvidia-docker driver example configuration
 Idefile:
 ```
 IDE_DRIVER="nvidia-docker"
@@ -194,7 +168,7 @@ IDE_DOCKER_IMAGE="some_nvidia_image:latest"
 This driver differs from `docker` driver in 1 way only: instead of `docker run`
  command, it uses `nvidia-docker run`. You have to have installed: [nvidia-docker](https://github.com/NVIDIA/nvidia-docker)
 
-#### `docker-compose` driver example configuration
+#### docker-compose driver example configuration
 Example Idefile for docker-compose driver:
 ```bash
 IDE_DRIVER="docker-compose"
@@ -209,7 +183,7 @@ alpine:
   # command: ["while true; do sleep 1d; done;"]
   command: ["true"]
 default:
-  image: "xmik/ideide:1.0.3"
+  image: "xmik/ideide:3.0.1"
   links:
   - alpine
   volumes:
@@ -235,7 +209,7 @@ services:
     # command: ["while true; do sleep 1d; done;"]
     command: ["true"]
   default:
-    image: "xmik/ideide:1.0.3"
+    image: "xmik/ideide:3.0.1"
     depends_on:
     - alpine
     volumes:
@@ -247,122 +221,136 @@ services:
 The same requirements apply as for docker-compose.yml version 1, but here you can
  also use `depends_on` docker-compose configuration.
 
-## Installation
-The only dependency is Bash and Docker.
-
-There are several ways of installing IDE, choose one:
-1. Run:
-    ```bash
-    sudo bash -c "`curl -L https://raw.githubusercontent.com/ai-traders/ide/master/install.sh`"
-    ```
-2. Just do what [install.sh](./install.sh) says.
-3. Use [ide cookbook](http://gogs.ai-traders.com/ide/cookbook-ide).
-4. Run:
-    ```bash
-    git clone --depth 1 --single-branch https://github.com/ai-traders/ide.git
-    ./ide/local_install.sh
-    rm -r ./ide
-    ```
-    If you want to install from a specified tag, e.g. `0.7.2`, add: `-b 0.7.2` option
-    to `git clone` command.
-
-## How to create ide Docker image?
-*This is a quite long documentation. You can skip it and go ahead to examples:
- [gitide](https://github.com/ai-traders/docker-gitide) or
- [ideide](https://github.com/ai-traders/docker-ideide)
- [example-ide](test/docker-example-ide),
- some images or test tools are not open source (yet)*
-
-There is an `ide_image_scripts/install.sh` script which helps create ide Docker
- image. See: `ide_image_scripts/Readme.md`.
-
-Frequently evolving IDE images are very ok. You should not just start using new
- tools without building and testing new dev image first.
-
-### Name
-A convention for all ide docker images names is to end them with `ide`, e.g.:
- * rubyide
- * chefide
- * gitide
- * someverylongname-ide
-
-### Readme
-The IDE image readme should note:
-* which configuration or secret files must exist on host
-* what is available by default, e.g. must I run `chef exec rake` or can just `rake`,
-what is current directory in docker container
-* example Idefile
-* example command
-* what is the development process
-
-### Linux user
-Docker image must have an `ide` user (actually any not-root user is fine, use
- `ide` user for convention only). It's recommended to use uid and gid 1000,
-  because there is a convention that main (human) linux user has uid and gid 1000.
-
-### Directories
-If your docker image already has `/ide/work` or `/ide/identity`, they will
- be overridden, because:
-   * `IDE_WORK` directory will be mounted as `/ide/work`.
-   * `IDE_IDENTITY` directory will be ro mounted as `/ide/identity` (with all settings
- and secrets). This may be troublesome to support beside docker containers.
-
- Entrypoint should fail if `IDE_WORK`or `IDE_IDENTITY` directories do not exist.
-
-### CMD and ENTRYPOINT
-#### Configuration and secrets
-* Map any settings and secrets files from IDE_IDENTITY into `/home/ide/`. Do it
- by **copying** and changing ownership and setting permissions to `ide` user.
- Do it e.g. in **`/etc/ide.d/scripts/20-ide-setup-identity.sh` script**.
-* If you want, you can map any files from `${IDE_IDENTITY}/.bashrc.d/` and from
- `${IDE_IDENTITY}/profile.d/`, because your
- entrypoint can ensure to run in login shell. If your host's shell is interactive,
- docker will be ran interactively too.
-* Exit with non 0 status if any obligatory config or secret file does not exist
- (tell which files are missing).
-* In order to limit the requirements put on docker host, it seems better to generate
- configuration files instead of requiring them to exist on docker host (unless
- impossible or uncomfortable or configuration files contain secrets).
-* It is usually better to first copy the whole configuration directory like
- `.ssh` or `.chef`, so that any secrets are copied and then (either or not)
-  generate some configs.
-* **Watch out for symlinks**: https://aitraders.tpondemand.com/entity/8464 . E.g.
-  if you have dotfiles repository and you have such symlinks in your HOME like:
-  `/home/user/.gitconfig -> /home/user/code/dotfiles/.gitconfig`, inside docker
-  container this symlink is: `/ide/identity/.gitconfig -> /home/user/code/dotfiles/.gitconfig`
-  and `/home/user/code/dotfiles/.gitconfig` does not exist.
-  The only known workaround: do not have symlinks, use plain files.
-
-#### UID GID problem
-* The destined uid and gid are the same as the uid and gid of `/ide/work` directory.
- Thanks to [Tom's docker-uid-gid-fix](https://github.com/tomzo/docker-uid-gid-fix)
- project, we are armed with PoC how to achieve this. We change the uid and gid of
- `ide` user with the destined uid and gid.
- This is done by `/etc/ide.d/scripts/50-ide-fix-uid-gid.sh` script.
-* When docker image already contains files owned by `ide` user,
-  (e.g. `/ide/home`), then after changing uid and gid we have to search for all
-  those files and update their ownership.
-* Avoid mounting anything into `/ide/work` as root.
-
-#### ENTRYPOINT
-The entrypoint should:
-* source any scripts from `/etc/ide.d/variables/*`.
-* invoke any scripts from `/etc/ide.d/scripts/*`.
-* enable end user to run the docker image interactively or not.
-* change the current directory into `/ide/work` (this may be done in
- `/home/ide/.profile`).
-* it could say which docker image name and tag it runs in.
-
-##### Examples
-You can choose `su` command to change user from root to ide. Disadvantage: the
- only possible command to invoke interactively is `/bin/bash`
- (https://aitraders.tpondemand.com/entity/8189 ). Example `su` command:
+## Why
+We believe any project should be built/tested by running:
 ```bash
-su - ide -c "$@"
+git clone <project-url>
+ide <development-command>
 ```
 
-Prefer `sudo` instead, but do remember that **`sudo` must be installed in
-the docker image**. Example `sudo` command:
+**regadless of software installed** on the host where this was called.
+
+### Use cases and common problems solved
+
+`ide` is useful when:
+1. **Your project often changes** and needs different development environment all the time (e.g.
+ newer java, more development tools, environment configuration changes). Installing
+ those on a workstation could pollute it. Installing anything without a script not reproducible at all. Reprovisioning the whole workstation is neither safe nor comfortable.
+1. Your code **compiled a month ago** on your workstation, but it does not now.
+ That build is not reproducible.
+1. **You have a new computer/hardware/OS**. Without `ide`, you'd have to provision
+ all the tools from the beginning at once (even if you already don't need a half of them).
+1. Your project is **complex and needs a lot of tools** to be developed (e.g. Ruby
+  and Chef and Cpp and Mono). It can be hard to install them all on one workstation.
+  With `ide`, you can have many Idefiles, each one pointing to different
+  development environment.
+1. You work on many projects and it is **impossible to have all the versions of
+ development tools installed on your workstation**.
+1. Your **code works on your machine**. But it does not work on some Continuous Integration.
+ Your workstation and CI agent should use the same
+ environment. Your project should specify which environment it needs.
+ Same if there are many developers - each one should use the same environment.
+ Forgetting configuration or secret files was one of the most frequent causes of failed CI jobs for us.
+1. You want to show case your code to others, but don't want to force them
+ to install and setup all the dependencies/development tools. Now, they can
+ just run: `ide`.
+1. You want to experiment, but don't want to pollute your workstation and
+ you want to work on local code base. Use `ide` interactively.
+
+`ide` wraps `docker`. It will
+  * fetch development/dependencies tools
+  * ensure environment configuration
+  * mount volumes from host to container(s), so that source code is on your
+  workstation, but the environment is in docker image
+
+Using `ide` there is **no need to update CI agents/workstations whenever your
+ project environment changes**. You only need Docker/Docker-compose, Bash and
+ ide installed and some secrets available. Thanks to that, we close all configuration problems of a particular
+project type in a single ide docker image.
+
+## How to create an ide Docker image?
+If you want to create a Docker image that can be used by ide, the best is to see
+ [ideide](https://github.com/ai-traders/docker-ideide) and treat it as example.
+
+First, **choose a name**. A convention for all ide docker images names is to end with 'ide', e.g.:
+  * rubyide
+  * cppide
+  * someverylongname-ide
+
+Then, **write a readme** to help you decide:
+  * which configuration or secret files must exist on host (in IDE_IDENTITY directory)
+  * what is available by default, e.g. must I run `chef exec rake` or can just `rake`,
+  what is current directory in docker container
+  * example Idefile
+  * example command
+  * what is the development process
+
+Then, read [ide_image_scripts/Readme.md](ide_image_scripts/Readme.md) and use
+ [ide_image_scripts/install.sh](ide_image_scripts/install.sh) script in your
+ Dockerfile. The script helps with:
+
+### UID GID problem and a Linux user
+When we mount a volume from localhost into a docker container:
+```
+$ docker run -ti -v $(pwd)/test/integration:/tmp/ide-test alpine:3.5 /bin/sh
+/ # ls -la /tmp/ide-test/
+total 12
+drwxrwxr-x    3 1000     1000          4096 Mar  7 11:24 .
+drwxrwxrwt    1 root     root          4096 Apr 17 16:55 ..
+drwxrwxr-x    2 1000     1000          4096 Apr 16 16:10 shpec
+```
+The files owner has the same UID and GID as the files owner on localhost (docker host).
+
+Ide Docker image must have some not-root user. Use ide user for convention.
+ Its uid and gid should be: 1000, because there is a convention that main (human)
+ linux user has uid and gid 1000.
+
+We need to:
+  * ensure `/ide/work` and ide user home are owned by ide user with
+  the uid and gid of `/ide/work` directory
+  * if docker image already contains files owned by `ide` user,
+    (e.g. `/ide/home`), then after changing uid and gid we have to search for all
+    those files and update their ownership.
+  * avoid mounting anything into `/ide/work` as root.
+
+Thanks to [Tom's docker-uid-gid-fix](https://github.com/tomzo/docker-uid-gid-fix)
+ project, we are armed with PoC how to achieve this. We change the uid and gid of
+ `ide` user with the destined uid and gid. This is done by `/etc/ide.d/scripts/50-ide-fix-uid-gid.sh` script.
+
+### ENTRYPOINT
+The entrypoint should:
+  * source any scripts from `/etc/ide.d/variables/*`.
+  * invoke any scripts from `/etc/ide.d/scripts/*`.
+  * enable end user to run the docker image interactively or not.
+  * change the current directory into `/ide/work` (this may be done in
+  `/home/ide/.profile`).
+  * it could say which docker image name and tag it runs in.
+
+#### Configuration and secrets management
+  * Entrypoint should map any settings and secrets files from IDE_IDENTITY into
+   `/home/ide/`. Do it by **copying** and changing ownership and setting permissions
+   to `ide` user. Do it e.g. in **`/etc/ide.d/scripts/20-ide-setup-identity.sh` script**.
+  * If you want, you can map any files from `${IDE_IDENTITY}/.bashrc.d/` and from
+   `${IDE_IDENTITY}/profile.d/`, because your
+   entrypoint can ensure to run in login shell. If your host's shell is interactive,
+   docker will be ran interactively too.
+  * Exit with non 0 status if any obligatory config or secret file does not exist
+   (tell which files are missing).
+  * In order to limit the requirements put on docker host, it seems better to generate
+   configuration files instead of requiring them to exist on docker host (unless
+   impossible or uncomfortable or configuration files contain secrets).
+  * It is usually better to first copy the whole configuration directory like
+   `.ssh` or `.chef`, so that any secrets are copied and then (either or not)
+    generate some configs.
+  * **Watch out for symlinks**: https://aitraders.tpondemand.com/entity/8464 . E.g.
+    if you have dotfiles repository and you have such symlinks in your HOME like:
+    `/home/user/.gitconfig -> /home/user/code/dotfiles/.gitconfig`, inside docker
+    container this symlink is: `/ide/identity/.gitconfig -> /home/user/code/dotfiles/.gitconfig`
+    and `/home/user/code/dotfiles/.gitconfig` does not exist.
+    The only known workaround: do not have symlinks, use plain files.
+
+#### ENTRYPOINT example
+You can choose `sudo` command to change user from root to ide. Example `sudo` command:
 ```bash
 sudo -E -H -u ide /bin/bash -lc "$@"
 ```
@@ -374,15 +362,10 @@ If you want to run your ide docker image without using its default entrypoint, r
 docker run --rm -ti --entrypoint=/bin/bash example-ide:0.0.1 -c "/bin/bash"
 ```
 
-#### CMD
+### CMD
 Thanks to ENTRYPOINT taking care of all configuration, secrets, ownership, current
  directory, the CMD can be as simple as possible, as if you ran it on fully
  provisioned instance. Example: `rake style:rubocop` or some mono command.
-
-Such a docker image can be run:
- * **not-interactively**: `docker run --rm -v ${PWD}/test/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro example-ide:0.0.1 "bash --version"`
- * **interactively**: `docker run -ti --rm -v ${PWD}/test/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro example-ide:0.0.1`
- * **interactively**: `docker run -ti --rm -v ${PWD}/test/example-ide-usage/work:/ide/work -v ${HOME}:/ide/identity:ro example-ide:0.0.1 "env && /bin/bash"`
 
 ### Docker in Docker
 If your ide docker image should have docker daemon:
@@ -396,118 +379,44 @@ dpkg: error: error removing old backup file '/var/lib/dpkg/status-old': Operatio
 E: Sub-process /usr/bin/dpkg returned an error code (2)
 ```
 
-Examples are: chefide and ideide.
+### ide Docker image release cycle
+Frequently evolving IDE images are very ok. You should not just start using new
+tools without building and testing new dev image first.
 
-### IDE Docker image release cycle
-
-*This is strongly work in progress and below information is obsolete*
-
-The release cycle is very similar to the [usual docker image release cycle](http://gogs.ai-traders.com/platform/docs/src/master/ReleaseCycle/DockerImage.md),
- but there are more tests.
-
-### Tests and build
-
-#### ide_configs tests (Test-Kitchen tests on base docker image + recipe)
-Whenever you build **ide docker image from cookbook**, **test ide configs
-first**, in order to **fail fast**. How:
-   * **keep a separate recipe `_ide`**. It won't install
-   anything but those 3 scripts: entrypoint.sh, ide-setup-identity.sh, ide-fix-uid-gid.sh and create ide user.
-   * **use fake identity**: you can have many directories with dummy identity. Some should have sth wrong e.g. be missing some secrets.
-   Those dummy identities will be mounted as docker volumes.
-   * verify that `ide-setup-identity.sh` works: files which must be mapped are mapped, or if not, then that clear message is shown.
-   * verify that `entrypoint.sh` succeeds (or that it fails from a know cause, e.g. that docker daemon is not installed and thus cannot be started).
-
-A working rake task:
-
-```ruby
-namespace 'itest' do
-  desc 'Verify ide configs before the big provisioning, to fail fast'
-  task 'ide_configs' do
-    ENV['KITCHEN_YAML'] = File.expand_path("#{__FILE__}/../.kitchen.yml")
-    Rake.sh('kitchen test config')
-  end
-end
+I recommend to use local `tasks` file, just like the one ideide uses. Example tasks:
 ```
-You have to provide `config` kitchen suite(s) (see [chefide .kitchen.yml](http://gogs.ai-traders.com/chef/docker-chefide/blob/master/cookbook-ai_docker_chefdev/.kitchen.yml)). Run those
-tests run **before the image is built**, on you docker base image.
-In `.kitchen.yml` file, when **mounting docker volumes, always ensure
- absolute path**, and watch out for the gocd issue which does not set PWD env
- variable. Working example is
- ```
-  volume:
-          - <%= File.dirname(__FILE__) %>/test/integration/dummy_work:/ide/work
-          - <%= File.dirname(__FILE__) %>/test/integration/dummy_identity:/ide/identity
- ```
+./tasks build # run docker build
+./tasks itest # run integration tests
+./tasks publish # run docker push
+```
 
-#### Build docker image
-Now build the docker image. You should use dockerimagerake gem, it will
- generate `imagerc` file after successful build.
+The most important is to test the end user use cases, that e.g. `ide rake build`
+ will really compile your code and produce an artifact.
 
-#### Test-kitchen tests on docker image
-After **docker image is built**, run usual test-kitchen tests e.g. that some
-debian packages are installed. You can run them using a rake task like
-`rake itest:kitchen:platform-suite`
-or `source imagerc && chef exec bundle exec kitchen verify platform-suite`.
-If your ide docker
-image requires some `IDE_` environment variable, you have to set it in
-`.kitchen.image.yml`, [example](http://gogs.ai-traders.com/chef/docker-chefide/blob/master/cookbook-ai_docker_chefdev/.kitchen.yml#L18).
-In `.kitchen.image.yml` set **entrypoint which is not the ide entrypoint**!
-When Test-Kitchen cannot start a container, it says only:
-`Error response from daemon: Container <id> is not running`, it does not say why.
-And sometimes you want to allow `entrypoint.sh` to fail (e.g. in the above point,
-when nothing is installed and thus some daemons will not start).
- You can set entrypoint in KitchenDockerfile:
-
- ```ruby
- FROM <%= config[:image] %>
-
- ENTRYPOINT ["/bin/bash"]
- ```
- Such an entrypoint demands updated docker run command in `.kitchen.yml` file,
- e.g.: `command: -c "/sbin/my_init"` or `-c 'while true; do sleep 1d; done;'`
- (I tested both).
- If you don't set command, docker logs will
- show: `/bin/sh: /bin/sh: cannot execute binary file`, because the default
- command set by kitchen-docker_cli is: `sh -c 'while true; do sleep 1d; done;'`.
- Similarly, if you set command to `/bin/bash`.
-
-#### End user tests (RSpec)
-Put them into `test/integration/end_user`.
-
-Here you test the end user usage of your ide docker image, with end user
-entrypoint and volumes. Implement them as: **RSpec tests which run docker run
-commands and mount identity and work directories as docker volumes**. You can
- use the same dummy identities as in ide_configs tests.
- If your ide docker
-image requires some `IDE_` environment variable, you have to set it in docker
-run commands.
-
-Those tests can use ide or just docker run command. (*Using ide here means that ide
- would have to be installed also inside another ide docker image which you use
- to run tests in (e.g. chefide). That could be troublesome because ide changes fast.*)
-
-#### General advices
-* Whenever you use dummy identity (dummy configuration and secret files) for tests,
+### Additional advice
+1. It is nice to separate installing ide configs from your ide docker image logic.
+ You should not mess them together in one docker RUN directive in a Dockerfile.
+ You can even have 2 Dockerfiles:
+   * one to just install and test ide docker image configs
+   * another, which end user logic. It should use the docker image built by the 1st Dockerfile.
+1. Whenever you use dummy identity (dummy configuration and secret files) for tests,
  it would be nice to ensure, that they have proper permissions, e.g. `~/.ssh/id_rsa`
   has permissions: `600`. Git does not preserve `600` permissions.
-* In Test-Kitchen tests keep 1 spec file named: `a_ide_scripts_spec.rb` so that
- it is run as the first one and it sets ide identity for the rest of the tests.
- (I think `01_ide_scripts_spec.rb` is not run as the first one).
-* see also: http://gogs.ai-traders.com/docker/gem-dockerimagerake
 
 ## FAQ
 > Why not mount `/home/user` as `/home/ide` but as `/ide/work`?
 
-Because `/home/ide` has already some configuration provided by the docker
-ide image and mounting it this way would shadow all the provisioned files.
+Because `/home/ide` in ide docker image can already have some configuration
+ and mounting it this way would override all the provisioned files.
 
 ## Development and contributions
 1. Make changes in a feature branch, created from a git tagged commit in master branch.
 1. You run tests:
-    ```
+    ```bash
     $ ./tasks style
     ```
     And the following tasks you can run using either default Idefile, on Ubuntu:
+    ```bash
     $ ide
     ./tasks unit
     ./tasks itest_build_exampleide
@@ -518,7 +427,7 @@ ide image and mounting it this way would shadow all the provisioned files.
     cd ide_image_scripts && ./tasks itest_build_images && ./tasks itest
     ```
     or on Alpine:
-    ```
+    ```bash
     $ ide --idefile Idefile.alpine
     # same as for default Idefile
     ```
@@ -530,20 +439,12 @@ ide image and mounting it this way would shadow all the provisioned files.
 Then:
 1. Maintainer merges PR(s) into master branch.
 1. Maintainer runs locally:
-  * `./tasks bump` to bump the patch version fragment by 1 OR
-  * e.g. `./tasks bump 1.2.3` to bump to a particular version
+    * `./tasks bump` to bump the patch version fragment by 1 OR
+    * e.g. `./tasks bump 1.2.3` to bump to a particular version
   Version is bumped in Changelog, ide_version file and OVersion backend.
 1. Everything is pushed to master onto private git server.
 1. CI server (GoCD) tests and releases IDE.
 1. After successful CI server pipeline, an maintainer pushes master to github.
-
-### Unit tests
-Unit tests run either bash functions or invoke ide command with `--dryrun`
- option. They never create any docker containers or pull/create docker images.
-
-
-### TODOs
-1. Apply https://github.com/progrium/bashstyle style guide.
 
 ## License
 

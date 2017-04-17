@@ -20,34 +20,21 @@ git clone --depth 1 --single-branch  https://github.com/ai-traders/ide.git
 ./ide/ide_image_scripts/src/install.sh
 rm -r ./ide
 ```
-If you want to install from a specified tag, e.g. `0.7.0`, add: `-b 0.7.0` option
+If you want to install from a specified tag, e.g. `0.8.0`, add: `-b 0.8.0` option
  to `git clone` command.
 
 On Alpine Linux ignore the: `Creating mailbox file: No such file or directory`
  message.
 
 ## Development
-### Tests
-
-There are Test-Kitchen tests with 2 tests suites, which run on Ubuntu and Alpine Linux:
- * default -- installs only default ide configuration files
- * ssh -- installs default ide configuration files and ensures that `~/.ssh/id_rsa`
- file is copied into ide docker container
-
-The tests framework is: BATS. To run 1 tests set:
-```bash
-ide # we need ruby + docker daemon
+Build and test ide docker images:
+```
+$ ide
 cd ide_image_scripts
-bundle install
-bundle exec kitchen converge default-alpine
-bundle exec kitchen verify default-alpine
-bundle exec kitchen destroy default-alpine
-exit
-```
-To run all the tests suites:
-```
-ide "cd ide_image_scripts && bundle install && bundle exec rake kitchen:all"
+./tasks itest_build_images
+./tasks itest
 ```
 
-### TODO
-1. Replace Test-Kitchen with some tool that does not need ruby.
+There are integration tests, which test the end user use cases. They test that
+ `ide <some-command>` is invocable and return valid exit status and correct
+  output. We test here 2 images: Ubuntu and Alpine.

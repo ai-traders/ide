@@ -1,5 +1,6 @@
 ### 0.8.1 (2017-Apr-16)
 
+* readme reordered, almost 100 lines less
 * development:
   * do not use ruby for development
   * GoCD pipeline in yaml (was in json)
