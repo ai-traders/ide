@@ -672,7 +672,11 @@ function runfunc() {
     log_error "IDE_WORK set to $IDE_WORK which does not exist"
     exit 1
   fi
-  if [[ $(find . -maxdepth 1 -name '.' -uid 0 | wc -l) == "1" ]]; then
+  find_uid_option="-uid"
+  if [[ -d /etc/apk ]]; then
+    find_uid_option="-user"
+  fi
+  if [[ $(find . -maxdepth 1 -name '.' "${find_uid_option}" 0 | wc -l) == "1" ]]; then
     log_warn "IDE_WORK directory is owned by root. This is highly inadvisable."
   fi
   if [ -z "$IDE_IDENTITY" ]; then

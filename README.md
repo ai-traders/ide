@@ -505,29 +505,37 @@ ide image and mounting it this way would shadow all the provisioned files.
 1. Make changes in a feature branch, created from a git tagged commit in master branch.
 1. You run tests:
     ```
+    $ ./tasks style
+    ```
+    And the following tasks you can run using either default Idefile, on Ubuntu:
     $ ide
-    ./tasks style
     ./tasks unit
-    ./tasks itest_build_example-ide
+    ./tasks itest_build_exampleide
     ./tasks itest
 
     ./tasks itest_install
     ./tasks itest_local_install
     cd ide_image_scripts && ./tasks itest_build_images && ./tasks itest
     ```
-    The `tasks` file contains guidelines how to install testing software.
+    or on Alpine:
+    ```
+    $ ide --idefile Idefile.alpine
+    # same as for default Idefile
+    ```
+    The `tasks` file contains guidelines how to install testing software if you can't
+    run in ide docker image.
 1. If you decide that your code is ready, create a PR. Your job as a contributor
  is done.
 
 Then:
-1. An IDE author merges PR(s) into master branch.
-1. An IDE author runs locally:
+1. Maintainer merges PR(s) into master branch.
+1. Maintainer runs locally:
   * `./tasks bump` to bump the patch version fragment by 1 OR
   * e.g. `./tasks bump 1.2.3` to bump to a particular version
   Version is bumped in Changelog, ide_version file and OVersion backend.
 1. Everything is pushed to master onto private git server.
 1. CI server (GoCD) tests and releases IDE.
-1. After successful CI server pipeline, an IDE author pushes master to github.
+1. After successful CI server pipeline, an maintainer pushes master to github.
 
 ### Unit tests
 Unit tests run either bash functions or invoke ide command with `--dryrun`

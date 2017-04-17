@@ -7,9 +7,11 @@
 
 TMPDIR=${TMPDIR:-/tmp}
 cd $TMPDIR
-wget --quiet https://raw.githubusercontent.com/ai-traders/ide/master/ide -O /usr/bin/ide
-wget --quiet https://raw.githubusercontent.com/ai-traders/ide/master/ide_functions -O /usr/bin/ide_functions
-wget --quiet https://raw.githubusercontent.com/ai-traders/ide/master/ide_version -O /usr/bin/ide_version
+# wget --quiet option is not available on Alpine, but wget -q is on both:
+# Alpine and Ubuntu
+wget -q https://raw.githubusercontent.com/ai-traders/ide/master/ide -O /usr/bin/ide
+wget -q https://raw.githubusercontent.com/ai-traders/ide/master/ide_functions -O /usr/bin/ide_functions
+wget -q https://raw.githubusercontent.com/ai-traders/ide/master/ide_version -O /usr/bin/ide_version
 chmod 755 /usr/bin/ide
 chmod 755 /usr/bin/ide_functions
 chmod 755 /usr/bin/ide_version

@@ -28,10 +28,11 @@ pipelines:
                 - small
               tasks:
                 - exec:
-                    command: ide
+                    command: /bin/bash
                     arguments:
+                      - -c
                       - ./tasks style
-            unit:
+            unit_ubuntu:
               resources:
                 - docker
                 - small
@@ -39,6 +40,17 @@ pipelines:
                 - exec:
                     command: ide
                     arguments:
+                      - ./tasks unit
+            unit_alpine:
+              resources:
+                - docker
+                - small
+              tasks:
+                - exec:
+                    command: ide
+                    arguments:
+                      - --idefile
+                      - Idefile.alpine
                       - ./tasks unit
       - ide_image_scripts_test:
           clean_workspace: true
@@ -55,7 +67,7 @@ pipelines:
       - itest:
           clean_workspace: true
           jobs:
-            itest_install:
+            itest_install_ubuntu:
               resources:
                 - docker
                 - small
@@ -64,7 +76,18 @@ pipelines:
                     command: ide
                     arguments:
                       - ./tasks itest_install
-            itest_local_install:
+            itest_install_alpine:
+              resources:
+                - docker
+                - small
+              tasks:
+                - exec:
+                    command: ide
+                    arguments:
+                      - --idefile
+                      - Idefile.alpine
+                      - ./tasks itest_install
+            itest_local_install_ubuntu:
               resources:
                 - docker
                 - small
@@ -73,7 +96,7 @@ pipelines:
                     command: ide
                     arguments:
                       - ./tasks itest_local_install
-            shpec:
+            itest_local_install_alpine:
               resources:
                 - docker
                 - small
@@ -81,6 +104,28 @@ pipelines:
                 - exec:
                     command: ide
                     arguments:
+                      - --idefile
+                      - Idefile.alpine
+                      - ./tasks itest_install
+            shpec_ubuntu:
+              resources:
+                - docker
+                - small
+              tasks:
+                - exec:
+                    command: ide
+                    arguments:
+                      - ./tasks itest_build_exampleide && ./tasks itest
+            shpec_alpine:
+              resources:
+                - docker
+                - small
+              tasks:
+                - exec:
+                    command: ide
+                    arguments:
+                      - --idefile
+                      - Idefile.alpine
                       - ./tasks itest_build_exampleide && ./tasks itest
       - release:
           clean_workspace: true

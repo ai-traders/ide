@@ -1,8 +1,12 @@
 ### 0.8.1 (2017-Apr-16)
 
-* do not use ruby for ide development
-* GoCD pipeline in yaml (was in json)
-* renamed dummyide used in tests to example-ide
+* development:
+  * do not use ruby for development
+  * GoCD pipeline in yaml (was in json)
+  * rename dummyide used in tests to example-ide
+  * use shellcheck 0.4.6 and fix style issues
+  * test on Ubuntu and Alpine, in 2 docker images: ideide and ideide-alpine
+  * test on docker 1.12.6 and docker-compose 1.12.0
 
 ### 0.8.0 (13 Apr 2017)
 
