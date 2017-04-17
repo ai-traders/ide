@@ -2,7 +2,7 @@
 
 set -e
 if [[ ! -f ./releaser ]];then
-  wget http://http.archive.ai-traders.com/releaser/0.3.1/releaser
+  wget http://http.archive.ai-traders.com/releaser/0.3.2/releaser
 fi
 source ./releaser
 releaser_init
@@ -33,8 +33,8 @@ case "${command}" in
       # 1. add to your apt source:
       # deb http://archive.ubuntu.com/ubuntu/ trusty-backports restricted main universe
       # 2. run: apt-get install shellcheck
-      shellcheck ide
-      shellcheck ide_functions
+      ide --idefile Idefile.shellcheck /ide/work/ide
+      ide --idefile Idefile.shellcheck /ide/work/ide_functions
       exit $?
       ;;
   unit)

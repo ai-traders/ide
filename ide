@@ -1,4 +1,6 @@
 #!/bin/bash
+# disable SC1090, because we test each ide src file separately
+# shellcheck disable=SC1090
 
 # http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -46,6 +48,7 @@ do
     ;;
   -v | --version)
     # Keep it in order not to surprise end user
+    # shellcheck disable=SC2154
     echo "$0 version $version"
     exit 0
     ;;

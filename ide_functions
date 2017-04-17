@@ -1,4 +1,6 @@
 #!/bin/bash
+# shellcheck disable=SC1090
+# shellcheck disable=SC2181
 
 log_debug() {
   if [[ "${quiet}" != "true" ]]; then
@@ -717,6 +719,7 @@ function runfunc() {
       exit 1;
     fi
     # construct docker command
+    # shellcheck disable=SC2153
     docker_command=$(construct_docker_command "$IDE_DRIVER" "$env_file" "$run_interactively" "$run_id" "$IDE_DOCKER_IMAGE" "$IDE_WORK" "$IDE_IDENTITY" "$remove_containers" "$command" "$IDE_DOCKER_OPTIONS")
     log_info "docker command will be:\n${docker_command}"
 
@@ -780,6 +783,7 @@ function runfunc() {
     verify_docker_compose_file "$IDE_DOCKER_COMPOSE_FILE"
 
     # construct docker-compose command
+    # shellcheck disable=SC2153
     docker_compose_command=$(construct_docker_compose_run_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$run_interactively" "$IDE_WORK" "$IDE_IDENTITY" "$command" "$IDE_DOCKER_COMPOSE_OPTIONS")
     docker_compose_stop_command=$(construct_docker_compose_stop_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$IDE_WORK" "$IDE_IDENTITY")
     docker_compose_rm_command=$(construct_docker_compose_rm_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$IDE_WORK" "$IDE_IDENTITY")
