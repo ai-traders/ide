@@ -1,3 +1,8 @@
+### 0.8.3 (2017-Jun-06)
+
+* \#11167 set 777 permissions on directory: /tmp/ide, so that many users of one OS can
+ use ide
+
 ### 0.8.2 (2017-Apr-16)
 
 * readme reordered, almost 100 lines less

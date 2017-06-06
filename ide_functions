@@ -705,6 +705,7 @@ function runfunc() {
   env_file=$(get_env_vars_file_name "${run_id}")
   env_dir=$(dirname "${env_file}")
   mkdir -p "${env_dir}"
+  chmod 777 "${env_dir}"
   save_environment_variables "$env_file" "$IDE_VARS_BLACKLIST"
 
   if [[ "${remove_containers}" != "true" ]]; then
