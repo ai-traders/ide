@@ -6,3 +6,4 @@ tmp_env
 **/*/.kitchen
 **/iderc.txt
 releaser
+Idefile.to_be_tested*

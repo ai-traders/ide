@@ -53,7 +53,7 @@ pipelines:
                 - exec:
                     command: ide
                     arguments:
-                      - cd ide_image_scripts && ./tasks itest_build_images && ./tasks itest
+                      - cd ide_image_scripts && ./tasks itest_build_images && ./tasks itest_configs && ./tasks itest
       - itest:
           clean_workspace: true
           jobs:

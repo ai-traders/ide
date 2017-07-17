@@ -1,15 +1,21 @@
 FROM ubuntu:16.04
 
+# For IDE:
+# * entrypoint requires sudo and bash
 RUN apt-get update && \
-  apt-get install -y --no-install-recommends sudo git ca-certificates && \
-  rm -rf /var/cache/apt/*
-RUN git clone --depth 1 https://github.com/sstephenson/bats.git && \
-  git clone --depth 1 https://github.com/ztombol/bats-support.git && \
-  git clone --depth 1 https://github.com/ztombol/bats-assert.git && \
-  /bats/install.sh /usr/local
+  DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends\
+  sudo
 
-# make ide scripts available in Docker build context, so that we can
-# install them later (using install.sh)
+
+# install default IDE configs
 COPY src /tmp/ide_image_scripts_src
+RUN /tmp/ide_image_scripts_src/install.sh
 
-ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["/usr/bin/entrypoint.sh"]
+CMD ["/bin/bash"]
+
+# For Tests only:
+# * install custom IDE configs (for tests)
+COPY test/integration/test-files/etc_ide.d/scripts/* /etc/ide.d/scripts/
+# not used:
+# COPY test/integration/test-files/etc_ide.d/variables/* /etc/ide.d/variables/

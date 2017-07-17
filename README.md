@@ -396,19 +396,14 @@ The most important is to test the end user use cases, that e.g. `ide rake build`
  will really compile your code and produce an artifact.
 
 ### Additional advice
-1. It is nice to separate installing ide configs from your ide docker image logic.
- You should not mess them together in one docker RUN directive in a Dockerfile.
- You can even have 2 Dockerfiles:
-   * one to just install and test ide docker image configs
-   * another, which end user logic. It should use the docker image built by the 1st Dockerfile.
-1. Whenever you use dummy identity (dummy configuration and secret files) for tests,
- it would be nice to ensure, that they have proper permissions, e.g. `~/.ssh/id_rsa`
-  has permissions: `600`. Git does not preserve `600` permissions.
-
-## FAQ
-> Why not mount `/home/user` as `/home/ide` but as `/ide/work`?
-
-Because `/home/ide` in ide docker image can already have some configuration
+1. You may find it helpful to keep 2 Dockerfiles:
+  * one to install and test IDE docker image configs
+  * another, with end user logic. It should use the docker image built by the 1st Dockerfile.
+1. The scripts to be put into `/etc/ide.d/scripts` directory should not only
+ copy files, but also ensure proper permissions. E.g. `~/.ssh/id_rsa` should
+  have permissions: `600`.
+1. Why not mount `/home/user` as `/home/ide` but as `/ide/work`?
+  Because `/home/ide` in ide docker image can already have some configuration
  and mounting it this way would override all the provisioned files.
 
 ## Development and contributions
@@ -426,7 +421,7 @@ Because `/home/ide` in ide docker image can already have some configuration
 
     ./tasks itest_install
     ./tasks itest_local_install
-    cd ide_image_scripts && ./tasks itest_build_images && ./tasks itest
+    cd ide_image_scripts && ./tasks itest_build_images && ./tasks itest_configs && ./tasks itest
     ```
     or on Alpine:
     ```bash

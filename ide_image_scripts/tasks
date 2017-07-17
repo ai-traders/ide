@@ -10,17 +10,27 @@ case "${command}" in
       docker build -f DockerfileUbuntu -t ide-image-scripts:ubuntu .
       exit $?
       ;;
-  itest)
-      docker_mounts="-v $(pwd)/test/integration/test-files/ide_work:/ide/work -v $(pwd)/test/integration/test-files/ide_identities/full:/ide/identity -v $(pwd)/test/integration/bats:/tmp/bats -v $(pwd)/test/integration/test-files/29-not-executable-file.sh:/etc/ide.d/scripts/29-not-executable-file.sh -v $(pwd)/test/integration/test-files/30-copy-ssh-configs.sh:/etc/ide.d/scripts/30-copy-ssh-configs.sh"
+  itest_configs)
+      # do not use the production ENTRYPOINT
+      echo "IDE_DOCKER_OPTIONS=\"--entrypoint=/bin/bash\"" > ./Idefile.to_be_tested_configs
+      echo "IDE_IDENTITY=\"$(pwd)/test/integration/test-files/ide_identities/full\"" >> ./Idefile.to_be_tested_configs
+      echo "IDE_WORK=$(pwd)/test/integration/test-files/ide_work" >> Idefile.to_be_tested_configs
 
-      echo "Testing on Alpine"
-      docker run ${docker_mounts} ide-image-scripts:alpine -c "/usr/local/bin/bats /tmp/bats"
-      # To run it interactively:
-      # docker run -ti ${docker_mounts} ide-image-scripts:alpine -c /bin/bash
-      echo "Testing on Ubuntu"
-      docker run ${docker_mounts} ide-image-scripts:ubuntu -c "/usr/local/bin/bats /tmp/bats"
-      # To run it interactively:
-      # docker run -ti ${docker_mounts} ide-image-scripts:ubuntu -c /bin/bash
+      echo "Testing image: ide-image-scripts:alpine"
+      IDE_DOCKER_IMAGE="ide-image-scripts:alpine" bats "$(pwd)/test/integration/configs/bats"
+      echo "Testing image: ide-image-scripts:ubuntu"
+      IDE_DOCKER_IMAGE="ide-image-scripts:ubuntu" bats "$(pwd)/test/integration/configs/bats"
+      exit $?
+      ;;
+  itest)
+      # use the production ENTRYPOINT
+      echo "IDE_IDENTITY=\"$(pwd)/test/integration/test-files/ide_identities/full\"" >> ./Idefile.to_be_tested
+      echo "IDE_WORK=$(pwd)/test/integration/test-files/ide_work" >> Idefile.to_be_tested
+
+      echo "Testing image: ide-image-scripts:alpine"
+      IDE_DOCKER_IMAGE="ide-image-scripts:alpine" bats "$(pwd)/test/integration/end_user/bats"
+      echo "Testing image: ide-image-scripts:ubuntu"
+      IDE_DOCKER_IMAGE="ide-image-scripts:ubuntu" bats "$(pwd)/test/integration/end_user/bats"
       exit $?
       ;;
   *)

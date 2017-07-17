@@ -1,20 +1,21 @@
 FROM alpine:3.5
 
-# * Test-Kitchen needs bash to login into the container.
-# * "apk add --no-cache" will install packages running first apk update and
-# then rm -rf /var/cache/apk/*
-# * add community edge repository to install shadow package
+# For IDE:
+# * entrypoint requires sudo and bash
 # * install shadow to get usermod and groupmod commands
-# * sudo is needed for entrypoint.sh
+# * add community edge repository to install shadow package
 RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
- apk add --no-cache bash shadow sudo git
-RUN git clone --depth 1 https://github.com/sstephenson/bats.git && \
-  git clone --depth 1 https://github.com/ztombol/bats-support.git && \
-  git clone --depth 1 https://github.com/ztombol/bats-assert.git && \
-  /bats/install.sh /usr/local
+  apk add --no-cache bash shadow sudo
 
-# make ide scripts available in Docker build context, so that we can
-# install them later (using install.sh)
+# install default IDE configs
 COPY src /tmp/ide_image_scripts_src
+RUN /tmp/ide_image_scripts_src/install.sh
 
-ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["/usr/bin/entrypoint.sh"]
+CMD ["/bin/bash"]
+
+# For Tests only:
+# * install custom IDE configs (for tests)
+COPY test/integration/test-files/etc_ide.d/scripts/* /etc/ide.d/scripts/
+# not used:
+# COPY test/integration/test-files/etc_ide.d/variables/* /etc/ide.d/variables/
