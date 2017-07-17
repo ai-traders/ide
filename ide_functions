@@ -255,12 +255,13 @@ function construct_docker_command() {
   container_name="$4"
   image_name="$5"
   ide_work="$6"
-  ide_identity="$7"
-  remove_containers="$8"
+  ide_work_inner="$7"
+  ide_identity="$8"
+  remove_containers="$9"
   # can be unset
-  command="$9"
+  command="${10}"
   # can be unset
-  ide_docker_options="${10}"
+  ide_docker_options="${11}"
   if [ -z "$env_file" ]; then
     log_error "env_file not specified"
     return 1;
@@ -279,6 +280,10 @@ function construct_docker_command() {
   fi
   if [ -z "$ide_work" ]; then
     log_error "ide_work not specified"
+    return 1;
+  fi
+  if [ -z "$ide_work_inner" ]; then
+    log_error "ide_work_inner not specified"
     return 1;
   fi
   if [ -z "$ide_identity" ]; then
@@ -302,7 +307,7 @@ function construct_docker_command() {
   if [[ "$remove_containers" == "true" ]]; then
     docker_cmd+=" --rm"
   fi
-  docker_cmd+=" -v $ide_work:/ide/work -v $ide_identity:/ide/identity:ro"
+  docker_cmd+=" -v ${ide_work}:${ide_work_inner} -v ${ide_identity}:/ide/identity:ro"
   docker_cmd+=" --env-file=\"$env_file\""
 
   if [ -n "$DISPLAY" ]; then
@@ -346,13 +351,15 @@ function construct_docker_command() {
 # $2 is the docker-compose yaml file path
 # $3 is docker-compose project name
 # $4 is IDE_WORK
-# $5 is IDE_IDENTITY
+# $5 is ide_work_inner
+# $6 is IDE_IDENTITY
 function construct_docker_compose_command_part1() {
   env_file="$1"
   docker_compose_file="$2"
   project_name="$3"
   ide_work="$4"
-  ide_identity="$5"
+  ide_work_inner="$5"
+  ide_identity="$6"
   if [ -z "$env_file" ]; then
     log_error "env_file not specified"
     return 1;
@@ -367,6 +374,10 @@ function construct_docker_compose_command_part1() {
   fi
   if [ -z "$ide_work" ]; then
     log_error "ide_work not specified"
+    return 1;
+  fi
+  if [ -z "$ide_work_inner" ]; then
+    log_error "ide_work_inner not specified"
     return 1;
   fi
   if [ -z "$ide_identity" ]; then
@@ -384,23 +395,25 @@ function construct_docker_compose_command_part1() {
 # $3 is docker-compose project name
 # $4 is the true/false whether to run interactively
 # $5 is IDE_WORK
-# $6 is IDE_IDENTITY
-# $7 is command to be run in docker container
-# $8 are docker compose options
+# $6 is ide_work_inner
+# $7 is IDE_IDENTITY
+# $8 is command to be run in docker container
+# $9 are docker compose options
 function construct_docker_compose_run_command() {
   env_file="$1"
   docker_compose_file="$2"
   project_name="$3"
   run_interactively="$4"
   ide_work="$5"
-  ide_identity="$6"
+  ide_work_inner="$6"
+  ide_identity="$7"
   # can be unset
-  command="$7"
+  command="$8"
   # can be unset
-  ide_docker_compose_options="$8"
+  ide_docker_compose_options="$9"
 
   # initial part of the docker compose command
-  docker_compose_cmd=$(construct_docker_compose_command_part1 "${env_file}" "${docker_compose_file}" "${project_name}" "${ide_work}" "${ide_identity}")
+  docker_compose_cmd=$(construct_docker_compose_command_part1 "${env_file}" "${docker_compose_file}" "${project_name}" "${ide_work}" "${ide_work_inner}" "${ide_identity}")
   if [[ "$?" != "0" ]]; then
     log_error "$docker_compose_cmd"
     return 1
@@ -445,15 +458,17 @@ function construct_docker_compose_run_command() {
 # $2 is docker-compose project name
 # $3 is the docker-compose yaml file path
 # $4 is IDE_WORK
-# $5 is IDE_IDENTITY
+# $5 is ide_work_inner
+# $6 is IDE_IDENTITY
 function construct_docker_compose_stop_command() {
   env_file="$1"
   docker_compose_file="$2"
   project_name="$3"
   ide_work="$4"
-  ide_identity="$5"
+  ide_work_inner="$5"
+  ide_identity="$6"
 
-  docker_compose_cmd=$(construct_docker_compose_command_part1 "${env_file}" "${docker_compose_file}" "${project_name}" "${ide_work}" "${ide_identity}")
+  docker_compose_cmd=$(construct_docker_compose_command_part1 "${env_file}" "${docker_compose_file}" "${project_name}" "${ide_work}" "${ide_work_inner}" "${ide_identity}")
   if [[ "$?" != "0" ]]; then
     log_error "$docker_compose_cmd"
     return 1
@@ -467,15 +482,17 @@ function construct_docker_compose_stop_command() {
 # $2 is docker-compose project name
 # $3 is the docker-compose yaml file path
 # $4 is IDE_WORK
-# $5 is IDE_IDENTITY
+# $5 is ide_work_inner
+# $6 is IDE_IDENTITY
 function construct_docker_compose_rm_command() {
   env_file="$1"
   docker_compose_file="$2"
   project_name="$3"
   ide_work="$4"
-  ide_identity="$5"
+  ide_work_inner="$5"
+  ide_identity="$6"
 
-  docker_compose_cmd=$(construct_docker_compose_command_part1 "${env_file}" "${docker_compose_file}" "${project_name}" "${ide_work}" "${ide_identity}")
+  docker_compose_cmd=$(construct_docker_compose_command_part1 "${env_file}" "${docker_compose_file}" "${project_name}" "${ide_work}" "${ide_work_inner}" "${ide_identity}")
   if [[ "$?" != "0" ]]; then
     log_error "$docker_compose_cmd"
     return 1
@@ -672,6 +689,10 @@ function runfunc() {
     log_error "IDE_WORK set to $IDE_WORK which does not exist"
     exit 1
   fi
+  if [ -z "$IDE_WORK_INNER" ]; then
+    IDE_WORK_INNER="/ide/work"
+    log_debug "IDE_WORK_INNER not set, setting to: ${IDE_WORK_INNER}"
+  fi
   find_uid_option="-uid"
   if [[ -d /etc/apk ]]; then
     find_uid_option="-user"
@@ -725,7 +746,7 @@ function runfunc() {
     fi
     # construct docker command
     # shellcheck disable=SC2153
-    docker_command=$(construct_docker_command "$IDE_DRIVER" "$env_file" "$run_interactively" "$run_id" "$IDE_DOCKER_IMAGE" "$IDE_WORK" "$IDE_IDENTITY" "$remove_containers" "$command" "$IDE_DOCKER_OPTIONS")
+    docker_command=$(construct_docker_command "$IDE_DRIVER" "$env_file" "$run_interactively" "$run_id" "$IDE_DOCKER_IMAGE" "$IDE_WORK" "${IDE_WORK_INNER}" "$IDE_IDENTITY" "$remove_containers" "$command" "$IDE_DOCKER_OPTIONS")
     log_info "docker command will be:\n${docker_command}"
 
     on_control_c()
@@ -789,9 +810,9 @@ function runfunc() {
 
     # construct docker-compose command
     # shellcheck disable=SC2153
-    docker_compose_command=$(construct_docker_compose_run_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$run_interactively" "$IDE_WORK" "$IDE_IDENTITY" "$command" "$IDE_DOCKER_COMPOSE_OPTIONS")
-    docker_compose_stop_command=$(construct_docker_compose_stop_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$IDE_WORK" "$IDE_IDENTITY")
-    docker_compose_rm_command=$(construct_docker_compose_rm_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$IDE_WORK" "$IDE_IDENTITY")
+    docker_compose_command=$(construct_docker_compose_run_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$run_interactively" "$IDE_WORK" "${IDE_WORK_INNER}" "$IDE_IDENTITY" "$command" "$IDE_DOCKER_COMPOSE_OPTIONS")
+    docker_compose_stop_command=$(construct_docker_compose_stop_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$IDE_WORK" "${IDE_WORK_INNER}" "$IDE_IDENTITY")
+    docker_compose_rm_command=$(construct_docker_compose_rm_command "$env_file" "$IDE_DOCKER_COMPOSE_FILE" "$run_id" "$IDE_WORK" "${IDE_WORK_INNER}" "$IDE_IDENTITY")
     log_info "docker-compose run command will be:\n${docker_compose_command}"
     log_debug "docker-compose stop command will be:\n${docker_compose_stop_command}"
     log_debug "docker-compose rm command will be:\n${docker_compose_rm_command}"
@@ -946,7 +967,7 @@ function pullfunc() {
       # word, because docker-compose v2 files support volumes named with 1 word
       # and if such a volume does not exist, then there is an error like:
       # ERROR: Named volume "dummy:/ide/identity:ro" is used in service "default" but no declaration was found in the volumes section.
-      IDE_WORK="${empty_env_file}" IDE_IDENTITY="${empty_env_file}" ENV_FILE="${empty_env_file}" docker-compose -f "${IDE_DOCKER_COMPOSE_FILE}" pull
+      IDE_WORK="${empty_env_file}" IDE_WORK_INNER="/ide/work" IDE_IDENTITY="${empty_env_file}" ENV_FILE="${empty_env_file}" docker-compose -f "${IDE_DOCKER_COMPOSE_FILE}" pull
       rm "${empty_env_file}"
     fi
   fi

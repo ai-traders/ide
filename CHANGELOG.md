@@ -1,3 +1,5 @@
+* add option IDE_WORK_INNER, which defaults to `/ide/work`
+
 ### 0.8.3 (2017-Jun-06)
 
 * \#11167 set 777 permissions on directory: /tmp/ide, so that many users of one OS can

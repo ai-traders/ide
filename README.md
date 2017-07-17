@@ -131,13 +131,15 @@ Configuration is kept in an Idefile. It is an environment variable style
 Supported variables:
 * `IDE_DRIVER`, supported values: **docker**, **docker-compose**, **nvidia-docker**.
  Default: **docker**
-* `IDE_IDENTITY`, what on localhost should be read-only mounted into container as
+* `IDE_IDENTITY`, **a directory on localhost** to be read-only mounted into container as
 `/ide/identity`, defaults to `HOME`
-* `IDE_WORK`, what on localhost should be read-write mounted into container as
-`/ide/work`, this is your working copy, your project repository;
-defaults to current directory. Thanks to this, your project's code is visible
+* `IDE_WORK`, **a directory on localhost** to be read-write mounted into container as
+`IDE_WORK_INNER` directory. This is your working copy, your project repository.
+Defaults to current directory. Thanks to this, your project's code is visible
 inside the container (so its has code to work on) and you can see any container's
  work result (code changes).
+* `IDE_WORK_INNER`, **a directory in docker container** to which `IDE_WORK` local
+ directory is mounted. Defaults to `/ide/work`.
 * variables only for **docker driver**:
   * `IDE_DOCKER_IMAGE`, the only required setting, docker image (or in the future
    maybe openstack image) to use
