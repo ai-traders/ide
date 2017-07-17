@@ -1,3 +1,5 @@
+### 0.9.0 (2017-Jul-17)
+
 * add option IDE_WORK_INNER, which defaults to `/ide/work`
 * export IDE_WORK_INNER, so that it is preserved into a docker container created
  by IDE and we can set ide_work="${IDE_WORK_INNER}" (backwards compatibility for
