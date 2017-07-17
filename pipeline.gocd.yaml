@@ -13,9 +13,7 @@ pipelines:
           clean_workspace: true
           jobs:
             verify_version:
-              resources:
-                - docker
-                - small
+              elastic_profile_id: w.c1.m1024.e5
               tasks:
                 - exec:
                     command: /bin/bash
@@ -23,9 +21,7 @@ pipelines:
                       - -c
                       - ./tasks verify_version
             style:
-              resources:
-                - docker
-                - small
+              elastic_profile_id: w.c1.m1024.e5
               tasks:
                 - exec:
                     command: /bin/bash
@@ -33,18 +29,14 @@ pipelines:
                       - -c
                       - ./tasks style
             unit_ubuntu:
-              resources:
-                - docker
-                - small
+              elastic_profile_id: w.c1.m1024.e5
               tasks:
                 - exec:
                     command: ide
                     arguments:
                       - ./tasks unit
             unit_alpine:
-              resources:
-                - docker
-                - small
+              elastic_profile_id: w.c1.m1024.e5
               tasks:
                 - exec:
                     command: ide
@@ -56,9 +48,7 @@ pipelines:
           clean_workspace: true
           jobs:
             itest:
-              resources:
-                - docker
-                - small
+              elastic_profile_id: w.c1.m1024.e5
               tasks:
                 - exec:
                     command: ide
@@ -68,18 +58,14 @@ pipelines:
           clean_workspace: true
           jobs:
             itest_install_ubuntu:
-              resources:
-                - docker
-                - small
+              elastic_profile_id: w.c1.m1024.e5
               tasks:
                 - exec:
                     command: ide
                     arguments:
                       - ./tasks itest_install
             itest_install_alpine:
-              resources:
-                - docker
-                - small
+              elastic_profile_id: w.c1.m1024.e5
               tasks:
                 - exec:
                     command: ide
@@ -88,18 +74,14 @@ pipelines:
                       - Idefile.alpine
                       - ./tasks itest_install
             itest_local_install_ubuntu:
-              resources:
-                - docker
-                - small
+              elastic_profile_id: w.c1.m1024.e5
               tasks:
                 - exec:
                     command: ide
                     arguments:
                       - ./tasks itest_local_install
             itest_local_install_alpine:
-              resources:
-                - docker
-                - small
+              elastic_profile_id: w.c1.m1024.e5
               tasks:
                 - exec:
                     command: ide
@@ -108,18 +90,14 @@ pipelines:
                       - Idefile.alpine
                       - ./tasks itest_install
             shpec_ubuntu:
-              resources:
-                - docker
-                - small
+              elastic_profile_id: w.c1.m1024.e5
               tasks:
                 - exec:
                     command: ide
                     arguments:
                       - ./tasks itest_build_exampleide && ./tasks itest
             shpec_alpine:
-              resources:
-                - docker
-                - small
+              elastic_profile_id: w.c1.m1024.e5
               tasks:
                 - exec:
                     command: ide
@@ -131,9 +109,7 @@ pipelines:
           clean_workspace: true
           jobs:
             code:
-              resources:
-                - docker
-                - small
+              elastic_profile_id: w.c1.m1024.e5
               tasks:
                 - exec:
                     command: /bin/bash

@@ -2,26 +2,31 @@
 
 set -e
 if [[ ! -f ./releaser ]];then
-  wget http://http.archive.ai-traders.com/releaser/0.3.2/releaser
+  wget -q http://http.archive.ai-traders.com/releaser/1.0.0/releaser
 fi
 source ./releaser
 releaser_init
 
 function verify_version_ide {
-  version=$(get_next_version)
+  version=$(get_next_oversion)
   if [[ "version=\"${version}\"" != $(cat ./ide_version) ]]; then
-    echo "fail! version was not bumped in ide_version file"
+    echo "fail! version in ide_version file is different than in OVersion backend"
     exit 1
   fi
-  verify_version_no_version_file
+  verify_version_for_release
 }
 
 command="$1"
 case "${command}" in
-  bump)
-      version=$(get_next_version)
-      echo "version=\"${version}\"" > "./ide_version"
-      bump_changelog_and_oversion "$2"
+  set_version)
+      if [[ -n "$2" ]]; then
+        next_version="$2"
+        set_next_oversion "${next_version}"
+      else
+        next_version=$(get_next_oversion)
+      fi
+      set_version_in_changelog "${changelog_file}" "${next_version}"
+      echo "version=\"${next_version}\"" > "./ide_version"
       exit $?
       ;;
   verify_version)
@@ -33,6 +38,10 @@ case "${command}" in
       # 1. add to your apt source:
       # deb http://archive.ubuntu.com/ubuntu/ trusty-backports restricted main universe
       # 2. run: apt-get install shellcheck
+      #
+      # To run the docker container interactively:
+      # 1. add this to Idefile.shellcheck: IDE_DOCKER_OPTIONS="--entrypoint=/bin/sh"
+      # 2. run: ide --idefile Idefile.shellcheck
       ide --idefile Idefile.shellcheck /ide/work/ide
       ide --idefile Idefile.shellcheck /ide/work/ide_functions
       exit $?
@@ -78,8 +87,11 @@ case "${command}" in
       fi
       ;;
   release)
-      verify_version_ide
+      verify_version_for_release
       git_tag_from_oversion
+      old_version=$(get_next_oversion)
+      next_version=$(bump_patch_version "${old_version}")
+      set_next_oversion "${next_version}"
       exit $?
       ;;
   *)

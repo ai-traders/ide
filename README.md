@@ -441,9 +441,10 @@ Because `/home/ide` in ide docker image can already have some configuration
 Then:
 1. Maintainer merges PR(s) into master branch.
 1. Maintainer runs locally:
-    * `./tasks bump` to bump the patch version fragment by 1 OR
-    * e.g. `./tasks bump 1.2.3` to bump to a particular version
-  Version is bumped in Changelog, ide_version file and OVersion backend.
+    * `./tasks set_version` to set version in CHANGELOG and ide_version files to
+    the version from OVersion backend
+    * e.g. `./tasks set_version 1.2.3` to set version in CHANGELOG and ide_version
+     files and in OVersion backend to 1.2.3
 1. Everything is pushed to master onto private git server.
 1. CI server (GoCD) tests and releases IDE.
 1. After successful CI server pipeline, an maintainer pushes master to github.
