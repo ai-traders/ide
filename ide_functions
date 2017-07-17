@@ -693,6 +693,7 @@ function runfunc() {
     IDE_WORK_INNER="/ide/work"
     log_debug "IDE_WORK_INNER not set, setting to: ${IDE_WORK_INNER}"
   fi
+  export IDE_WORK_INNER
   find_uid_option="-uid"
   if [[ -d /etc/apk ]]; then
     find_uid_option="-user"
