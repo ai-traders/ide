@@ -11,11 +11,11 @@ describe "ide command: run"
   describe 'when IDE_DRIVER="docker"'
     describe 'when --force_not_interactive is set and docker run cmd is set'
       describe 'easy, common use-case'
-        env_files_count_before_test=$(ls /tmp/ide/ | wc -l)
+        env_files_count_before_test=$(ls /tmp | grep ide-environment | wc -l)
         docker_containers_count_before_test=$(docker ps -a | wc -l)
         message=$(cd test/docker/example-ide-usage && IDE_LOG_LEVEL=debug ${IDE_PATH} --force_not_interactive "bash --version && pwd")
         docker_containers_count_after_test=$(docker ps -a | wc -l)
-        env_files_count_after_test=$(ls /tmp/ide/ | wc -l)
+        env_files_count_after_test=$(ls /tmp | grep ide-environment | wc -l)
         exit_status="$?"
         it "exits with status 0"
           assert equal "$exit_status" "0"
@@ -94,13 +94,13 @@ describe "ide command: run"
   describe 'when IDE_DRIVER="docker-compose"'
     describe 'when --force_not_interactive is set and docker-compose run cmd is set'
       describe 'docker-compose file version 1'
-        env_files_count_before_test=$(ls /tmp/ide/ | wc -l)
+        env_files_count_before_test=$(ls /tmp | grep ide-environment | wc -l)
         docker_containers_count_before_test=$(docker ps -a | wc -l)
         docker_networks_count_before_test=$(docker network ls -q | wc -l)
         message=$(cd test/docker-compose/default && IDE_LOG_LEVEL=debug ${IDE_PATH} --force_not_interactive 'bash --version && pwd')
         docker_networks_count_after_test=$(docker network ls -q | wc -l)
         docker_containers_count_after_test=$(docker ps -a | wc -l)
-        env_files_count_after_test=$(ls /tmp/ide/ | wc -l)
+        env_files_count_after_test=$(ls /tmp | grep ide-environment | wc -l)
         exit_status="$?"
         it "exits with status 0"
           assert equal "$exit_status" "0"

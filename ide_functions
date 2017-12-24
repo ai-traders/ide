@@ -59,15 +59,18 @@ get_run_id() {
 }
 
 # Returns a name of a file which will contain environment variables.
-# e.g. /tmp/ide/environment-ide-example-ide-usage-2016-03-08_18-51-09-68509321
+# e.g. /tmp/ide-environment-example-ide-usage-2016-03-08_18-51-09-68509321
+# The file name must start with "ide-" and must not be put into a shared directory
+# like /tmp/ide, because there may be 2 users sharing /tmp directory
+# and we could not set proper permissions of /tmp/ide without sudo
+# (same permissions as /tmp directory has) #12181.
 get_env_vars_file_name() {
-
   run_id="$1"
   if [ -z "$run_id" ]; then
     log_error "run_id not specified"
     return 1;
   fi
-  echo "/tmp/ide/environment-${run_id}"
+  echo "/tmp/ide-environment-${run_id}"
 }
 
 # $1 is the environment variable name and does not start with IDE_
@@ -730,7 +733,6 @@ function runfunc() {
   env_file=$(get_env_vars_file_name "${run_id}")
   env_dir=$(dirname "${env_file}")
   mkdir -p "${env_dir}"
-  chmod 777 "${env_dir}"
   save_environment_variables "$env_file" "$IDE_VARS_BLACKLIST"
 
   if [[ "${remove_containers}" != "true" ]]; then
@@ -762,13 +764,14 @@ function runfunc() {
         if [[ $(docker inspect -f "{{.State.Running}}" "$run_id" ) == "false" ]]; then
           # If Ctrl+c was typed fast enough, docker container is not running, but
           # it is created. If that is the case, remove it.
-          log_error "I will remove docker container: $run_id (it was created but not started)"
+          log_error "removing docker container: $run_id (it was created but not started)"
           docker rm "$run_id"
         else
-          log_error "I will stop docker container: $run_id"
+          log_error "stopping docker container: $run_id"
           # this can still take some time (up to 10 seconds)
           docker stop "$run_id"
         fi
+        rm -rf "${env_file}"
     }
     trap 'on_control_c' INT
 

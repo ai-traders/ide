@@ -17,9 +17,9 @@ describe "get_run_id and similar"
       run_id="some-random-string-666"
       message="$(/bin/bash -c "source ${IDE_PATH} && get_env_vars_file_name ${run_id}")"
       assert equal "$?" "0"
-      # e.g. /tmp/ide/environment-2016-02-17_16-32-29-68192406
+      # e.g. /tmp/ide-environment-2016-02-17_16-32-29-68192406
       # {2,} == match at least 2 occurrences of a char
-      assert do_match "$message" "/tmp/ide/environment-some-random-string-666"
+      assert do_match "$message" "/tmp/ide-environment-some-random-string-666"
     end
   end
 end

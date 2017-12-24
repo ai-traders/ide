@@ -1,3 +1,10 @@
+### 0.10.1 (2017-Dec-24)
+
+* do not create the directory `/tmp/ide` for saving environment variables.
+ Instead: use files starting with: `/tmp/ide-environment-...`, because there may
+ be 2 users sharing /tmp directory and we could not set proper permissions of
+ /tmp/ide without sudo (same permissions as /tmp directory has) #12181.
+
 ### 0.10.0 (2017-Dec-24)
 
 * stop requiring Idefile #9919 (but some variables must be set,

@@ -39,7 +39,7 @@ Run:
 ```bash
 $ ide bats --version
 17-04-2017 16:07:55 IDE info: docker command will be:
-docker run --rm -v /home/ewa/code/ide:/ide/work -v /home/ewa:/ide/identity:ro --env-file="/tmp/ide/environment-ide-ide-2017-04-17_16-07-55-85219559" -v /tmp/.X11-unix:/tmp/.X11-unix --privileged -ti --name ide-ide-2017-04-17_16-07-55-85219559 xmik/ideide:3.0.1 "shpec --version"
+docker run --rm -v /home/ewa/code/ide:/ide/work -v /home/ewa:/ide/identity:ro --env-file="/tmp/ide-environment-ide-ide-2017-04-17_16-07-55-85219559" -v /tmp/.X11-unix:/tmp/.X11-unix --privileged -ti --name ide-ide-2017-04-17_16-07-55-85219559 xmik/ideide:3.0.1 "shpec --version"
 Unable to find image 'xmik/ideide:3.0.1' locally
 3.0.1: Pulling from xmik/ideide
 # pulling docker image
@@ -54,7 +54,7 @@ What happens:
 1. IDE creates a container from xmik/ideide:3.0.1 image with the following command:
    ```
    docker run --rm -v ${IDE_WORK}:/ide/work -v ${IDE_IDENTITY}:/ide/identity:ro \
-     --env-file /tmp/ide/environment-2016-02-08_17-56-19-78638303 ${IDE_DOCKER_IMAGE} \
+     --env-file /tmp/ide-environment-2016-02-08_17-56-19-78638303 ${IDE_DOCKER_IMAGE} \
      "bats --version"
    ```
 1. IDE runs `bats --version` in the container in the `/ide/work` directory.
@@ -64,7 +64,7 @@ Run:
 ```bash
 $ ide
 17-04-2017 16:10:06 IDE info: docker command will be:
-docker run --rm -v /home/ewa/code/ide:/ide/work -v /home/ewa:/ide/identity:ro --env-file="/tmp/ide/environment-ide-ide-2017-04-17_16-10-05-40045882" -v /tmp/.X11-unix:/tmp/.X11-unix --privileged -ti --name ide-ide-2017-04-17_16-10-05-40045882 xmik/ideide:3.0.1
+docker run --rm -v /home/ewa/code/ide:/ide/work -v /home/ewa:/ide/identity:ro --env-file="/tmp/ide-environment-ide-ide-2017-04-17_16-10-05-40045882" -v /tmp/.X11-unix:/tmp/.X11-unix --privileged -ti --name ide-ide-2017-04-17_16-10-05-40045882 xmik/ideide:3.0.1
 usermod: no changes
 ide init finished (interactive shell)
 using ideide:3.0.1
@@ -82,7 +82,7 @@ What happens:
 1. IDE creates a container from xmik/ideide:3.0.1 image with the following command:
    ```
    docker run --rm -v ${IDE_WORK}:/ide/work -v ${IDE_IDENTITY}:/ide/identity:ro \
-     --env-file /tmp/ide/environment-2016-02-08_17-56-19-78638303 ${IDE_DOCKER_IMAGE}
+     --env-file /tmp/ide-environment-2016-02-08_17-56-19-78638303 ${IDE_DOCKER_IMAGE}
    ```
 1. IDE runs the default command for a docker image, it is `/bin/bash` for `xmik/ideide`.
 
