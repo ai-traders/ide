@@ -2,7 +2,7 @@
 
 set -e
 if [[ ! -f ./releaser ]];then
-  wget -q http://http.archive.ai-traders.com/releaser/1.0.0/releaser
+  wget -q http://http.archive.ai-traders.com/releaser/1.0.3/releaser || { echo "cannot download releaser, but maybe not needed"; }
 fi
 source ./releaser
 releaser_init
@@ -50,7 +50,14 @@ case "${command}" in
       # install shpec with (https://github.com/rylnd/shpec):
       # sudo sh -c "`curl -L https://raw.github.com/rylnd/shpec/master/install.sh`"
       set +e
-      time shpec test/unit/shpec/**/*.sh
+      ide "time shpec test/unit/shpec/**/*.sh"
+      exit $?
+      ;;
+  unit_alpine)
+      # install shpec with (https://github.com/rylnd/shpec):
+      # sudo sh -c "`curl -L https://raw.github.com/rylnd/shpec/master/install.sh`"
+      set +e
+      ide --idefile Idefile.alpine "time shpec test/unit/shpec/**/*.sh"
       exit $?
       ;;
   itest_build_exampleide)

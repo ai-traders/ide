@@ -12,7 +12,7 @@ pipelines:
       - style_unit:
           clean_workspace: true
           jobs:
-            verify_version:
+            style_unit:
               elastic_profile_id: w.c1.m1024.e5
               tasks:
                 - exec:
@@ -20,30 +20,21 @@ pipelines:
                     arguments:
                       - -c
                       - ./tasks verify_version
-            style:
-              elastic_profile_id: w.c1.m1024.e5
-              tasks:
                 - exec:
                     command: /bin/bash
                     arguments:
                       - -c
                       - ./tasks style
-            unit_ubuntu:
-              elastic_profile_id: w.c1.m1024.e5
-              tasks:
                 - exec:
-                    command: ide
+                    command: /bin/bash
                     arguments:
+                      - -c
                       - ./tasks unit
-            unit_alpine:
-              elastic_profile_id: w.c1.m1024.e5
-              tasks:
                 - exec:
-                    command: ide
+                    command: /bin/bash
                     arguments:
-                      - --idefile
-                      - Idefile.alpine
-                      - ./tasks unit
+                      - -c
+                      - ./tasks unit_alpine
       - ide_image_scripts_test:
           clean_workspace: true
           jobs:

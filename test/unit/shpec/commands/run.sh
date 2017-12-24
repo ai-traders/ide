@@ -56,13 +56,28 @@ describe "ide command: run"
     end
     describe "--idefile"
       describe 'when --idefile not set and Idefile does not exist in curent directory'
-        message=$(cd test && ${IDE_PATH} --dryrun)
-        exit_status="$?"
-        it "exits with status 1"
-          assert equal "$exit_status" "1"
+        describe 'when all needed variables are set'
+          message=$(cd test && IDE_DOCKER_IMAGE="blabla" ${IDE_PATH} --dryrun)
+          exit_status="$?"
+          it "exits with status 0"
+            assert equal "$exit_status" "0"
+          end
+          it "informs that Idefile does not exist"
+            assert do_match "$message" "idefile: ${PWD}/test/Idefile does not exist"
+          end
         end
-        it "informs that Idefile does not exist"
-          assert do_match "$message" "idefile: ${PWD}/test/Idefile does not exist"
+        describe 'when IDE_DOCKER_IMAGE is not set'
+          message=$(cd test && ${IDE_PATH} --dryrun)
+          exit_status="$?"
+          it "exits with status 1"
+            assert equal "$exit_status" "1"
+          end
+          it "informs that Idefile does not exist"
+            assert do_match "$message" "idefile: ${PWD}/test/Idefile does not exist"
+          end
+          it "informs that IDE_DOCKER_IMAGE not set"
+            assert do_match "$message" "IDE_DOCKER_IMAGE not set"
+          end
         end
       end
       describe 'when --idefile set to zero-length string'
@@ -73,17 +88,17 @@ describe "ide command: run"
           assert equal "$exit_status" "1"
         end
         it "informs that Idefile path set to zero-length string"
-          assert do_match "$message" "error: idefile path set to zero-length string"
+          assert do_match "$message" "error: idefile set to custom file: , but does not exist"
         end
       end
       describe 'when --idefile set to not existent file'
-        message=$(${IDE_PATH} --idefile aa --dryrun some_command)
+        message=$(IDE_DOCKER_IMAGE="blabla" ${IDE_PATH} --idefile aa --dryrun some_command)
         exit_status="$?"
         it "exits with status 1"
           assert equal "$exit_status" "1"
         end
         it "informs that Idefile does not exist"
-          assert do_match "$message" "aa does not exist"
+          assert do_match "$message" "idefile set to custom file: aa, but does not exist"
         end
       end
       describe 'when --idefile not set but Idefile exists in curent directory'

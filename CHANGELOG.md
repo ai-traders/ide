@@ -1,3 +1,8 @@
+### 0.10.0 (2017-Dec-24)
+
+* stop requiring Idefile #9919 (but some variables must be set,
+   e.g. IDE_DOCKER_IMAGE)
+
 ### 0.9.0 (2017-Jul-17)
 
 * add option IDE_WORK_INNER, which defaults to `/ide/work`
