@@ -4,6 +4,7 @@
  Instead: use files starting with: `/tmp/ide-environment-...`, because there may
  be 2 users sharing /tmp directory and we could not set proper permissions of
  /tmp/ide without sudo (same permissions as /tmp directory has) #12181.
+* add `LC*` to IDE_VARS_BLACKLIST #11705
 
 ### 0.10.0 (2017-Dec-24)
 

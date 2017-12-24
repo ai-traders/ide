@@ -707,25 +707,25 @@ function runfunc() {
   if [[ $(find . -maxdepth 1 -name '.' "${find_uid_option}" 0 | wc -l) == "1" ]]; then
     log_warn "IDE_WORK directory is owned by root. This is highly inadvisable."
   fi
-  if [ -z "$IDE_IDENTITY" ]; then
-    IDE_IDENTITY="$HOME"
-    log_debug "IDE_IDENTITY not set, setting to: $IDE_IDENTITY"
+  if [ -z "${IDE_IDENTITY}" ]; then
+    IDE_IDENTITY="${HOME}"
+    log_debug "IDE_IDENTITY not set, setting to: ${IDE_IDENTITY}"
   fi
-  if [ ! -d "$IDE_IDENTITY" ]; then
-    log_error "IDE_IDENTITY set to $IDE_IDENTITY which does not exist"
+  if [ ! -d "${IDE_IDENTITY}" ]; then
+    log_error "IDE_IDENTITY set to ${IDE_IDENTITY} which does not exist"
     exit 1
   fi
-  if [ -z "$IDE_VARS_BLACKLIST" ]; then
-    IDE_VARS_BLACKLIST="BASH*,HOME,USERNAME,USER,LOGNAME,PATH,TERM,SHELL,MAIL,SUDO_*,WINDOWID,SSH_*,SESSION_*,GEM_HOME,GEM_PATH,GEM_ROOT,HOSTNAME,HOSTTYPE,IFS,PPID,PWD,OLDPWD"
-    log_debug "IDE_VARS_BLACKLIST not set, setting to: $IDE_VARS_BLACKLIST"
+  if [ -z "${IDE_VARS_BLACKLIST}" ]; then
+    IDE_VARS_BLACKLIST="BASH*,HOME,USERNAME,USER,LOGNAME,PATH,TERM,SHELL,MAIL,SUDO_*,WINDOWID,SSH_*,SESSION_*,GEM_HOME,GEM_PATH,GEM_ROOT,HOSTNAME,HOSTTYPE,IFS,PPID,PWD,OLDPWD,LC*"
+    log_debug "IDE_VARS_BLACKLIST not set, setting to: ${IDE_VARS_BLACKLIST}"
   fi
-  if [ -t 0 ] && [[ -z "$force_not_interactive" ]]; then
+  if [ -t 0 ] && [[ -z "${force_not_interactive}" ]]; then
     # shell is really interactive and "$force_not_interactive" is not set
     run_interactively="true"
   else
     run_interactively="false"
   fi
-  log_debug "run_interactively: $run_interactively"
+  log_debug "run_interactively: ${run_interactively}"
 
   # it serves here as an identificator, will be used as docker container name
   # and as a part of env_file
@@ -733,7 +733,7 @@ function runfunc() {
   env_file=$(get_env_vars_file_name "${run_id}")
   env_dir=$(dirname "${env_file}")
   mkdir -p "${env_dir}"
-  save_environment_variables "$env_file" "$IDE_VARS_BLACKLIST"
+  save_environment_variables "$env_file" "${IDE_VARS_BLACKLIST}"
 
   if [[ "${remove_containers}" != "true" ]]; then
     # Just not removing docker container would be impractical, we'd have to
