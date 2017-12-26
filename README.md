@@ -411,11 +411,12 @@ The most important is to test the end user use cases, that e.g. `ide rake build`
 1. You run tests:
     ```bash
     $ ./tasks style
+    $ ./tasks unit
+    $ ./tasks unit_alpine
     ```
     And the following tasks you can run using either default Idefile, on Ubuntu:
     ```bash
     $ ide
-    ./tasks unit
     ./tasks itest_build_exampleide
     ./tasks itest
 

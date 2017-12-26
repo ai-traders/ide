@@ -1,3 +1,7 @@
+### 0.10.2 (2017-Dec-26)
+
+* reuse clean_func function
+
 ### 0.10.1 (2017-Dec-24)
 
 * do not create the directory `/tmp/ide` for saving environment variables.

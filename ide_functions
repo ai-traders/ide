@@ -771,7 +771,7 @@ function runfunc() {
           # this can still take some time (up to 10 seconds)
           docker stop "$run_id"
         fi
-        rm -rf "${env_file}"
+        clean_func "${env_file}"
     }
     trap 'on_control_c' INT
 
@@ -789,8 +789,7 @@ function runfunc() {
       fi
       exit_status="$?"
     fi
-    rm -rf "${env_file}"
-    log_debug "Removed environment file: ${env_file}"
+    clean_func "${env_file}"
     if [[ "$dryrun" != "true" ]]; then
       log_debug "ide exit status: $exit_status"
       if [[ "$exit_status" != "0" ]]; then
@@ -855,30 +854,11 @@ function runfunc() {
       eval "${docker_compose_stop_command} >&2"
       log_debug "Removing"
       eval "${docker_compose_rm_command} >&2"
-      # Docker network is created only if using docker-compose driver and
-      # only if using docker-compose file v2. So remove it only if exists.
-      if docker network inspect "${expected_docker_network}" >/dev/null 2>&1; then
-        docker network rm "${expected_docker_network}" >/dev/null
-        log_info "Removed docker network: ${expected_docker_network}"
-      else
-        log_debug "No need to remove docker network: ${expected_docker_network}. It was not created)"
-      fi
-      # remove unused docker networks created in the past by ide
-      for network in $(docker network ls | awk '{print $2}'); do
-        if [[ "${network}" == "ide"* ]]; then
-          # docker network created by ide
-          if docker network inspect "${network}" | grep "Containers\": {}" >/dev/null; then
-            log_info "Found unused docker network created by ide: ${network}"
-            docker network rm "${network}" >/dev/null
-            log_info "Removed docker network: ${network}"
-          else
-            log_debug "Found docker network created by ide, but it is still in use: ${network}"
-          fi
-        fi
-      done
+
+      clean_docker_networks_func "${expected_docker_network}"
     fi
-    rm -rf "${env_file}"
-    log_debug "Removed environment file: ${env_file}"
+    clean_func "${env_file}"
+
     if [[ "$dryrun" != "true" ]]; then
       log_debug "Ide exit status: $exit_status"
       if [[ "$exit_status" != "0" ]]; then
@@ -887,6 +867,37 @@ function runfunc() {
       fi
     fi
   fi
+}
+
+function clean_func() {
+  env_file="$1"
+  rm -rf "${env_file}"
+  log_debug "Removed environment file: ${env_file}"
+}
+function clean_docker_networks_func() {
+  expected_docker_network="$1"
+
+  # Docker network is created only if using docker-compose driver and
+  # only if using docker-compose file v2. So remove it only if exists.
+  if docker network inspect "${expected_docker_network}" >/dev/null 2>&1; then
+    docker network rm "${expected_docker_network}" >/dev/null
+    log_info "Removed docker network: ${expected_docker_network}"
+  else
+    log_debug "No need to remove docker network: ${expected_docker_network}. It was not created)"
+  fi
+  # remove unused docker networks created in the past by ide
+  for network in $(docker network ls | awk '{print $2}'); do
+    if [[ "${network}" == "ide"* ]]; then
+      # docker network created by ide
+      if docker network inspect "${network}" | grep "Containers\": {}" >/dev/null; then
+        log_info "Found unused docker network created by ide: ${network}"
+        docker network rm "${network}" >/dev/null
+        log_info "Removed docker network: ${network}"
+      else
+        log_debug "Found docker network created by ide, but it is still in use: ${network}"
+      fi
+    fi
+  done
 }
 
 # Arguments:
