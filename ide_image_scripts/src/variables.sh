@@ -8,7 +8,7 @@
 
 # ide_work is the directory mounted as docker volume inside a docker container.
 # From that directory we can infer uid and gid.
-export ide_work="${IDE_WORK_INNER}"
+export ide_work="${IDE_WORK_INNER:-/ide/work}"
 export ide_home="/home/ide"
 export ide_identity="/ide/identity"
 export owner_username="ide"

@@ -1,3 +1,7 @@
+### 0.10.3 (2018-Jun-09)
+
+* set default for ide_work variable used inside ide docker image #12045
+
 ### 0.10.2 (2017-Dec-26)
 
 * reuse clean_func function
