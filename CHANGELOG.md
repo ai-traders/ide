@@ -1,3 +1,5 @@
+* add more logging in entrypoint in IDE docker images #16815
+
 ### 0.10.3 (2018-Jun-09)
 
 * set default for ide_work variable used inside ide docker image #12045
