@@ -2,7 +2,7 @@
 
 set -e
 if [[ ! -f ./releaser ]];then
-  wget -q http://http.archive.ai-traders.com/releaser/1.0.3/releaser || { echo "cannot download releaser, but maybe not needed"; }
+  wget -q http://http.archive.ai-traders.com/releaser/1.0.6/releaser || { echo "cannot download releaser, but maybe not needed"; }
 fi
 source ./releaser
 releaser_init
