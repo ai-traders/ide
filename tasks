@@ -2,10 +2,12 @@
 
 set -e
 if [[ ! -f ./releaser ]];then
-  wget -q http://http.archive.ai-traders.com/releaser/1.0.6/releaser || { echo "cannot download releaser, but maybe not needed"; }
+  timeout 2 wget -O releaser http://http.archive.ai-traders.com/releaser/1.0.6/releaser || { echo "Cannot download releaser, ignoring"; rm -f ./releaser; }
 fi
-source ./releaser
-releaser_init
+if [[ -f ./releaser ]];then
+  source ./releaser
+  releaser_init
+fi
 
 function verify_version_ide {
   version=$(get_next_oversion)
