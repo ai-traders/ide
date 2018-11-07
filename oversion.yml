@@ -1,4 +1,4 @@
 ---
 backend: 'consul'
 project_name: 'ide'
-consul_url: 'http://consul.service.mosk.consul.ai-traders.com:8500'
+consul_url: 'http://consul.ai-traders.com:8500'
