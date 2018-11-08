@@ -49,8 +49,12 @@ describe "ide command: pull"
       it "informs that command to be used is: pull"
         assert do_match "$message" "ide_command: pull"
       end
-      it "informs there is no need to pull docker image"
-        assert do_match "$message" "Image is up to date for alpine:3.5"
+      message=$(docker images | grep alpine)
+      exit_status="$?"
+      it "docker image is pulled"
+        assert equal "$exit_status" "0"
+        assert do_match "$message" "alpine"
+        assert do_match "$message" "3.5"
       end
     end
   end
@@ -67,8 +71,12 @@ describe "ide command: pull"
       it "informs that command to be used is: pull"
         assert do_match "$message" "ide_command: pull"
       end
-      it "pulls docker image"
-        assert do_match "$message" "Downloaded newer image for alpine:3.5"
+      message=$(docker images | grep alpine)
+      exit_status="$?"
+      it "docker image is pulled"
+        assert equal "$exit_status" "0"
+        assert do_match "$message" "alpine"
+        assert do_match "$message" "3.5"
       end
     end
     describe "when run with '--command pull' and docker image exists locally"
@@ -80,8 +88,12 @@ describe "ide command: pull"
       it "informs that command to be used is: pull"
         assert do_match "$message" "ide_command: pull"
       end
-      it "informs there is no need to pull docker image"
-        assert do_match "$message" "Image is up to date for alpine:3.5"
+      message=$(docker images | grep alpine)
+      exit_status="$?"
+      it "docker image is pulled"
+        assert equal "$exit_status" "0"
+        assert do_match "$message" "alpine"
+        assert do_match "$message" "3.5"
       end
     end
   end
@@ -98,8 +110,12 @@ describe "ide command: pull"
       it "informs that command to be used is: pull"
         assert do_match "$message" "ide_command: pull"
       end
-      it "pulls docker image"
-        assert do_match "$message" "Downloaded newer image for alpine:3.5"
+      message=$(docker images | grep alpine)
+      exit_status="$?"
+      it "docker image is pulled"
+        assert equal "$exit_status" "0"
+        assert do_match "$message" "alpine"
+        assert do_match "$message" "3.5"
       end
     end
     describe "when run with '--command pull' and docker image exists locally"
@@ -111,8 +127,12 @@ describe "ide command: pull"
       it "informs that command to be used is: pull"
         assert do_match "$message" "ide_command: pull"
       end
-      it "informs there is no need to pull docker image"
-        assert do_match "$message" "Image is up to date for alpine:3.5"
+      message=$(docker images | grep alpine)
+      exit_status="$?"
+      it "docker image is pulled"
+        assert equal "$exit_status" "0"
+        assert do_match "$message" "alpine"
+        assert do_match "$message" "3.5"
       end
     end
   end
