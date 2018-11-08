@@ -1,7 +1,6 @@
 # ide - isolated development environment
 
-Build/test/release your software in an **isolated, reproducible, well-defined** environment.
-This project is more about **conventions and best practices** than actual code.
+Provides an **isolated, reproducible, well-defined** environment for your project.
 
 ## Installation
 There are several ways of installing `ide`, **choose one**:
@@ -9,9 +8,8 @@ There are several ways of installing `ide`, **choose one**:
     ```bash
     sudo bash -c "`curl -L https://raw.githubusercontent.com/ai-traders/ide/master/install.sh`"
     ```
-2. Just do what [install.sh](./install.sh) says.
-3. Use private [ide cookbook](http://gogs.ai-traders.com/ide/cookbook-ide).
-4. Run:
+2. Follow instructions from [install.sh](./install.sh).
+3. Run:
     ```bash
     git clone --depth 1 --single-branch https://github.com/ai-traders/ide.git
     ./ide/local_install.sh
@@ -25,51 +23,34 @@ There are several ways of installing `ide`, **choose one**:
 * Docker
 
 ## Usage
-Create a file: `./Idefile`, e.g. like this:
+Create a file: `./Idefile`, e.g.:
 ```
 IDE_DOCKER_IMAGE="xmik/ideide:3.0.2"
 IDE_DOCKER_OPTIONS="--privileged"
 ```
 
-**Idefile** points to a development environment - the one that is **suitable
- for exactly this particular commit**.
+**Idefile** points to an isolated, reproducible, well-defined environment.
 
 ### Run not interactively
 Run:
 ```bash
 $ ide bats --version
-17-04-2017 16:07:55 IDE info: docker command will be:
-docker run --rm -v /home/ewa/code/ide:/ide/work -v /home/ewa:/ide/identity:ro --env-file="/tmp/ide-environment-ide-ide-2017-04-17_16-07-55-85219559" -v /tmp/.X11-unix:/tmp/.X11-unix --privileged -ti --name ide-ide-2017-04-17_16-07-55-85219559 xmik/ideide:3.0.2 "shpec --version"
-Unable to find image 'xmik/ideide:3.0.2' locally
-3.0.1: Pulling from xmik/ideide
-# pulling docker image
-usermod: no changes
-ide init finished (interactive shell)
-using ideide:3.0.2
+# some log messages omitted
+08-11-2018 13:45:29 IDE entrypoint info: using ideide:3.0.2
 Bats 0.4.0
 ```
 
 What happens:
-1. IDE determines that docker image xmik/ideide:3.0.2 is needed
-1. IDE creates a container from xmik/ideide:3.0.2 image with the following command:
-   ```
-   docker run --rm -v ${IDE_WORK}:/ide/work -v ${IDE_IDENTITY}:/ide/identity:ro \
-     --env-file /tmp/ide-environment-2016-02-08_17-56-19-78638303 ${IDE_DOCKER_IMAGE} \
-     "bats --version"
-   ```
-1. IDE runs `bats --version` in the container in the `/ide/work` directory.
+1. IDE determines that docker image `xmik/ideide:3.0.2` is needed.
+1. IDE creates a container from `xmik/ideide:3.0.2` image, mounts current directory as `/ide/work` inside the container.
+1. IDE runs `bats --version` in the container.
 
 ### Run Interactively
 Run:
 ```bash
 $ ide
-17-04-2017 16:10:06 IDE info: docker command will be:
-docker run --rm -v /home/ewa/code/ide:/ide/work -v /home/ewa:/ide/identity:ro --env-file="/tmp/ide-environment-ide-ide-2017-04-17_16-10-05-40045882" -v /tmp/.X11-unix:/tmp/.X11-unix --privileged -ti --name ide-ide-2017-04-17_16-10-05-40045882 xmik/ideide:3.0.2
-usermod: no changes
-ide init finished (interactive shell)
-using ideide:3.0.2
-ide@fac6c0976cd1:/ide/work$ echo hello
-hello
+# some log messages omitted
+08-11-2018 13:48:00 IDE entrypoint info: using ideide:3.0.2
 ide@fac6c0976cd1:/ide/work$ whoami
 ide
 ide@fac6c0976cd1:/ide/work$ exit
@@ -78,19 +59,15 @@ $
 ```
 
 What happens:
-1. IDE determines that docker image xmik/ideide:3.0.2 is needed
-1. IDE creates a container from xmik/ideide:3.0.2 image with the following command:
-   ```
-   docker run --rm -v ${IDE_WORK}:/ide/work -v ${IDE_IDENTITY}:/ide/identity:ro \
-     --env-file /tmp/ide-environment-2016-02-08_17-56-19-78638303 ${IDE_DOCKER_IMAGE}
-   ```
-1. IDE runs the default command for a docker image, it is `/bin/bash` for `xmik/ideide`.
+1. IDE determines that docker image `xmik/ideide:3.0.2` is needed.
+1. IDE creates a container from `xmik/ideide:3.0.2` image, mounts current directory as `/ide/work` inside the container, sets flags: `-ti`.
+1. IDE runs the default command for a docker image. It is `/bin/bash` for `xmik/ideide`.
 
 
 ### Warnings, limitations
 Current implementation limitations:
 * works only on local docker host (docker daemon must be installed locally).
-* works only on Linux (tested on Ubuntu and Alpine).
+* works only on Linux (tested on Ubuntu/Debian and Alpine).
 
 ### Advanced usage
 For debug output set `IDE_LOG_LEVEL=debug`.
@@ -396,9 +373,6 @@ The most important is to test the end user use cases, that e.g. `ide rake build`
  will really compile your code and produce an artifact.
 
 ### Additional advice
-1. You may find it helpful to keep 2 Dockerfiles:
-  * one to install and test IDE docker image configs
-  * another, with end user logic. It should use the docker image built by the 1st Dockerfile.
 1. The scripts to be put into `/etc/ide.d/scripts` directory should not only
  copy files, but also ensure proper permissions. E.g. `~/.ssh/id_rsa` should
   have permissions: `600`.
