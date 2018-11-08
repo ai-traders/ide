@@ -1,6 +1,9 @@
+### 0.10.5 (2018-Nov-08)
+
 * tasks: do not fail if cannot download releaser, thus e.g. allow some tasks
  to be run without releaser
 * newer development docker images: ideide:3.0.2 with Shpec 0.3.0
+
 ### 0.10.4 (2018-Nov-04)
 
 * add more logging in entrypoint in IDE docker images #16815
