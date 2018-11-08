@@ -3,6 +3,7 @@
 * tasks: do not fail if cannot download releaser, thus e.g. allow some tasks
  to be run without releaser
 * newer development docker images: ideide:3.0.2 with Shpec 0.3.0
+* change log level of several messages to debug
 
 ### 0.10.4 (2018-Nov-04)
 

@@ -582,7 +582,7 @@ function runfunc() {
 
   # shellcheck disable=SC2128
   if [ -z "$opts" ]; then
-    log_debug "opts for pullfunc not specified and that is ok"
+    log_debug "opts for runfunc not specified and that is ok"
   else
     # parse options
     counter=0
@@ -881,7 +881,7 @@ function clean_docker_networks_func() {
   # only if using docker-compose file v2. So remove it only if exists.
   if docker network inspect "${expected_docker_network}" >/dev/null 2>&1; then
     docker network rm "${expected_docker_network}" >/dev/null
-    log_info "Removed docker network: ${expected_docker_network}"
+    log_debug "Removed docker network: ${expected_docker_network}"
   else
     log_debug "No need to remove docker network: ${expected_docker_network}. It was not created)"
   fi
@@ -890,9 +890,9 @@ function clean_docker_networks_func() {
     if [[ "${network}" == "ide"* ]]; then
       # docker network created by ide
       if docker network inspect "${network}" | grep "Containers\": {}" >/dev/null; then
-        log_info "Found unused docker network created by ide: ${network}"
+        log_debug "Found unused docker network created by ide: ${network}"
         docker network rm "${network}" >/dev/null
-        log_info "Removed docker network: ${network}"
+        log_debug "Removed docker network: ${network}"
       else
         log_debug "Found docker network created by ide, but it is still in use: ${network}"
       fi
