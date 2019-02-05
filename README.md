@@ -1,3 +1,8 @@
+# Obsolete!
+Ide got renamed to [Dojo](https://github.com/ai-traders/dojo) and was rewritten from Bash to Golang. If you need help with migrating your ide Docker images, please create a Github issue.
+
+---
+
 # ide - isolated development environment
 
 Provides an **isolated, reproducible, well-defined** environment for your project.
